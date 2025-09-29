@@ -1,6 +1,7 @@
 package com.sparta.delivery.backend.common;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
@@ -10,11 +11,21 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import lombok.Getter;
 
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
+@Getter
 public class BaseEntity {
+
+	@Id
+	@GeneratedValue
+	private UUID id;
 
 	@CreatedDate
 	@Column(updatable = false)
@@ -33,5 +44,16 @@ public class BaseEntity {
 	private LocalDateTime deletedAt;
 
 	private Long deletedBy;
+
+	@PrePersist
+	protected void prePersist() {
+		this.createdAt = LocalDateTime.now();
+		this.updatedAt = LocalDateTime.now();
+	}
+
+	@PreUpdate
+	protected void preUpdate() {
+		this.updatedAt = LocalDateTime.now();
+	}
 
 }
