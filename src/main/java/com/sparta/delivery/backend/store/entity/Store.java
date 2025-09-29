@@ -1,0 +1,66 @@
+package com.sparta.delivery.backend.store.entity;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+import org.hibernate.annotations.UuidGenerator;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
+
+import com.sparta.delivery.backend.category.entity.Category;
+import com.sparta.delivery.backend.common.BaseEntity;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Table(name = "p_store")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
+public class Store extends BaseEntity {
+	// @ManyToOne(fetch = FetchType.LAZY)
+	// @JoinColumn(name = "p_owner_id", nullable = false)
+	// private Owner owner;
+
+	// @OneToMany(mappedBy = " ")
+	// private List<Image> images = new ArrayList<>();
+
+	@Column(name = "p_region_dong")
+	private String regionDong;
+
+	// @OneToMany(mappedBy = " ")
+	//  private List<Category> categories = new ArrayList<>();
+
+	@Column(name = "name")
+	private String name;
+
+	@Column(name = "address_details")
+	private String addressDetails;
+
+	@Column(name = "review_rate")
+	private double reviewRate;
+
+	@Column(name = "min_order_price")
+	private Integer minOrderPrice;
+
+	@Column(name = "delivery_fee")
+	private Integer deliveryFee;
+
+	@Column(name = "status")
+	private StoreStatusEnum status;
+
+	@Column(name = "phone_number")
+	private String phoneNumber;
+}
