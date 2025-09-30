@@ -5,8 +5,6 @@ import lombok.*;
 
 import java.util.UUID;
 
-import org.hibernate.annotations.UuidGenerator;
-
 @Entity
 @Table(name = "p_user")
 @Getter
@@ -18,7 +16,6 @@ public class User {
     private Long id;
 
     @Column(name = "public_id", nullable = false, unique = true)
-	@UuidGenerator
     private UUID publicId;
 
     @Column(name = "username", length = 50, nullable = false, unique = true)
@@ -29,10 +26,10 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", length = 20, nullable = false)
-    private UserRole role;
+    private UserRoleEnum role;
 
     @Builder
-    private User(String username, String password, UserRole role) {
+    private User(String username, String password, UserRoleEnum role) {
         this.username = username;
         this.password = password;
         this.role = role;
