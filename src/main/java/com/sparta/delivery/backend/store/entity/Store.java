@@ -13,15 +13,24 @@ import org.springframework.data.annotation.LastModifiedDate;
 
 import com.sparta.delivery.backend.category.entity.Category;
 import com.sparta.delivery.backend.common.BaseEntity;
+import com.sparta.delivery.backend.image.entity.Image;
+import com.sparta.delivery.backend.owner.entity.Owner;
+import com.sparta.delivery.backend.store.dto.StoreResponseDto;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -30,18 +39,18 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class Store extends BaseEntity {
-	// @ManyToOne(fetch = FetchType.LAZY)
-	// @JoinColumn(name = "p_owner_id", nullable = false)
-	// private Owner owner;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "p_owner_id", nullable = false)
+	private Owner owner;
 
-	// @OneToMany(mappedBy = " ")
-	// private List<Image> images = new ArrayList<>();
+	@OneToMany(mappedBy = "store")
+	private List<Image> images = new ArrayList<>();
 
 	@Column(name = "p_region_dong")
 	private String regionDong;
 
-	// @OneToMany(mappedBy = " ")
-	//  private List<Category> categories = new ArrayList<>();
+	@OneToMany(mappedBy = "store", fetch = FetchType.LAZY)
+	 private List<Category> categories = new ArrayList<>();
 
 	@Column(name = "name")
 	private String name;
@@ -58,9 +67,13 @@ public class Store extends BaseEntity {
 	@Column(name = "delivery_fee")
 	private int deliveryFee;
 
+	@Enumerated(EnumType.STRING)
 	@Column(name = "status")
 	private StoreStatusEnum status;
 
 	@Column(name = "phone_number")
 	private String phoneNumber;
+
+
+
 }
