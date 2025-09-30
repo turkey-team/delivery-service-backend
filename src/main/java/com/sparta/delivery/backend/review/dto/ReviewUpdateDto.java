@@ -3,10 +3,9 @@ package com.sparta.delivery.backend.review.dto;
 import java.util.UUID;
 
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
-public class ReviewRegisterDto {
+public class ReviewUpdateDto {
 
 	private String context;
 	private int rate;

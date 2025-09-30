@@ -12,6 +12,7 @@ import com.sparta.delivery.backend.image.repository.ImageRepository;
 import com.sparta.delivery.backend.review.dto.ReviewRegisterDto;
 import com.sparta.delivery.backend.review.dto.ReviewResponseDto;
 import com.sparta.delivery.backend.review.dto.ReviewSearchCondition;
+import com.sparta.delivery.backend.review.dto.ReviewUpdateDto;
 import com.sparta.delivery.backend.review.dto.ReviewViewDto;
 import com.sparta.delivery.backend.review.entity.Review;
 import com.sparta.delivery.backend.review.repository.ReviewRepository;
@@ -87,6 +88,15 @@ public class ReviewService {
 	}
 
 	// review 수정
+	@Transactional
+	public ReviewResponseDto updateReview(ReviewUpdateDto dto, UUID reviewId) {
+		Review review = reviewRepository.findById(reviewId)
+			.orElseThrow(() -> new IllegalArgumentException("해당 리뷰를 찾을 수 없습니다."));
+
+		review.update(dto.getContext(), dto.getRate());
+
+		return ReviewResponseDto.of(review);
+	}
 
 	// review 삭제
 

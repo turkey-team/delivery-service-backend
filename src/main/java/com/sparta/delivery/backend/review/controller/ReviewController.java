@@ -7,11 +7,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sparta.delivery.backend.review.dto.ReviewRegisterDto;
 import com.sparta.delivery.backend.review.dto.ReviewResponseDto;
 import com.sparta.delivery.backend.review.dto.ReviewSearchCondition;
+import com.sparta.delivery.backend.review.dto.ReviewUpdateDto;
 import com.sparta.delivery.backend.review.dto.ReviewViewDto;
 import com.sparta.delivery.backend.review.service.ReviewService;
 import com.sparta.delivery.backend.user.entity.User;
@@ -36,10 +39,16 @@ public class ReviewController {
 	}
 
 	@PostMapping("/stores/{storeId}/review")
-	public ReviewResponseDto writeReview(@PathVariable UUID storeId, ReviewRegisterDto registerDto,
+	public ReviewResponseDto writeReview(@PathVariable UUID storeId, @RequestBody ReviewRegisterDto registerDto,
 		UUID orderId, User user) {
 		// 추후 Authentication UserDetails로 바꾸기
 		return reviewService.registerReview(registerDto, storeId, orderId, user);
+	}
+
+	@PutMapping("/stores/{storeId}/reviews/{reviewId}")
+	public ReviewResponseDto updateReview(@PathVariable UUID storeId, @PathVariable UUID reviewId,
+		@RequestBody ReviewUpdateDto updateDto) {
+		return reviewService.updateReview(updateDto, reviewId);
 	}
 
 }
