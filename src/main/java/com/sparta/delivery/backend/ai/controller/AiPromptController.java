@@ -13,7 +13,7 @@ import com.sparta.delivery.backend.ai.service.AiPromptService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/ai-prompts")
+@RequestMapping("/v1/ai-prompts")
 @RequiredArgsConstructor
 public class AiPromptController {
 

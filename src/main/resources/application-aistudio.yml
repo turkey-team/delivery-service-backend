@@ -1,4 +1,6 @@
-googleai:
+googleAi:
   api:
-    baseurl: https://generativelanguage.googleapis.com
     key: AIzaSyBSkadohKBc0Vf7yUYYRP2StgTUQ3T8qKU
+    model: gemini-2.0-flash
+    temperature: 1.0
+    maxLength: 50

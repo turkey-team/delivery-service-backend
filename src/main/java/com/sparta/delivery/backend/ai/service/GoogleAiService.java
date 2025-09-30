@@ -1,64 +1,53 @@
 package com.sparta.delivery.backend.ai.service;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.google.genai.Client;
+import com.google.genai.types.GenerateContentConfig;
+import com.google.genai.types.GenerateContentResponse;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class GoogleAiService {
 
-	private final WebClient webClient;
-	private final String key;
+	private final String model;
+	private final float temperature;
+	private final int maxLength;
+	private final Client client;
 
-	public GoogleAiService(@Qualifier("googleAi") WebClient webClient, @Value("${googleai.api.key}") String key) {
-		this.webClient = webClient;
-		this.key = key;
+	public GoogleAiService(
+		@Value("${googleAi.api.key}") String key,
+		@Value("${googleAi.api.model}") String model,
+		@Value("${googleAi.api.temperature}") float temperature,
+		@Value("${googleAi.api.maxLength}") int maxLength
+	) {
+		this.model = model;
+		this.temperature = temperature;
+		this.maxLength = maxLength;
+		this.client = Client.builder()
+			.apiKey(key)
+			.build();
 	}
 
 	public String createAiPrompt(String reqMessage) {
-		Map<String, Object> body = buildRequestBody(reqMessage);
+		try {
+			log.info("AI 프롬프트 생성");
+			String text = String.format("%s (%d글자 이내로)", reqMessage, maxLength);
+			GenerateContentConfig config = GenerateContentConfig.builder()
+				.temperature(temperature)
+				.maxOutputTokens(maxLength * 2)
+				.build();
+			GenerateContentResponse response = client.models.generateContent(model, text, config);
 
-		JsonNode jsonNode = webClient
-			.post()
-			.uri(uriBuilder -> uriBuilder
-				.path("/v1beta/models/gemini-2.0-flash:generateContent")
-				.queryParam("key", key)
-				.build()
-			)
-			.contentType(MediaType.APPLICATION_JSON)
-			.bodyValue(body)
-			.retrieve()
-			.bodyToMono(JsonNode.class)
-			.block();
+			return response.text();
+		} catch (Exception e) {
+			log.error("AI 프롬프트 생성 실패 {}", e.getMessage());
+			throw new RuntimeException("AI 프롬프트 생성 중 오류가 발생했습니다.");
+		}
 
-		return getAiPromptMessage(jsonNode);
-	}
-
-	// 요청 바디 생성
-	private Map<String, Object> buildRequestBody(String reqMessage) {
-		return Map.of("contents",
-			List.of(Map.of("parts",
-				List.of(Map.of("text", reqMessage))
-			))
-		);
-	}
-
-	// 응답 메세지 추출
-	private String getAiPromptMessage(JsonNode jsonNode) {
-		return Objects.requireNonNull(jsonNode)
-			.path("candidates").get(0)
-			.path("content")
-			.path("parts").get(0)
-			.path("text")
-			.asText();
 	}
 
 }

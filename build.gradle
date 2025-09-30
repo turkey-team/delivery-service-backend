@@ -43,8 +43,8 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-    // WebClient
-    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    // Google Gen AI Java SDK
+    implementation 'com.google.genai:google-genai:1.16.0'
 }
 
 tasks.named('test') {
