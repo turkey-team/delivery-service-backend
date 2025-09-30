@@ -56,7 +56,7 @@ public class Store extends BaseEntity {
 	private Integer minOrderPrice;
 
 	@Column(name = "delivery_fee")
-	private Integer deliveryFee;
+	private int deliveryFee;
 
 	@Column(name = "status")
 	private StoreStatusEnum status;
