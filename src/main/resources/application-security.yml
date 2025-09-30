@@ -1,0 +1,53 @@
+spring:
+  config:
+    activate:
+      on-profile: test
+
+jwt:
+  access:
+    secret: "9uMDsQmC38C8ImGMeiRC2CDHhP5eUoq3NThQIfiy6zU="
+    expiration: 1h  # 한시간
+  refresh:
+    secret: "BQ5Np0TZqkzaE8FAKWu3JtvbAXoJV+Qz+nrvQt9QILQ="
+    expiration: 7d # 일주일
+
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+
+jwt:
+  access:
+    secret: "9uMDsQmC38C8ImGMeiRC2CDHhP5eUoq3NThQIfiy6zU="
+    expiration: 1h  # 한시간
+  refresh:
+    secret: "BQ5Np0TZqkzaE8FAKWu3JtvbAXoJV+Qz+nrvQt9QILQ="
+    expiration: 7d # 일주일
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+jwt:
+  access:
+    secret: "9uMDsQmC38C8ImGMeiRC2CDHhP5eUoq3NThQIfiy6zU="
+    expiration: 1h  # 한시간
+  refresh:
+    secret: "BQ5Np0TZqkzaE8FAKWu3JtvbAXoJV+Qz+nrvQt9QILQ="
+    expiration: 7d # 일주일
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+jwt:
+  access:
+    secret: "QDf/pEIa8OtEcpGD1ypymS6z2cGOi+VQF+lVg+vDN7Q="
+    expiration: 1h  # 한시간
+  refresh:
+    secret: "IKot+z0udp1tT6Iyg7wWXJ0HYOUyNP3vSp7Z94R/okY="
+    expiration: 7d # 일주일
