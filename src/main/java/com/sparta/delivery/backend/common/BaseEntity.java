@@ -31,6 +31,7 @@ public class BaseEntity {
 	@Column(updatable = false)
 	private LocalDateTime createdAt;
 
+	// BIGSERIAL 타입으로 되어있어서 Long으로 일단 했습니다
 	@CreatedBy
 	private Long createdBy;
 
