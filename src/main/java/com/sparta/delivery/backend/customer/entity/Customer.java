@@ -38,16 +38,4 @@ public class Customer {
         this.email = email;
         this.phoneNumber = phoneNumber;
     }
-
-    public void update(String nickname, String email, String phoneNumber) {
-        if (nickname != null) {
-            this.nickname = nickname;
-        }
-        if (email != null) {
-            this.email = email;
-        }
-        if (phoneNumber != null) {
-            this.phoneNumber = phoneNumber;
-        }
-    }
 }
