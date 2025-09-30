@@ -12,4 +12,6 @@ public interface ReviewRepoistoryCustom {
 
 	Page<ReviewViewDto> findReviews(UUID storeId, ReviewSearchCondition condition, Pageable pageable);
 
+	Page<ReviewViewDto> findMyOwnReviews(UUID customerId, ReviewSearchCondition condition, Pageable pageable);
+
 }

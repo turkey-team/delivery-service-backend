@@ -45,6 +45,11 @@ public class ReviewService {
 		return reviewRepository.findReviews(storeId, condition, pageable);
 	}
 
+	// 내가 작성한 reviews list 조회
+	public Page<ReviewViewDto> getMyReviews(UUID customerId, ReviewSearchCondition condition, Pageable pageable) {
+		return reviewRepository.findMyOwnReviews(customerId, condition, pageable);
+	}
+
 	// review 등록
 	@Transactional
 	public ReviewResponseDto registerReview(ReviewRegisterDto registerDto, UUID storeId,

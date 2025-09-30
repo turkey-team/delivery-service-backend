@@ -64,12 +64,57 @@ public class ReviewRepositoryImpl implements ReviewRepoistoryCustom {
 			orders.add(review.createdAt.desc());
 		}
 
+		query.orderBy(orders.toArray(new OrderSpecifier[0]));
+
 		QueryResults<ReviewViewDto> results = query.fetchResults();
 		List<ReviewViewDto> content = results.getResults();
 		long total = results.getTotal();
 
 		return new PageImpl<>(content, pageable, total);
 
+	}
+
+	@Override
+	public Page<ReviewViewDto> findMyOwnReviews(UUID customerId, ReviewSearchCondition condition, Pageable pageable) {
+		QReview review = QReview.review;
+
+		JPAQuery<ReviewViewDto> query = queryFactory.select(new QReviewViewDto(
+				review.id, review.customer.id,
+				review.store.id, review.image.imageUrl,
+				review.context, review.rate
+			))
+			.from(review)
+			.where(review.customer.id.eq(customerId),
+				rateBetween(condition.getMinRate(), condition.getMaxRate()),
+				containsContext(condition.getContext()),
+				createdBetween(condition.getStartDate(), condition.getEndDate()))
+			.offset(pageable.getOffset())
+			.limit(pageable.getPageSize());
+
+		// 정렬 조건을 담은 list
+		List<OrderSpecifier<?>> orders = new ArrayList<>();
+
+		if (pageable.getSort().isSorted()) {
+			for (Sort.Order order : pageable.getSort()) {
+				if (order.getProperty().equals("rate")) {
+					orders.add(order.isAscending() ? review.rate.asc() : review.rate.desc());
+				} else if (order.getProperty().equals("createdAt")) {
+					orders.add(order.isAscending() ? review.createdAt.asc() : review.createdAt.desc());
+				}
+			}
+		}
+
+		if (orders.isEmpty()) {
+			orders.add(review.createdAt.desc());
+		}
+
+		query.orderBy(orders.toArray(new OrderSpecifier[0]));
+
+		QueryResults<ReviewViewDto> results = query.fetchResults();
+		List<ReviewViewDto> content = results.getResults();
+		long total = results.getTotal();
+
+		return new PageImpl<>(content, pageable, total);
 	}
 
 	private BooleanExpression rateBetween(Integer minRate, Integer maxRate) {

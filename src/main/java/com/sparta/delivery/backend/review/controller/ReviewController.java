@@ -40,23 +40,33 @@ public class ReviewController {
 		return reviewService.getReview(storeId, reviewId);
 	}
 
+	// url은 추후 의논 후 변경
+	@GetMapping("/customer/{customerId}/reviews")
+	public Page<ReviewViewDto> getMyReviews(@PathVariable UUID customerId, ReviewSearchCondition condition,
+		Pageable pageable) {
+		// UserDetails를 통해 customerId와 UserDetails 객체 안의 customerId 일치하는지 확인
+		return reviewService.getMyReviews(customerId, condition, pageable);
+	}
+
 	@PostMapping("/stores/{storeId}/review")
 	public ReviewResponseDto writeReview(@PathVariable UUID storeId, @RequestBody ReviewRegisterDto registerDto,
 		UUID orderId, User user) {
-		// 추후 Authentication UserDetails로 바꾸기
+		// 추후 User를 Authentication UserDetails로 바꾸기
 		return reviewService.registerReview(registerDto, storeId, orderId, user);
 	}
 
 	@PutMapping("/stores/{storeId}/reviews/{reviewId}")
 	public ReviewResponseDto updateReview(@PathVariable UUID storeId, @PathVariable UUID reviewId,
 		@RequestBody ReviewUpdateDto updateDto) {
+		// review에 있는 customerID랑 Authentication UserDetails에 있는 customerId 일치 확인
 		return reviewService.updateReview(updateDto, reviewId);
 	}
 
 	@DeleteMapping("/stores/{storeId}/reviews/{reviewId}")
 	public ReviewDeleteResponseDto deleteReview(@PathVariable UUID storeId,
 		@PathVariable UUID reviewId, Long currentUserId) {
-		// 추후 Authentication UserDetails로 바꾸기
+		// 추후 currentUserId Authentication UserDetails로 바꾸기
+		// review에 있는 customerID랑 Authentication UserDetails에 있는 customerId 일치 확인
 		return reviewService.deleteReview(reviewId, currentUserId);
 	}
 
