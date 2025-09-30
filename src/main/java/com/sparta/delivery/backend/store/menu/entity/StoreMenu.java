@@ -1,6 +1,7 @@
 package com.sparta.delivery.backend.store.menu.entity;
 
 import java.awt.*;
+import java.time.Instant;
 
 import com.sparta.delivery.backend.common.BaseEntity;
 import com.sparta.delivery.backend.store.menu.enums.StockStatus;
@@ -31,7 +32,7 @@ import jakarta.persistence.UniqueConstraint;
 			menu.setSortOrder(maxSort + 1);
 	*/
 )
-public class StoreMenu extends BaseEntity {   // ★ BaseEntity 상속
+public class StoreMenu extends BaseEntity {
 
 	// FK 매핑: p_store_id
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -62,6 +63,7 @@ public class StoreMenu extends BaseEntity {   // ★ BaseEntity 상속
 	@Column(name = "stock_status", length = 20)
 	private StockStatus stockStatus;
 
+	// hiddenAt 로그 여부로 숨기기/보이기 설정하려면 Instant 가 적합 
 	@Column(name = "hidden_at")
-	private java.time.Instant hiddenAt;
+	private Instant hiddenAt;
 }
