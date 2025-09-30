@@ -54,9 +54,9 @@ public class ReviewService {
 		);
 
 		Order order = orderRepository.findById(orderId)
-			.orElseThrow(() -> new IllegalArgumentException("해당 Order를 찾을 수 없습니다."));*/
+			.orElseThrow(() -> new IllegalArgumentException("해당 Order를 찾을 수 없습니다."));
 
-		/*if (!order.getOrderStatus().equals(OrderStatus.SUCCESS)) {
+		if (!order.getOrderStatus().equals(OrderStatus.SUCCESS)) {
 			throw new IllegalArgumentException("배송 완료된 주문만 리뷰 작성 가능");
 		}
 

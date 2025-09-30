@@ -1,15 +1,19 @@
 package com.sparta.delivery.backend.review.repository;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import com.querydsl.core.QueryResults;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.sparta.delivery.backend.review.dto.QReviewViewDto;
 import com.sparta.delivery.backend.review.dto.ReviewSearchCondition;
@@ -30,7 +34,7 @@ public class ReviewRepositoryImpl implements ReviewRepoistoryCustom {
 	public Page<ReviewViewDto> findReviews(UUID storeId, ReviewSearchCondition condition, Pageable pageable) {
 		QReview review = QReview.review;
 
-		QueryResults<ReviewViewDto> results = queryFactory.select(new QReviewViewDto(
+		JPAQuery<ReviewViewDto> query = queryFactory.select(new QReviewViewDto(
 				review.id, review.customer.id,
 				review.store.id, review.image.imageUrl,
 				review.context, review.rate
@@ -41,9 +45,26 @@ public class ReviewRepositoryImpl implements ReviewRepoistoryCustom {
 				containsContext(condition.getContext()),
 				createdBetween(condition.getStartDate(), condition.getEndDate()))
 			.offset(pageable.getOffset())
-			.limit(pageable.getPageSize())
-			.fetchResults();
+			.limit(pageable.getPageSize());
 
+		// 정렬 조건을 담은 list
+		List<OrderSpecifier<?>> orders = new ArrayList<>();
+
+		if (pageable.getSort().isSorted()) {
+			for (Sort.Order order : pageable.getSort()) {
+				if (order.getProperty().equals("rate")) {
+					orders.add(order.isAscending() ? review.rate.asc() : review.rate.desc());
+				} else if (order.getProperty().equals("createdAt")) {
+					orders.add(order.isAscending() ? review.createdAt.asc() : review.createdAt.desc());
+				}
+			}
+		}
+
+		if (orders.isEmpty()) {
+			orders.add(review.createdAt.desc());
+		}
+
+		QueryResults<ReviewViewDto> results = query.fetchResults();
 		List<ReviewViewDto> content = results.getResults();
 		long total = results.getTotal();
 
