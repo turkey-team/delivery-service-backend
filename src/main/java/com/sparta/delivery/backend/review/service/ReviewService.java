@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.sparta.delivery.backend.image.entity.Image;
 import com.sparta.delivery.backend.image.repository.ImageRepository;
+import com.sparta.delivery.backend.review.dto.ReviewDeleteResponseDto;
 import com.sparta.delivery.backend.review.dto.ReviewRegisterDto;
 import com.sparta.delivery.backend.review.dto.ReviewResponseDto;
 import com.sparta.delivery.backend.review.dto.ReviewSearchCondition;
@@ -99,5 +100,14 @@ public class ReviewService {
 	}
 
 	// review 삭제
+	@Transactional
+	public ReviewDeleteResponseDto deleteReview(UUID reviewId, Long currentUserId) {
+		Review review = reviewRepository.findById(reviewId)
+			.orElseThrow(() -> new IllegalArgumentException("해당 리뷰를 찾을 수 없습니다."));
+
+		review.softDelete(currentUserId);
+
+		return ReviewDeleteResponseDto.of(review);
+	}
 
 }

@@ -56,4 +56,13 @@ public class BaseEntity {
 		this.updatedAt = LocalDateTime.now();
 	}
 
+	public void softDelete(Long userId) {
+		this.deletedAt = LocalDateTime.now();
+		this.deletedBy = userId;
+	}
+
+	public boolean isDeleted() {
+		return this.deletedAt != null;
+	}
+
 }

@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.sparta.delivery.backend.review.dto.ReviewDeleteResponseDto;
 import com.sparta.delivery.backend.review.dto.ReviewRegisterDto;
 import com.sparta.delivery.backend.review.dto.ReviewResponseDto;
 import com.sparta.delivery.backend.review.dto.ReviewSearchCondition;
@@ -49,6 +51,13 @@ public class ReviewController {
 	public ReviewResponseDto updateReview(@PathVariable UUID storeId, @PathVariable UUID reviewId,
 		@RequestBody ReviewUpdateDto updateDto) {
 		return reviewService.updateReview(updateDto, reviewId);
+	}
+
+	@DeleteMapping("/stores/{storeId}/reviews/{reviewId}")
+	public ReviewDeleteResponseDto deleteReview(@PathVariable UUID storeId,
+		@PathVariable UUID reviewId, Long currentUserId) {
+		// 추후 Authentication UserDetails로 바꾸기
+		return reviewService.deleteReview(reviewId, currentUserId);
 	}
 
 }
