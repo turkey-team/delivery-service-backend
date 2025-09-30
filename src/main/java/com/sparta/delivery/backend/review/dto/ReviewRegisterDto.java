@@ -3,8 +3,10 @@ package com.sparta.delivery.backend.review.dto;
 import java.util.UUID;
 
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
+@Setter
 public class ReviewRegisterDto {
 
 	private String context;

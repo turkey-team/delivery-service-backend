@@ -5,11 +5,17 @@ import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.sparta.delivery.backend.image.entity.Image;
+import com.sparta.delivery.backend.image.repository.ImageRepository;
+import com.sparta.delivery.backend.review.dto.ReviewRegisterDto;
+import com.sparta.delivery.backend.review.dto.ReviewResponseDto;
 import com.sparta.delivery.backend.review.dto.ReviewSearchCondition;
 import com.sparta.delivery.backend.review.dto.ReviewViewDto;
 import com.sparta.delivery.backend.review.entity.Review;
 import com.sparta.delivery.backend.review.repository.ReviewRepository;
+import com.sparta.delivery.backend.user.entity.User;
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,6 +24,10 @@ import lombok.RequiredArgsConstructor;
 public class ReviewService {
 
 	private final ReviewRepository reviewRepository;
+	//private final CustomerRepository customerRepository;
+	//private final StoreRepository storeRepository;
+	private final ImageRepository imageRepository;
+	//private final OrderRepository orderRepository;
 
 	// review 단건 조회
 	public ReviewViewDto getReview(UUID storeId, UUID reviewId) {
@@ -34,6 +44,47 @@ public class ReviewService {
 	}
 
 	// review 등록
+	@Transactional
+	public ReviewResponseDto registerReview(ReviewRegisterDto registerDto, UUID storeId,
+		UUID orderId, User user) {
+		/*Customer customer = customerRepository.findByUserId(user.getId()).orElseThrow(
+			() -> new IllegalArgumentException("해당 User를 찾을 수 없습니다.")
+		);
+
+		Order order = orderRepository.findById(orderId)
+			.orElseThrow(() -> new IllegalArgumentException("해당 Order를 찾을 수 없습니다."));*/
+
+		/*if (!order.getOrderStatus().equals(OrderStatus.SUCCESS)) {
+			throw new IllegalArgumentException("배송 완료된 주문만 리뷰 작성 가능");
+		}
+
+		if (!order.getCustomer().getId().equals(customer.getId())) {
+			throw new IllegalStateException("주문한 고객만 리뷰 작성 가능");
+		}
+
+		Store store = storeRepository.findById(storeId).orElseThrow(
+			() -> new IllegalArgumentException("해당 Store를 찾을 수 없습니다.")
+		);*/
+
+		Image image = null;
+		if (registerDto.getImageId() != null) {
+			image = imageRepository.findById(registerDto.getImageId())
+				.orElseThrow(() -> new IllegalArgumentException("해당 Image를 찾을 수 없습니다."));
+		}
+
+		/*Review review = Review.builder()
+			.customer(customer)
+			.store(store).image(image)
+			.context(registerDto.getContext())
+			.rate(registerDto.getRate())
+			.build();
+
+		reviewRepository.save(review);
+
+		return ReviewResponseDto.of(review);*/
+
+		return null;
+	}
 
 	// review 수정
 

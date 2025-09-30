@@ -35,3 +35,6 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Q entity 방지용 ###
+/src/main/generated/
