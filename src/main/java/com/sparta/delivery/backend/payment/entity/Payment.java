@@ -40,7 +40,7 @@ public class Payment extends BaseEntity {
 	@Column(name = "issuer_code", length = 2, nullable = false)
 	private String issuerCode; // 카드 발급사 코드
 
-	@Column(name = "issuer_code", length = 2, nullable = false)
+	@Column(name = "acquirer_code", length = 2, nullable = false)
 	private String acquirerCode; // 카드 매입사 코드
 
 	@Enumerated(EnumType.STRING)
