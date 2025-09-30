@@ -49,4 +49,9 @@ public class Review extends BaseEntity {
 		this.rate = rate;
 	}
 
+	public void update(String context, int rate) {
+		this.context = context;
+		this.rate = rate;
+	}
+
 }
