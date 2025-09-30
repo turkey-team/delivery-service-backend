@@ -5,3 +5,8 @@ spring:
   profiles:
     include:
       - datasource
+
+googleai:
+  api:
+    baseurl: https://generativelanguage.googleapis.com
+    key: AIzaSyBSkadohKBc0Vf7yUYYRP2StgTUQ3T8qKU
