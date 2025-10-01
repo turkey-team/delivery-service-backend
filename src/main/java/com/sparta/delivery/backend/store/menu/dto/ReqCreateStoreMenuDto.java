@@ -9,7 +9,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ReqStoreMenuUpdateDto {
+public class ReqCreateStoreMenuDto {
 	/*
 	이름
 	사진
@@ -26,4 +26,6 @@ public class ReqStoreMenuUpdateDto {
 	private String description;
 	private String prepTime;
 	private StockStatus stockStatus;
+	private int sortOrder;
+	private Boolean isHidden; // 체크박스로 정보가 넘어오기때문에 true false 를 instant 로 변환처리
 }

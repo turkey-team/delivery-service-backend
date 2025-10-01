@@ -1,6 +1,7 @@
 package com.sparta.delivery.backend.store.menu.dto;
 
 import java.time.Instant;
+import java.util.UUID;
 
 import com.sparta.delivery.backend.store.menu.entity.StoreMenu;
 
@@ -11,10 +12,12 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ResVisibilityDto {
+public class ResUpdateVisibilityDto {
+	private UUID menuId;
 	private Instant hiddenAt;
 
-	public ResVisibilityDto(StoreMenu storeMenu) {
+	public ResUpdateVisibilityDto(StoreMenu storeMenu) {
+		this.menuId = storeMenu.getId();
 		this.hiddenAt = storeMenu.getHiddenAt();
 	}
 }
