@@ -36,7 +36,7 @@ public class ReviewRepositoryImpl implements ReviewRepoistoryCustom {
 
 		JPAQuery<ReviewViewDto> query = queryFactory.select(new QReviewViewDto(
 				review.id, review.customer.id,
-				review.store.id, review.image.imageUrl,
+				review.store.id, review.imageUrl,
 				review.context, review.rate
 			))
 			.from(review)
@@ -80,7 +80,7 @@ public class ReviewRepositoryImpl implements ReviewRepoistoryCustom {
 
 		JPAQuery<ReviewViewDto> query = queryFactory.select(new QReviewViewDto(
 				review.id, review.customer.id,
-				review.store.id, review.image.imageUrl,
+				review.store.id, review.imageUrl,
 				review.context, review.rate
 			))
 			.from(review)

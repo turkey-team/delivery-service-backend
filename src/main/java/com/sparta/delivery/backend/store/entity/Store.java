@@ -1,36 +1,21 @@
 package com.sparta.delivery.backend.store.entity;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
-import org.hibernate.annotations.UuidGenerator;
-import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedBy;
-import org.springframework.data.annotation.LastModifiedDate;
-
-import com.sparta.delivery.backend.category.entity.Category;
 import com.sparta.delivery.backend.common.BaseEntity;
-import com.sparta.delivery.backend.image.entity.Image;
 import com.sparta.delivery.backend.owner.entity.Owner;
-import com.sparta.delivery.backend.store.dto.StoreResponseDto;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -50,7 +35,7 @@ public class Store extends BaseEntity {
 	private String regionDong;
 
 	@OneToMany(mappedBy = "store", fetch = FetchType.LAZY)
-	 private List<StoreCategory> storeCategories = new ArrayList<>();
+	private List<StoreCategory> storeCategories = new ArrayList<>();
 
 	@Column(name = "name")
 	private String name;
@@ -60,6 +45,9 @@ public class Store extends BaseEntity {
 
 	@Column(name = "review_rate")
 	private double reviewRate;
+
+	@Column(name = "review_cnt")
+	private int reviewCnt;
 
 	@Column(name = "min_order_price")
 	private Integer minOrderPrice;
@@ -74,6 +62,23 @@ public class Store extends BaseEntity {
 	@Column(name = "phone_number")
 	private String phoneNumber;
 
+	public void addReview(int rate) {
+		this.reviewRate = (this.reviewRate * this.reviewCnt + rate) / (this.reviewCnt + 1);
+		this.reviewCnt++;
+	}
 
+	public void updateReview(int oldRate, int newRate) {
+		this.reviewRate = (this.reviewRate * this.reviewCnt - oldRate + newRate);
+	}
+
+	public void deleteReview(int rate) {
+		if (this.reviewCnt <= 1) {
+			this.reviewRate = 0.0;
+			this.reviewCnt = 0;
+		} else {
+			this.reviewRate = (this.reviewRate * this.reviewCnt - rate) / (this.reviewCnt - 1);
+			this.reviewCnt--;
+		}
+	}
 
 }

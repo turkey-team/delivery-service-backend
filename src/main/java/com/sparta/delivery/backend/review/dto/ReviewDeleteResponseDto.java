@@ -21,7 +21,7 @@ public class ReviewDeleteResponseDto {
 	public static ReviewDeleteResponseDto of(Review review) {
 		ReviewDeleteResponseDto dto = new ReviewDeleteResponseDto();
 		dto.reviewId = review.getId();
-		dto.imageUrl = review.getImage().getImageUrl();
+		dto.imageUrl = review.getImageUrl();
 		dto.context = review.getContext();
 		dto.rate = review.getRate();
 		dto.createdAt = review.getCreatedAt();
