@@ -39,8 +39,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     //validation
     implementation 'org.springframework.boot:spring-boot-starter-validation'
-    // Security
-    implementation 'org.springframework.boot:spring-boot-starter-security'
     // redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     // JWT
@@ -49,12 +47,11 @@ dependencies {
     runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.11.5'
     // Security
     implementation 'org.springframework.boot:spring-boot-starter-security'
-    compileOnly 'org.projectlombok:lombok'
     //postgresSQL
     runtimeOnly 'org.postgresql:postgresql'
     //H2
-
     runtimeOnly 'com.h2database:h2'
+    //lombok
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
