@@ -1,7 +1,5 @@
 package com.sparta.delivery.backend.store.menu.dto;
 
-import java.time.Instant;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -9,6 +7,6 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ReqVisibilityOwnerDto {
+public class ReqVisibilityDto {
 	private boolean hidden;
 }

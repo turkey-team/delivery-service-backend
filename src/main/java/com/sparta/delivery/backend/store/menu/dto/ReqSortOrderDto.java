@@ -7,6 +7,6 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ReqSortOrderOwnerDto {
+public class ReqSortOrderDto {
 	private int sortOrder;
 }

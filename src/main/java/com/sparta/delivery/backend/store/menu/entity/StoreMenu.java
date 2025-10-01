@@ -5,7 +5,8 @@ import java.time.Instant;
 import com.sparta.delivery.backend.common.BaseEntity;
 import com.sparta.delivery.backend.image.entity.Image;
 import com.sparta.delivery.backend.store.entity.Store;
-import com.sparta.delivery.backend.store.menu.dto.ReqStoreMenuOwnerDto;
+import com.sparta.delivery.backend.store.menu.dto.ReqStoreMenuCreateDto;
+import com.sparta.delivery.backend.store.menu.dto.ReqStoreMenuUpdateDto;
 import com.sparta.delivery.backend.store.menu.enums.StockStatus;
 
 import jakarta.persistence.Column;
@@ -21,10 +22,8 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Getter
-@Setter
 @Entity
 @Table(
 	name = "p_store_menu",
@@ -78,13 +77,34 @@ public class StoreMenu extends BaseEntity {
 	private Instant hiddenAt;
 
 	@Builder
-	private StoreMenu(ReqStoreMenuOwnerDto reqStoreMenuOwnerDto, Store store, Image image) {
+	private StoreMenu(ReqStoreMenuCreateDto reqStoreMenuCreateDto, Store store, Image image) {
 		this.store = store;
 		this.image = image;
-		this.name = reqStoreMenuOwnerDto.getName();
-		this.price = reqStoreMenuOwnerDto.getPrice();
-		this.description = reqStoreMenuOwnerDto.getDescription();
-		this.prepTime = reqStoreMenuOwnerDto.getPrepTime();
-		this.stockStatus = reqStoreMenuOwnerDto.getStockStatus();
+		this.name = reqStoreMenuCreateDto.getName();
+		this.price = reqStoreMenuCreateDto.getPrice();
+		this.description = reqStoreMenuCreateDto.getDescription();
+		this.prepTime = reqStoreMenuCreateDto.getPrepTime();
+		this.stockStatus = reqStoreMenuCreateDto.getStockStatus();
+		this.setSortOrder(reqStoreMenuCreateDto.getSortOrder());	// 순서는 1 이상
+		this.setHiddenAt(reqStoreMenuCreateDto.getHiddenAt());		// Boolean → Instant 변환
+	}
+
+	public void updateStoreMenu(ReqStoreMenuUpdateDto reqStoreMenuUpdateDto, Image image) {
+		this.image = image;
+		this.name = reqStoreMenuUpdateDto.getName();
+		this.price = reqStoreMenuUpdateDto.getPrice();
+		this.description = reqStoreMenuUpdateDto.getDescription();
+		this.prepTime = reqStoreMenuUpdateDto.getPrepTime();
+		this.stockStatus = reqStoreMenuUpdateDto.getStockStatus();
+	}
+
+	public void setSortOrder(int sortOrder) {
+		if (sortOrder < 1) throw new IllegalArgumentException();
+		this.sortOrder = sortOrder;
+	}
+
+	public void setHiddenAt(Boolean hidden) {
+		// True 일때는 Instant 로 변환해서 저장, 아닐 경우 null 로 저장
+		this.hiddenAt = Boolean.TRUE.equals(hidden) ? Instant.now() : null;
 	}
 }

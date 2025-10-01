@@ -13,7 +13,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ResStoreMenuOwnerDto {
+public class ResStoreMenuDto {
 	private UUID id;
 	private String name;
 	private String imageUrl;
@@ -24,7 +24,7 @@ public class ResStoreMenuOwnerDto {
 	private int sortOrder;
 	private Instant hiddenAt;
 
-	public ResStoreMenuOwnerDto(StoreMenu storeMenu) {
+	public ResStoreMenuDto(StoreMenu storeMenu) {
 		this.id = storeMenu.getId();
 		this.name = storeMenu.getName();
 		this.price = storeMenu.getPrice();

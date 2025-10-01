@@ -1,8 +1,9 @@
 package com.sparta.delivery.backend.store.menu.dto;
 
+import java.time.Instant;
+
 import com.sparta.delivery.backend.store.menu.entity.StoreMenu;
 
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -10,10 +11,10 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ResSortOrderOwnerDto {
-	private int sortOrder;
+public class ResVisibilityDto {
+	private Instant hiddenAt;
 
-	public ResSortOrderOwnerDto(StoreMenu storeMenu) {
-		this.sortOrder = storeMenu.getSortOrder();
+	public ResVisibilityDto(StoreMenu storeMenu) {
+		this.hiddenAt = storeMenu.getHiddenAt();
 	}
 }

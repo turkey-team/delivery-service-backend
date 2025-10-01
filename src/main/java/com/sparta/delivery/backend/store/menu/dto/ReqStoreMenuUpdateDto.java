@@ -1,7 +1,5 @@
 package com.sparta.delivery.backend.store.menu.dto;
 
-import java.time.Instant;
-
 import com.sparta.delivery.backend.store.menu.enums.StockStatus;
 
 import lombok.Getter;
@@ -11,7 +9,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ReqStoreMenuOwnerDto {
+public class ReqStoreMenuUpdateDto {
 	/*
 	이름
 	사진
