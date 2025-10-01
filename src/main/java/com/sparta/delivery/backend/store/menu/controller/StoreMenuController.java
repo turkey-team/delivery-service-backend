@@ -28,7 +28,7 @@ import com.sparta.delivery.backend.store.menu.service.StoreMenuService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/v1/stores/{storeId}/menus")
+@RequestMapping("/v1/stores/{storeId}/menus")
 @RequiredArgsConstructor
 public class StoreMenuController {
 

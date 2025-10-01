@@ -15,7 +15,7 @@ import com.sparta.delivery.backend.order.service.OrderService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/v1")
 @RequiredArgsConstructor
 public class OrderController {
 
