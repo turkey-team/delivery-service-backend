@@ -97,6 +97,7 @@ public class SigunguService {
 		return ResUpdateSigunguDto.from(sigungu);
 	}
 
+	@Transactional
 	public void deleteSigungu(UUID sidoId, UUID sigunguId) {
 		Sido sido = sidoRepository.findById(sidoId).orElseThrow(() -> {
 			log.warn("시/도 지역 검색 실패");
