@@ -33,6 +33,6 @@ public class ResStoreMenuCreateDto {
 		this.sortOrder = storeMenu.getSortOrder();
 		this.stockStatus = storeMenu.getStockStatus();
 		this.hiddenAt = storeMenu.getHiddenAt();
-		this.imageUrl = storeMenu.getImage() != null ? storeMenu.getImage().getImageUrl() : null;
+		this.imageUrl = storeMenu.getImageUrl();
 	}
 }

@@ -26,6 +26,4 @@ public class ReqStoreMenuUpdateDto {
 	private String description;
 	private String prepTime;
 	private StockStatus stockStatus;
-	private int sortOrder;
-	private Boolean hiddenAt; // 체크박스로 정보가 넘어오기때문에 true false 를 instant 로 변환처리
 }

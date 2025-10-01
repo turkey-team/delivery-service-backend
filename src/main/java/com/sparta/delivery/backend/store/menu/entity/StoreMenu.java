@@ -86,7 +86,7 @@ public class StoreMenu extends BaseEntity {
 		this.prepTime = reqStoreMenuCreateDto.getPrepTime();
 		this.stockStatus = reqStoreMenuCreateDto.getStockStatus();
 		this.setSortOrder(reqStoreMenuCreateDto.getSortOrder());	// 순서는 1 이상
-		this.setHiddenAt(reqStoreMenuCreateDto.getHiddenAt());		// Boolean → Instant 변환
+		this.setHiddenAt(reqStoreMenuCreateDto.getIsHidden());		// Boolean → Instant 변환
 	}
 
 	public void updateStoreMenu(ReqStoreMenuUpdateDto reqStoreMenuUpdateDto, Image image) {
@@ -103,8 +103,12 @@ public class StoreMenu extends BaseEntity {
 		this.sortOrder = sortOrder;
 	}
 
-	public void setHiddenAt(Boolean hidden) {
+	public void setHiddenAt(Boolean isHidden) {
 		// True 일때는 Instant 로 변환해서 저장, 아닐 경우 null 로 저장
-		this.hiddenAt = Boolean.TRUE.equals(hidden) ? Instant.now() : null;
+		this.hiddenAt = Boolean.TRUE.equals(isHidden) ? Instant.now() : null;
+	}
+
+	public String getImageUrl() {
+		return image != null ? image.getImageUrl() : null;
 	}
 }

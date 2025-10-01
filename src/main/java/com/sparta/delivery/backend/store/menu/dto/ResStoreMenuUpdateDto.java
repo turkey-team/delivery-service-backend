@@ -21,8 +21,6 @@ public class ResStoreMenuUpdateDto {
 	private String description;
 	private String prepTime;
 	private StockStatus stockStatus;
-	private int sortOrder;
-	private Instant hiddenAt;
 
 	public ResStoreMenuUpdateDto(StoreMenu storeMenu) {
 		this.id = storeMenu.getId();
@@ -30,9 +28,7 @@ public class ResStoreMenuUpdateDto {
 		this.price = storeMenu.getPrice();
 		this.description = storeMenu.getDescription();
 		this.prepTime = storeMenu.getPrepTime();
-		this.sortOrder = storeMenu.getSortOrder();
 		this.stockStatus = storeMenu.getStockStatus();
-		this.hiddenAt = storeMenu.getHiddenAt();
 		this.imageUrl = storeMenu.getImage() != null ? storeMenu.getImage().getImageUrl() : null;
 	}
 }
