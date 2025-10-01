@@ -1,6 +1,6 @@
 package com.sparta.delivery.backend.category.dto;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 import com.sparta.delivery.backend.category.entity.Category;
@@ -14,13 +14,12 @@ public class CategoryResponseDto {
 
 	private UUID id;
 	private String name;
-	private LocalDateTime createdAt;
-	private LocalDateTime updatedAt;
-	private LocalDateTime deletedAt;
+	private Instant createdAt;
+	private Instant updatedAt;
+	private Instant deletedAt;
 	private Long createdBy;
 	private Long updatedBy;
 	private Long deletedBy;
-
 
 	public CategoryResponseDto(Category category) {
 		this.id = category.getId();
