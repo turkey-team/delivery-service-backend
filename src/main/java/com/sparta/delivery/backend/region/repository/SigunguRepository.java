@@ -19,4 +19,8 @@ public interface SigunguRepository extends JpaRepository<Sigungu, UUID> {
 
 	Optional<Sigungu> findByIdAndSido(UUID sigunguId, Sido sido);
 
+	boolean existsByNameAndIdNot(String name, UUID sidoId);
+
+	boolean existsByCodeAndIdNot(String code, UUID sidoId);
+
 }

@@ -77,17 +77,17 @@ public class SigunguService {
 			return new EntityNotFoundException("존재하지 않는 시/도입니다.");
 		});
 
-		Sigungu sigungu = sigunguRepository.findById(sigunguId).orElseThrow(() -> {
+		Sigungu sigungu = sigunguRepository.findByIdAndSido(sigunguId, sido).orElseThrow(() -> {
 			log.warn("시/군/구 지역 검색 실패");
 			return new EntityNotFoundException("존재하지 않는 시/군/구입니다.");
 		});
 
-		if (sigunguRepository.existsByName(requestDto.getName())) {
+		if (sigunguRepository.existsByNameAndIdNot(requestDto.getName(), sigungu.getId())) {
 			log.warn("시/군/구 지역 이름 중복");
 			throw new IllegalArgumentException("이미 존재하는 시/군/구 이름입니다.");
 		}
 
-		if (sigunguRepository.existsByCode(requestDto.getCode())) {
+		if (sigunguRepository.existsByCodeAndIdNot(requestDto.getCode(), sigungu.getId())) {
 			log.warn("시/군/구 지역 코드 중복");
 			throw new IllegalArgumentException("이미 존재하는 시/군/구 코드입니다.");
 		}
