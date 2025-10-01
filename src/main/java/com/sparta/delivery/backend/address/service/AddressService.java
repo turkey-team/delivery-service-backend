@@ -11,8 +11,6 @@ import com.sparta.delivery.backend.address.dto.ReqUpdateAddressDto;
 import com.sparta.delivery.backend.address.dto.ResAddressDto;
 import com.sparta.delivery.backend.address.entity.Address;
 import com.sparta.delivery.backend.address.repository.AddressRepository;
-import com.sparta.delivery.backend.customer.entity.Customer;
-import com.sparta.delivery.backend.customer.repository.CustomerRepository;
 import com.sparta.delivery.backend.global.excpetion.NotFoundException;
 import com.sparta.delivery.backend.global.excpetion.UnauthorizedException;
 import com.sparta.delivery.backend.region.entity.Dong;
@@ -46,7 +44,7 @@ public class AddressService {
 
 	@Transactional(readOnly = true)
 	public List<ResAddressDto> getMyAddresses(UserDetailsImpl user) {
-		List<Address> findAddresses = addressRepository.findAllByUserId(user.getId());
+		List<Address> findAddresses = addressRepository.findAllByUserIdOrderByCreatedAtDesc(user.getId());
 		return findAddresses.stream().map(ResAddressDto::from).toList();
 	}
 
