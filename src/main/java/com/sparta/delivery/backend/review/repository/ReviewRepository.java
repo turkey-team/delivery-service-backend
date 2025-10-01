@@ -15,14 +15,14 @@ public interface ReviewRepository extends JpaRepository<Review, UUID>, ReviewRep
 	// 각 Void 부분 대신 Store쪽에서 평균 rating과 같이 보여줄 dto 만들어서 넣어주면 됩니다.
 	// 평균평점이 함께 들어가있는 Store List로 조회
 	@Query("select s.id as storeId, s.name as storeName, "
-		+ "avg(r.rate) from Store s left join Review r on s.id = r.store.id "
+		+ "avg(r.rate) as avgRate, count(r.id) as reviewCnt from Store s left join Review r on s.id = r.store.id "
 		+ "group by s.id")
 	List<Void> findStoresWithAverageRating();
 
 	// 각 Void 부분 대신 Store쪽에서 평균 rating과 같이 보여줄 dto 만들어서 넣어주면 됩니다.
 	// 평균평점이 함께 들어가있는 Store 단건 조회
 	@Query("select s.id as storeId, s.name as storeName, "
-		+ "avg(r.rate) from Store s left join Review r on s.id = r.store.id "
+		+ "avg(r.rate) as avgRate, count(r.id) as reviewCnt from Store s left join Review r on s.id = r.store.id "
 		+ "where s.id = :storeId "
 		+ "group by s.id")
 	Optional<Void> findStoreWithAverageRating(@Param("storeId") UUID storeId);

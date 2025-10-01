@@ -1,6 +1,6 @@
 package com.sparta.delivery.backend.common;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 import org.hibernate.annotations.UuidGenerator;
@@ -29,35 +29,35 @@ public class BaseEntity {
 
 	@CreatedDate
 	@Column(updatable = false)
-	private LocalDateTime createdAt;
+	private Instant createdAt;
 
 	// BIGSERIAL 타입으로 되어있어서 Long으로 일단 했습니다
 	@CreatedBy
 	private Long createdBy;
 
 	@LastModifiedDate
-	private LocalDateTime updatedAt;
+	private Instant updatedAt;
 
 	@LastModifiedBy
 	private Long updatedBy;
 
-	private LocalDateTime deletedAt;
+	private Instant deletedAt;
 
 	private Long deletedBy;
 
 	@PrePersist
 	protected void prePersist() {
-		this.createdAt = LocalDateTime.now();
-		this.updatedAt = LocalDateTime.now();
+		this.createdAt = Instant.now();
+		this.updatedAt = Instant.now();
 	}
 
 	@PreUpdate
 	protected void preUpdate() {
-		this.updatedAt = LocalDateTime.now();
+		this.updatedAt = Instant.now();
 	}
 
 	public void softDelete(Long userId) {
-		this.deletedAt = LocalDateTime.now();
+		this.deletedAt = Instant.now();
 		this.deletedBy = userId;
 	}
 
