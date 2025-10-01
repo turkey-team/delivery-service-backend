@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReviewUpdateDto {
+public class ReqUpdateReviewDto {
 
 	private String context;
 	private int rate;

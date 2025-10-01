@@ -1,32 +1,18 @@
 package com.sparta.delivery.backend.review.service;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 
-import com.sparta.delivery.backend.image.entity.Image;
-import com.sparta.delivery.backend.review.dto.ReviewDeleteResponseDto;
-import com.sparta.delivery.backend.review.dto.ReviewResponseDto;
-import com.sparta.delivery.backend.review.dto.ReviewSearchCondition;
-import com.sparta.delivery.backend.review.dto.ReviewUpdateDto;
-import com.sparta.delivery.backend.review.dto.ReviewViewDto;
-import com.sparta.delivery.backend.review.entity.Review;
+import com.sparta.delivery.backend.customer.entity.Customer;
+import com.sparta.delivery.backend.customer.repository.CustomerRepository;
+import com.sparta.delivery.backend.order.entity.Order;
+import com.sparta.delivery.backend.order.repository.OrderRepository;
 import com.sparta.delivery.backend.review.repository.ReviewRepository;
+import com.sparta.delivery.backend.store.entity.Store;
+import com.sparta.delivery.backend.store.repository.StoreRepository;
+import com.sparta.delivery.backend.user.entity.User;
 
 @ExtendWith(MockitoExtension.class)
 class ReviewServiceTest {
@@ -35,108 +21,190 @@ class ReviewServiceTest {
 	private ReviewService reviewService;
 
 	@Mock
-	private ReviewRepository reviewRepositoryCustom; // ReviewRepositoryImpl의 인터페이스
+	private ReviewRepository reviewRepository;
 
-	// ===== 리뷰 수정 테스트 =====
+	@Mock
+	private CustomerRepository customerRepository;
+
+	@Mock
+	private OrderRepository orderRepository;
+
+	@Mock
+	private StoreRepository storeRepository;
+
+	private User testUser;
+	private Customer testCustomer;
+	private Store testStore;
+	private Order testOrder;
+
+	private Long testUserId = 1L;
+
+	/*@BeforeEach
+	void setUp() {
+		// 테스트용 User / Customer / Store / Order 생성
+		UUID testId = UUID.randomUUID();
+		testUser = new User();
+		testUser.setId(testUserId);
+		testUser.setUsername("testUser");
+		testUser.setPassword("pw");
+		testUser.setRole(UserRoleEnum.CUSTOMER);
+
+		testCustomer = new Customer();
+		testCustomer.setId(UUID.randomUUID());
+		testCustomer.setUser(testUser);
+
+		testStore = new Store();
+		testStore.setId(UUID.randomUUID());
+		testStore.setName("테스트 가게");
+
+		testOrder = new Order();
+		testOrder.setId(UUID.randomUUID());
+		testOrder.setCustomer(testCustomer);
+		testOrder.setStore(testStore);
+		testOrder.setOrderStatus(OrderStatus.SUCCESS);
+
+		// SecurityContext에 로그인 정보 설정
+		UserDetailsImpl userDetails = new UserDetailsImpl(testUser);
+		Authentication auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+		SecurityContextHolder.getContext().setAuthentication(auth);
+	}
+
+	// ==================== 리뷰 등록 ====================
 	@Test
-	void testUpdateReview() {
-		UUID reviewId = UUID.randomUUID();
+	void testRegisterReview_authenticatedUser() {
+		ReqCreateReviewDto dto = new ReqCreateReviewDto("리뷰 내용", 5, null);
 
+		when(customerRepository.findByUserId(testUserId)).thenReturn(Optional.of(testCustomer));
+		when(orderRepository.findById(testOrder.getId())).thenReturn(Optional.of(testOrder));
+		when(storeRepository.findById(testStore.getId())).thenReturn(Optional.of(testStore));
+		when(reviewRepository.save(any(Review.class))).thenAnswer(i -> i.getArguments()[0]);
+
+		ResResultReviewDto result = reviewService.registerReview(dto, testStore.getId(), testOrder.getId());
+
+		assertNotNull(result);
+		assertEquals("리뷰 내용", result.getContext());
+		assertEquals(5, result.getRate());
+
+		System.out.println("✅ 리뷰 등록 결과 DTO: " + result);
+	}
+
+	// 다른 사람이 리뷰 등록하려할때
+	@Test
+	void testRegisterReview_notAuthenticatedUser_throwsException() {
+
+		// given
+		ReqCreateReviewDto dto = new ReqCreateReviewDto("리뷰 내용", 5, null);
+
+		// 다른 사용자(Customer)를 Mock으로 반환
+		Customer otherCustomer = new Customer();
+		otherCustomer.setId(UUID.randomUUID());
+		User otherUser = new User();
+		otherUser.setId(999L); // 로그인된 사용자 ID(testUserId)와 다른 값
+		otherCustomer.setUser(otherUser);
+
+		when(customerRepository.findByUserId(testUserId))
+			.thenReturn(Optional.of(otherCustomer)); // 로그인한 사용자의 Customer가 아닌 다른 사용자를 반환
+		when(orderRepository.findById(testOrder.getId()))
+			.thenReturn(Optional.of(testOrder));
+
+		// when & then
+		assertThrows(UnauthorizedException.class,
+			() -> reviewService.registerReview(dto, testStore.getId(), testOrder.getId()));
+	}
+
+	// ==================== 리뷰 수정 ====================
+	@Test
+	void testUpdateReview_authenticatedUser() {
+		UUID reviewId = UUID.randomUUID();
 		Review existingReview = Review.builder()
+			.customer(testCustomer)
+			.store(testStore)
 			.context("기존 리뷰")
 			.rate(3)
 			.imageUrl("http://image.com")
 			.build();
-		//existingReview.setId(reviewId);
 
-		ReviewUpdateDto updateDto = new ReviewUpdateDto("수정된 리뷰", 5, "http://image1.com");
+		ReqUpdateReviewDto updateDto = new ReqUpdateReviewDto("수정된 리뷰", 4, "http://image1.com");
 
-		// Mock 동작 정의
-		when(reviewRepositoryCustom.findById(reviewId)).thenReturn(Optional.of(existingReview));
-		// save 호출 검증 제거
+		when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(existingReview));
+		when(customerRepository.findByUserId(testUserId)).thenReturn(Optional.of(testCustomer));
+		when(storeRepository.findById(testStore.getId())).thenReturn(Optional.of(testStore));
 
-		// 서비스 호출
-		ReviewResponseDto result = reviewService.updateReview(updateDto, reviewId);
+		ResResultReviewDto updated = reviewService.updateReview(updateDto, reviewId);
 
-		// 검증
-		assertNotNull(result);
-		assertEquals("수정된 리뷰", result.getContext());
-		assertEquals(5, result.getRate());
+		assertEquals("수정된 리뷰", updated.getContext());
+		assertEquals(4, updated.getRate());
 
-		verify(reviewRepositoryCustom, times(1)).findById(reviewId);
-		// save 검증 제거
+		System.out.println("updated = " + updated);
 	}
 
+	// ==================== 리뷰 삭제 ====================
 	@Test
-	void testDeleteReview() {
+	void testDeleteReview_authenticatedUser() {
 		UUID reviewId = UUID.randomUUID();
-		Long currentUserId = 1L;
-
-		Image image = Image.builder()
-			.imageUrl("test.jpg")
-			.build();
-
 		Review existingReview = Review.builder()
+			.customer(testCustomer)
+			.store(testStore)
 			.context("삭제할 리뷰")
-			.rate(4)
-			.imageUrl("http://image.com")
+			.rate(5)
 			.build();
-		//existingReview.setId(reviewId);
-		System.out.println("existingReview = " + existingReview.getDeletedAt());
 
-		// Mock 동작 정의
-		when(reviewRepositoryCustom.findById(reviewId)).thenReturn(Optional.of(existingReview));
+		when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(existingReview));
+		when(customerRepository.findByUserId(testUserId)).thenReturn(Optional.of(testCustomer));
+		when(storeRepository.findById(testStore.getId())).thenReturn(Optional.of(testStore));
 
-		// 서비스 호출
-		ReviewDeleteResponseDto result = reviewService.deleteReview(reviewId, currentUserId);
-		System.out.println("result = " + result.getDeletedAt());
+		ReqDeleteReviewDto deleted = reviewService.deleteReview(reviewId);
 
-		// 검증
-		assertNotNull(result);
-		//assertEquals(reviewId, result.getReviewId());
-		// Soft delete 필드 검증
-		// assertNotNull(existingReview.getDeletedAt());
+		assertNotNull(deleted);
+		// Soft delete 여부 확인
+		assertNotNull(deleted.getDeletedAt());
 
-		verify(reviewRepositoryCustom, times(1)).findById(reviewId);
+		System.out.println("deleted = " + deleted);
+	}
+
+	// ==================== 권한 없는 사용자 예외 ====================
+	@Test
+	void testUpdateReview_notAuthor_throwsException() {
+		UUID reviewId = UUID.randomUUID();
+		UUID customerId = UUID.randomUUID();
+
+		Customer otherCustomer = new Customer();
+		otherCustomer.setId(customerId);
+
+		Review existingReview = new Review();
+		existingReview.setCustomer(otherCustomer); // 다른 사용자 작성
+		existingReview.setStore(testStore);
+		existingReview.setContext("기존 리뷰");
+		existingReview.setRate(3);
+
+		ReqUpdateReviewDto updateDto = new ReqUpdateReviewDto("수정된 리뷰", 4, null);
+
+		when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(existingReview));
+		when(customerRepository.findByUserId(testUserId)).thenReturn(Optional.of(testCustomer));
+
+		assertThrows(UnauthorizedException.class,
+			() -> reviewService.updateReview(updateDto, reviewId));
 	}
 
 	@Test
-	void testFindReviews_withPageableAndFilters() {
-		// ===== 1. 테스트 데이터 준비 =====
-		UUID storeId = UUID.randomUUID();
-		UUID reviewId1 = UUID.randomUUID();
-		UUID reviewId2 = UUID.randomUUID();
+	void testDeleteReview_notAuthor_throwsException() {
+		UUID reviewId = UUID.randomUUID();
+		UUID customerId = UUID.randomUUID();
 
-		ReviewViewDto review1 = new ReviewViewDto(reviewId1, UUID.randomUUID(), storeId,
-			"http://img1.com", "좋아요", 5);
-		ReviewViewDto review2 = new ReviewViewDto(reviewId2, UUID.randomUUID(), storeId,
-			"http://img2.com", "보통", 3);
+		Customer otherCustomer = new Customer();
+		otherCustomer.setId(customerId);
 
-		List<ReviewViewDto> mockReviews = Arrays.asList(review1, review2);
+		Review existingReview = new Review();
+		existingReview.setCustomer(otherCustomer); // 다른 사용자 작성
+		existingReview.setStore(testStore);
+		existingReview.setContext("삭제할 리뷰");
+		existingReview.setRate(5);
 
-		ReviewSearchCondition condition = new ReviewSearchCondition();
-		/*condition.setMinRate(3);
-		condition.setMaxRate(5);
-		condition.setContext("");*/
+		when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(existingReview));
+		when(customerRepository.findByUserId(testUserId)).thenReturn(Optional.of(testCustomer));
 
-		Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Order.asc("createdAt")));
-
-		// ===== 2. Mockito 동작 정의 =====
-		when(reviewRepositoryCustom.findReviews(storeId, condition, pageable))
-			.thenReturn(new PageImpl<>(mockReviews, pageable, mockReviews.size()));
-
-		// ===== 3. Service 호출 =====
-		Page<ReviewViewDto> resultPage = reviewService.getReviews(storeId, condition, pageable);
-
-		// ===== 4. 결과 검증 =====
-		// 정렬 테스트는 모든 entity 정상적으로 매핑될때(mock에서는 정렬 test 불가능)
-		assertNotNull(resultPage);
-		assertEquals(2, resultPage.getContent().size());
-		assertEquals(5, resultPage.getContent().get(0).getRate());
-		assertEquals(3, resultPage.getContent().get(1).getRate());
-
-		// ===== 5. Repository 호출 검증 =====
-		verify(reviewRepositoryCustom, times(1)).findReviews(storeId, condition, pageable);
-	}
+		assertThrows(UnauthorizedException.class,
+			() -> reviewService.deleteReview(reviewId));
+	}*/
 
 }

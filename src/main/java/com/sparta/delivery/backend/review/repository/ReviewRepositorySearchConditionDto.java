@@ -1,11 +1,11 @@
-package com.sparta.delivery.backend.review.dto;
+package com.sparta.delivery.backend.review.repository;
 
 import java.time.Instant;
 
 import lombok.Getter;
 
 @Getter
-public class ReviewSearchCondition {
+public class ReviewRepositorySearchConditionDto {
 
 	private Integer minRate;
 	private Integer maxRate;
