@@ -10,6 +10,6 @@ import org.springframework.stereotype.Repository;
 import com.sparta.delivery.backend.store.menu.entity.StoreMenu;
 
 @Repository
-public interface StoreMenuRepository extends JpaRepository<StoreMenu, Long> {
+public interface StoreMenuRepository extends JpaRepository<StoreMenu, UUID> {
 	Page<StoreMenu> findAllByStoreId(UUID store_id, Pageable pageable);
 }
