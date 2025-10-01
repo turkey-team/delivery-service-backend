@@ -1,15 +1,15 @@
 package com.sparta.delivery.backend.store.menu.dto;
 
-import java.time.Instant;
-
 import com.sparta.delivery.backend.store.menu.enums.StockStatus;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
+@Setter
 @NoArgsConstructor
-public class StoreMenuRequestDto {
+public class ReqStoreMenuUpdateDto {
 	/*
 	이름
 	사진
@@ -26,6 +26,4 @@ public class StoreMenuRequestDto {
 	private String description;
 	private String prepTime;
 	private StockStatus stockStatus;
-	private int sortOrder;
-	private Instant hiddenAt;
 }
