@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,6 +23,7 @@ import com.sparta.delivery.backend.address.dto.ResAddressDto;
 import com.sparta.delivery.backend.address.service.AddressService;
 import com.sparta.delivery.backend.security.UserDetailsImpl;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -33,7 +35,7 @@ public class AddressController {
 
 	@PostMapping
 	public ResponseEntity<Void> registerAddress(
-		@RequestBody ReqRegisterAddressDto requestDto,
+		@Valid @RequestBody ReqRegisterAddressDto requestDto,
 		@AuthenticationPrincipal UserDetailsImpl user
 	) {
 		addressService.registerAddress(requestDto, user);
@@ -49,7 +51,7 @@ public class AddressController {
 	@PutMapping("/{id}")
 	public ResAddressDto updateAddress(
 		@PathVariable UUID id,
-		@RequestBody ReqUpdateAddressDto requestDto,
+		@Valid @RequestBody ReqUpdateAddressDto requestDto,
 		@AuthenticationPrincipal UserDetailsImpl user
 	) {
 		return addressService.updateAddress(id, requestDto, user);
