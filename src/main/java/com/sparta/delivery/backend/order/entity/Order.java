@@ -3,13 +3,28 @@ package com.sparta.delivery.backend.order.entity;
 import java.time.Instant;
 
 import com.sparta.delivery.backend.common.BaseEntity;
+import com.sparta.delivery.backend.customer.entity.Customer;
 import com.sparta.delivery.backend.order.enums.OrderStatus;
-import jakarta.persistence.*;
+import com.sparta.delivery.backend.region.entity.Dong;
+import com.sparta.delivery.backend.store.entity.Store;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "p_order")
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Order extends BaseEntity {
 
 	// 매장 FK
@@ -48,4 +63,20 @@ public class Order extends BaseEntity {
 
 	@Column(name = "cancelled_reason", length = 255)
 	private String cancelledReason;
+
+	@Builder
+	private Order(Store store, Customer customer, Dong dongEntity, String gu, String dong,
+		String addressDetail, OrderStatus orderStatus, Instant cancelledAt, Long cancelledBy,
+		String cancelledReason) {
+		this.store = store;
+		this.customer = customer;
+		this.dongEntity = dongEntity;
+		this.gu = gu;
+		this.dong = dong;
+		this.addressDetail = addressDetail;
+		this.orderStatus = orderStatus;
+		this.cancelledAt = cancelledAt;
+		this.cancelledBy = cancelledBy;
+		this.cancelledReason = cancelledReason;
+	}
 }
