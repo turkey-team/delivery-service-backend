@@ -1,5 +1,8 @@
 package com.sparta.delivery.backend.security.util;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.security.Key;
 import java.time.Duration;
 import java.util.Base64;
@@ -96,22 +99,25 @@ public class JwtUtil {
 		res.setHeader(AUTHORIZATION_HEADER, accessToken);
 	}
 
-	// JWT를 Header에 추가
+	// JWT를 Cookie에 추가
 	public void addRefreshTokenToCookie(String refreshToken, HttpServletResponse res) {
-		// Refresh Token은 HttpOnly Cookie
-		Cookie refreshCookie = new Cookie(REFRESH_TOKEN_COOKIE, refreshToken);
-		refreshCookie.setHttpOnly(true);  // JS 접근 차단
-		//TODO: 추후 보안을 위해 HTTPS만 가능하도록 수정
-		refreshCookie.setSecure(false);
-		refreshCookie.setPath("/");
-		refreshCookie.setMaxAge((int) refreshExpiration.toSeconds());
-		res.addCookie(refreshCookie);
+		try {
+			refreshToken = URLEncoder.encode(refreshToken, "utf-8").replaceAll("\\+", "%20"); // Cookie Value 에는 공백이 불가능해서 encoding 진행
+
+			Cookie cookie = new Cookie(REFRESH_TOKEN_COOKIE, refreshToken); // Name-Value
+			cookie.setPath("/");
+
+			// Response 객체에 Cookie 추가
+			res.addCookie(cookie);
+		} catch (UnsupportedEncodingException e) {
+			logger.error(e.getMessage());
+		}
 	}
 
 	// JWT 토큰 substring
 	public String substringToken(String tokenValue) {
 		if (StringUtils.hasText(tokenValue) && tokenValue.startsWith(BEARER_PREFIX)) {
-			return tokenValue.substring(7);
+			return tokenValue.substring(BEARER_PREFIX.length());
 		}
 		logger.error("Not Found Token");
 		throw new NullPointerException("Not Found Token");
@@ -119,6 +125,11 @@ public class JwtUtil {
 
 	// Access 토큰 검증
 	public boolean validateAccessToken(String token) {
+		if (token == null || token.isEmpty()) {
+			logger.error("Token is null or empty");
+			return false;
+		}
+
 		try {
 			Jwts.parserBuilder().setSigningKey(accessKey).build().parseClaimsJws(token);
 			return true;
@@ -136,6 +147,11 @@ public class JwtUtil {
 
 	// Refresh 토큰 검증
 	public boolean validateRefreshToken(String token) {
+		if (token == null || token.isEmpty()) {
+			logger.error("Token is null or empty");
+			return false;
+		}
+
 		try {
 			Jwts.parserBuilder().setSigningKey(refreshKey).build().parseClaimsJws(token);
 			return true;
@@ -173,13 +189,25 @@ public class JwtUtil {
 	// Refresh Token 가져오기 (Cookie에서)
 	public String getRefreshTokenFromCookie(HttpServletRequest req) {
 		Cookie[] cookies = req.getCookies();
-		if (cookies != null) {
+		if(cookies != null) {
 			for (Cookie cookie : cookies) {
 				if (cookie.getName().equals(REFRESH_TOKEN_COOKIE)) {
-					return cookie.getValue();
+					try {
+						return URLDecoder.decode(cookie.getValue(), "UTF-8"); // Encode 되어 넘어간 Value 다시 Decode
+					} catch (UnsupportedEncodingException e) {
+						return null;
+					}
 				}
 			}
 		}
 		return null;
+	}
+
+	public void deleteCookieFromResponse(HttpServletResponse response) {
+		Cookie cookie = new Cookie(REFRESH_TOKEN_COOKIE, null);
+		cookie.setMaxAge(0);
+		cookie.setPath("/");
+		cookie.setHttpOnly(true);
+		response.addCookie(cookie);
 	}
 }

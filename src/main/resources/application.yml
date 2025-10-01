@@ -7,3 +7,4 @@ spring:
       - datasource
       - security
       - aistudio
+      - redis
