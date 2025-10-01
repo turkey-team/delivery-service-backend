@@ -1,36 +1,23 @@
 package com.sparta.delivery.backend.store.entity;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
-import org.hibernate.annotations.UuidGenerator;
-import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedBy;
-import org.springframework.data.annotation.LastModifiedDate;
-
-import com.sparta.delivery.backend.category.entity.Category;
 import com.sparta.delivery.backend.common.BaseEntity;
-import com.sparta.delivery.backend.image.entity.Image;
 import com.sparta.delivery.backend.owner.entity.Owner;
-import com.sparta.delivery.backend.store.dto.StoreResponseDto;
+import com.sparta.delivery.backend.region.entity.Dong;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.PrePersist;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -46,8 +33,9 @@ public class Store extends BaseEntity {
 	@OneToMany(mappedBy = "store")
 	private List<StoreImage> storeImages = new ArrayList<>();
 
-	@Column(name = "p_region_dong")
-	private String regionDong;
+	@OneToOne
+	@JoinColumn(name = "p_region_dong_id")
+	private Dong regionDong;
 
 	@OneToMany(mappedBy = "store", fetch = FetchType.LAZY)
 	 private List<StoreCategory> storeCategories = new ArrayList<>();
