@@ -12,6 +12,9 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
@@ -42,14 +45,14 @@ import lombok.Setter;
 public class StoreMenu extends BaseEntity {
 
 	// FK 매핑: p_store_id
-	/*@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "p_store_id", nullable = false)
 	private Store store;
 
 	// FK 매핑: p_image_id
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "p_image_id")
-	private Image image;*/
+	private Image image;
 
 	@Column(nullable = false, length = 100, unique = true) // 메뉴 이름은 중복 불가
 	private String name;

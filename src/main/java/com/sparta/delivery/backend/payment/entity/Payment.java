@@ -1,6 +1,6 @@
 package com.sparta.delivery.backend.payment.entity;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import com.sparta.delivery.backend.common.BaseEntity;
 
@@ -47,11 +47,11 @@ public class Payment extends BaseEntity {
 	@Column(name = "payment_status", length = 16, nullable = false)
 	private PaymentStatus paymentStatus;
 
-	private LocalDateTime approvedAt; // 결제 승인 시간
+	private Instant approvedAt; // 결제 승인 시간
 
 	@Builder
 	private Payment(String paymentGateway, String paymentKey, String paymentMethod, int amount, String cardNumber,
-		String issuerCode, String acquirerCode, PaymentStatus paymentStatus, LocalDateTime approvedAt) {
+		String issuerCode, String acquirerCode, PaymentStatus paymentStatus, Instant approvedAt) {
 		this.paymentGateway = paymentGateway;
 		this.paymentKey = paymentKey;
 		this.paymentMethod = paymentMethod;

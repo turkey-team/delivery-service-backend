@@ -1,19 +1,13 @@
 package com.sparta.delivery.backend.cart.entity;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 import org.hibernate.annotations.UuidGenerator;
-import org.springframework.data.annotation.CreatedDate;
-
-import com.sparta.delivery.backend.common.BaseEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -38,8 +32,8 @@ public class Cart {
 	// private Menu menu;
 
 	@Column(name = "create_at", updatable = false, nullable = false)
-	private LocalDateTime createAt;
+	private Instant createAt;
 
 	@Column(name = "deleted_at")
-	private LocalDateTime deletedAt;
+	private Instant deletedAt;
 }

@@ -1,6 +1,6 @@
 package com.sparta.delivery.backend.ai.entity;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 import org.hibernate.annotations.UuidGenerator;
@@ -37,7 +37,7 @@ public class AiPrompt {
 
 	@CreatedDate
 	@Column(updatable = false)
-	private LocalDateTime createdAt;
+	private Instant createdAt;
 
 	@CreatedBy
 	private Long createdBy;
