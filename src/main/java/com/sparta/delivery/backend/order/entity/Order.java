@@ -50,8 +50,8 @@ public class Order extends BaseEntity {
 	@Column(length = 50, nullable = false)
 	private String dong;
 
-	@Column(name = "address_detail", length = 255, nullable = false)
-	private String addressDetail;
+	@Column(name = "address_details", length = 255, nullable = false)
+	private String addressDetails;
 
 	@Enumerated(EnumType.STRING)
 	@Column(length = 20, nullable = false)
@@ -68,14 +68,14 @@ public class Order extends BaseEntity {
 
 	@Builder
 	private Order(Store store, Customer customer, Dong dongEntity, String gu, String dong,
-		String addressDetail, OrderStatus orderStatus, Instant cancelledAt, Long cancelledBy,
+		String addressDetails, OrderStatus orderStatus, Instant cancelledAt, Long cancelledBy,
 		String cancelledReason) {
 		this.store = store;
 		this.customer = customer;
 		this.dongEntity = dongEntity;
 		this.gu = gu;
 		this.dong = dong;
-		this.addressDetail = addressDetail;
+		this.addressDetails = addressDetails;
 		this.orderStatus = orderStatus;
 		this.cancelledAt = cancelledAt;
 		this.cancelledBy = cancelledBy;
