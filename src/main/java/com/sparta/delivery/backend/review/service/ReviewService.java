@@ -13,14 +13,14 @@ import com.sparta.delivery.backend.image.repository.ImageRepository;
 import com.sparta.delivery.backend.order.entity.Order;
 import com.sparta.delivery.backend.order.enums.OrderStatus;
 import com.sparta.delivery.backend.order.repository.OrderRepository;
-import com.sparta.delivery.backend.review.dto.ReviewDeleteResponseDto;
-import com.sparta.delivery.backend.review.dto.ReviewRegisterDto;
-import com.sparta.delivery.backend.review.dto.ReviewResponseDto;
-import com.sparta.delivery.backend.review.dto.ReviewSearchCondition;
-import com.sparta.delivery.backend.review.dto.ReviewUpdateDto;
-import com.sparta.delivery.backend.review.dto.ReviewViewDto;
+import com.sparta.delivery.backend.review.dto.ReqCreateReviewDto;
+import com.sparta.delivery.backend.review.dto.ReqDeleteReviewDto;
+import com.sparta.delivery.backend.review.dto.ReqUpdateReviewDto;
+import com.sparta.delivery.backend.review.dto.ResResultReviewDto;
+import com.sparta.delivery.backend.review.dto.ResViewReviewDto;
 import com.sparta.delivery.backend.review.entity.Review;
 import com.sparta.delivery.backend.review.repository.ReviewRepository;
+import com.sparta.delivery.backend.review.repository.ReviewRepositorySearchConditionDto;
 import com.sparta.delivery.backend.store.entity.Store;
 import com.sparta.delivery.backend.store.repository.StoreRepository;
 import com.sparta.delivery.backend.user.entity.User;
@@ -38,27 +38,29 @@ public class ReviewService {
 	private final OrderRepository orderRepository;
 
 	// review 단건 조회
-	public ReviewViewDto getReview(UUID storeId, UUID reviewId) {
+	public ResViewReviewDto getReview(UUID storeId, UUID reviewId) {
 		Review review = reviewRepository.findById(reviewId)
 			.filter(r -> r.getStore().getId().equals(storeId))
 			.orElseThrow(() -> new IllegalArgumentException("해당 리뷰를 찾을 수 없습니다."));
 
-		return ReviewViewDto.of(review);
+		return ResViewReviewDto.of(review);
 	}
 
 	// reviews list 조회
-	public Page<ReviewViewDto> getReviews(UUID storeId, ReviewSearchCondition condition, Pageable pageable) {
+	public Page<ResViewReviewDto> getReviews(UUID storeId, ReviewRepositorySearchConditionDto condition,
+		Pageable pageable) {
 		return reviewRepository.findReviews(storeId, condition, pageable);
 	}
 
 	// 내가 작성한 reviews list 조회
-	public Page<ReviewViewDto> getMyReviews(UUID customerId, ReviewSearchCondition condition, Pageable pageable) {
+	public Page<ResViewReviewDto> getMyReviews(UUID customerId, ReviewRepositorySearchConditionDto condition,
+		Pageable pageable) {
 		return reviewRepository.findMyOwnReviews(customerId, condition, pageable);
 	}
 
 	// review 등록
 	@Transactional
-	public ReviewResponseDto registerReview(ReviewRegisterDto registerDto, UUID storeId,
+	public ResResultReviewDto registerReview(ReqCreateReviewDto registerDto, UUID storeId,
 		UUID orderId, User user) {
 		Customer customer = customerRepository.findByUserId(user.getId()).orElseThrow(
 			() -> new IllegalArgumentException("해당 User를 찾을 수 없습니다.")
@@ -89,12 +91,12 @@ public class ReviewService {
 		reviewRepository.save(review);
 		store.addReview(review.getRate());
 
-		return ReviewResponseDto.of(review);
+		return ResResultReviewDto.of(review);
 	}
 
 	// review 수정
 	@Transactional
-	public ReviewResponseDto updateReview(ReviewUpdateDto dto, UUID reviewId) {
+	public ResResultReviewDto updateReview(ReqUpdateReviewDto dto, UUID reviewId) {
 		Review review = reviewRepository.findById(reviewId)
 			.orElseThrow(() -> new IllegalArgumentException("해당 리뷰를 찾을 수 없습니다."));
 
@@ -106,12 +108,12 @@ public class ReviewService {
 
 		store.updateReview(review.getRate(), dto.getRate());
 
-		return ReviewResponseDto.of(review);
+		return ResResultReviewDto.of(review);
 	}
 
 	// review 삭제
 	@Transactional
-	public ReviewDeleteResponseDto deleteReview(UUID reviewId, Long currentUserId) {
+	public ReqDeleteReviewDto deleteReview(UUID reviewId, Long currentUserId) {
 		Review review = reviewRepository.findById(reviewId)
 			.orElseThrow(() -> new IllegalArgumentException("해당 리뷰를 찾을 수 없습니다."));
 
@@ -123,7 +125,7 @@ public class ReviewService {
 
 		store.deleteReview(review.getRate());
 
-		return ReviewDeleteResponseDto.of(review);
+		return ReqDeleteReviewDto.of(review);
 	}
 
 }

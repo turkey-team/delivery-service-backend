@@ -8,7 +8,7 @@ import com.sparta.delivery.backend.review.entity.Review;
 import lombok.Getter;
 
 @Getter
-public class ReviewResponseDto {
+public class ResResultReviewDto {
 
 	private UUID reviewId;
 	private String context;
@@ -17,8 +17,8 @@ public class ReviewResponseDto {
 
 	private Instant createdAt;
 
-	public static ReviewResponseDto of(Review review) {
-		ReviewResponseDto dto = new ReviewResponseDto();
+	public static ResResultReviewDto of(Review review) {
+		ResResultReviewDto dto = new ResResultReviewDto();
 		dto.reviewId = review.getId();
 		dto.imageUrl = review.getImageUrl();
 		dto.context = review.getContext();

@@ -3,7 +3,7 @@ package com.sparta.delivery.backend.review.dto;
 import lombok.Getter;
 
 @Getter
-public class ReviewRegisterDto {
+public class ReqCreateReviewDto {
 
 	private String context;
 	private int rate;

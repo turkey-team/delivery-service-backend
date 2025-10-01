@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class ReviewViewDto {
+public class ResViewReviewDto {
 
 	private UUID id;
 	private UUID customerId;
@@ -21,7 +21,7 @@ public class ReviewViewDto {
 	private int rate;
 
 	@QueryProjection
-	public ReviewViewDto(UUID id, UUID customerId, UUID storeId,
+	public ResViewReviewDto(UUID id, UUID customerId, UUID storeId,
 		String imageUrl, String context, int rate) {
 		this.id = id;
 		this.customerId = customerId;
@@ -31,8 +31,8 @@ public class ReviewViewDto {
 		this.rate = rate;
 	}
 
-	public static ReviewViewDto of(Review review) {
-		ReviewViewDto dto = new ReviewViewDto();
+	public static ResViewReviewDto of(Review review) {
+		ResViewReviewDto dto = new ResViewReviewDto();
 		dto.id = review.getId();
 		dto.customerId = review.getCustomer().getId();
 		dto.storeId = review.getStore().getId();

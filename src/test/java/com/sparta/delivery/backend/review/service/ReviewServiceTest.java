@@ -20,13 +20,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 import com.sparta.delivery.backend.image.entity.Image;
-import com.sparta.delivery.backend.review.dto.ReviewDeleteResponseDto;
-import com.sparta.delivery.backend.review.dto.ReviewResponseDto;
-import com.sparta.delivery.backend.review.dto.ReviewSearchCondition;
-import com.sparta.delivery.backend.review.dto.ReviewUpdateDto;
-import com.sparta.delivery.backend.review.dto.ReviewViewDto;
+import com.sparta.delivery.backend.review.dto.ReqDeleteReviewDto;
+import com.sparta.delivery.backend.review.dto.ReqUpdateReviewDto;
+import com.sparta.delivery.backend.review.dto.ResResultReviewDto;
+import com.sparta.delivery.backend.review.dto.ResViewReviewDto;
 import com.sparta.delivery.backend.review.entity.Review;
 import com.sparta.delivery.backend.review.repository.ReviewRepository;
+import com.sparta.delivery.backend.review.repository.ReviewRepositorySearchConditionDto;
 
 @ExtendWith(MockitoExtension.class)
 class ReviewServiceTest {
@@ -49,14 +49,14 @@ class ReviewServiceTest {
 			.build();
 		//existingReview.setId(reviewId);
 
-		ReviewUpdateDto updateDto = new ReviewUpdateDto("수정된 리뷰", 5, "http://image1.com");
+		ReqUpdateReviewDto updateDto = new ReqUpdateReviewDto("수정된 리뷰", 5, "http://image1.com");
 
 		// Mock 동작 정의
 		when(reviewRepositoryCustom.findById(reviewId)).thenReturn(Optional.of(existingReview));
 		// save 호출 검증 제거
 
 		// 서비스 호출
-		ReviewResponseDto result = reviewService.updateReview(updateDto, reviewId);
+		ResResultReviewDto result = reviewService.updateReview(updateDto, reviewId);
 
 		// 검증
 		assertNotNull(result);
@@ -88,7 +88,7 @@ class ReviewServiceTest {
 		when(reviewRepositoryCustom.findById(reviewId)).thenReturn(Optional.of(existingReview));
 
 		// 서비스 호출
-		ReviewDeleteResponseDto result = reviewService.deleteReview(reviewId, currentUserId);
+		ReqDeleteReviewDto result = reviewService.deleteReview(reviewId, currentUserId);
 		System.out.println("result = " + result.getDeletedAt());
 
 		// 검증
@@ -107,14 +107,14 @@ class ReviewServiceTest {
 		UUID reviewId1 = UUID.randomUUID();
 		UUID reviewId2 = UUID.randomUUID();
 
-		ReviewViewDto review1 = new ReviewViewDto(reviewId1, UUID.randomUUID(), storeId,
+		ResViewReviewDto review1 = new ResViewReviewDto(reviewId1, UUID.randomUUID(), storeId,
 			"http://img1.com", "좋아요", 5);
-		ReviewViewDto review2 = new ReviewViewDto(reviewId2, UUID.randomUUID(), storeId,
+		ResViewReviewDto review2 = new ResViewReviewDto(reviewId2, UUID.randomUUID(), storeId,
 			"http://img2.com", "보통", 3);
 
-		List<ReviewViewDto> mockReviews = Arrays.asList(review1, review2);
+		List<ResViewReviewDto> mockReviews = Arrays.asList(review1, review2);
 
-		ReviewSearchCondition condition = new ReviewSearchCondition();
+		ReviewRepositorySearchConditionDto condition = new ReviewRepositorySearchConditionDto();
 		/*condition.setMinRate(3);
 		condition.setMaxRate(5);
 		condition.setContext("");*/
@@ -126,7 +126,7 @@ class ReviewServiceTest {
 			.thenReturn(new PageImpl<>(mockReviews, pageable, mockReviews.size()));
 
 		// ===== 3. Service 호출 =====
-		Page<ReviewViewDto> resultPage = reviewService.getReviews(storeId, condition, pageable);
+		Page<ResViewReviewDto> resultPage = reviewService.getReviews(storeId, condition, pageable);
 
 		// ===== 4. 결과 검증 =====
 		// 정렬 테스트는 모든 entity 정상적으로 매핑될때(mock에서는 정렬 test 불가능)
