@@ -36,7 +36,7 @@ public class ReviewViewDto {
 		dto.id = review.getId();
 		dto.customerId = review.getCustomer().getId();
 		dto.storeId = review.getStore().getId();
-		dto.imageUrl = review.getImage().getImageUrl();
+		dto.imageUrl = review.getImageUrl();
 		dto.context = review.getContext();
 		dto.rate = review.getRate();
 

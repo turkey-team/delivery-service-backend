@@ -20,7 +20,7 @@ public class ReviewResponseDto {
 	public static ReviewResponseDto of(Review review) {
 		ReviewResponseDto dto = new ReviewResponseDto();
 		dto.reviewId = review.getId();
-		dto.imageUrl = review.getImage().getImageUrl();
+		dto.imageUrl = review.getImageUrl();
 		dto.context = review.getContext();
 		dto.rate = review.getRate();
 		dto.createdAt = review.getCreatedAt();

@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.sparta.delivery.backend.common.BaseEntity;
 import com.sparta.delivery.backend.owner.entity.Owner;
+
 import com.sparta.delivery.backend.region.entity.Dong;
 
 import jakarta.persistence.Column;
@@ -15,7 +16,9 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+
 import jakarta.persistence.OneToOne;
+
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -38,7 +41,7 @@ public class Store extends BaseEntity {
 	private Dong regionDong;
 
 	@OneToMany(mappedBy = "store", fetch = FetchType.LAZY)
-	 private List<StoreCategory> storeCategories = new ArrayList<>();
+	private List<StoreCategory> storeCategories = new ArrayList<>();
 
 	@Column(name = "name")
 	private String name;
@@ -48,6 +51,9 @@ public class Store extends BaseEntity {
 
 	@Column(name = "review_rate")
 	private double reviewRate;
+
+	@Column(name = "review_cnt")
+	private int reviewCnt;
 
 	@Column(name = "min_order_price")
 	private Integer minOrderPrice;
@@ -62,6 +68,23 @@ public class Store extends BaseEntity {
 	@Column(name = "phone_number")
 	private String phoneNumber;
 
+	public void addReview(int rate) {
+		this.reviewRate = (this.reviewRate * this.reviewCnt + rate) / (this.reviewCnt + 1);
+		this.reviewCnt++;
+	}
 
+	public void updateReview(int oldRate, int newRate) {
+		this.reviewRate = (this.reviewRate * this.reviewCnt - oldRate + newRate);
+	}
+
+	public void deleteReview(int rate) {
+		if (this.reviewCnt <= 1) {
+			this.reviewRate = 0.0;
+			this.reviewCnt = 0;
+		} else {
+			this.reviewRate = (this.reviewRate * this.reviewCnt - rate) / (this.reviewCnt - 1);
+			this.reviewCnt--;
+		}
+	}
 
 }
