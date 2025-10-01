@@ -1,6 +1,6 @@
 package com.sparta.delivery.backend.review.dto;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 import com.sparta.delivery.backend.review.entity.Review;
@@ -15,7 +15,7 @@ public class ReviewResponseDto {
 	private int rate;
 	private String imageUrl;
 
-	private LocalDateTime createdAt;
+	private Instant createdAt;
 
 	public static ReviewResponseDto of(Review review) {
 		ReviewResponseDto dto = new ReviewResponseDto();

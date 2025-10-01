@@ -1,6 +1,5 @@
 package com.sparta.delivery.backend.store.menu.entity;
 
-import java.awt.*;
 import java.time.Instant;
 
 import com.sparta.delivery.backend.common.BaseEntity;
@@ -10,9 +9,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
@@ -21,28 +17,28 @@ import jakarta.persistence.UniqueConstraint;
 	name = "p_store_menu",
 	uniqueConstraints = @UniqueConstraint(columnNames = {"p_store_id", "sort_order"})
 	/**
-		스토어(p_store_id) 단위로 sort_order Unique 보장
-		-> Order의 수는 겹치면 안되며 1부터 시작해야 한다.
-		1. jakarta.validation으로 @Min Annotation 사용
-		2. DB 생성 시
-			ALTER TABLE p_store_menu
-			ADD CONSTRAINT chk_sort_order CHECK (sort_order >= 1);
-		비즈니스 로직:
-			Integer maxSort = repository.findMaxSortOrderByStore(storeId);
-			menu.setSortOrder(maxSort + 1);
+	스토어(p_store_id) 단위로 sort_order Unique 보장
+	-> Order의 수는 겹치면 안되며 1부터 시작해야 한다.
+	1. jakarta.validation으로 @Min Annotation 사용
+	2. DB 생성 시
+	ALTER TABLE p_store_menu
+	ADD CONSTRAINT chk_sort_order CHECK (sort_order >= 1);
+	비즈니스 로직:
+	Integer maxSort = repository.findMaxSortOrderByStore(storeId);
+	menu.setSortOrder(maxSort + 1);
 	*/
 )
 public class StoreMenu extends BaseEntity {
 
 	// FK 매핑: p_store_id
-	@ManyToOne(fetch = FetchType.LAZY)
+	/*@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "p_store_id", nullable = false)
 	private Store store;
 
 	// FK 매핑: p_image_id
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "p_image_id")
-	private Image image;
+	private Image image;*/
 
 	@Column(nullable = false, length = 100, unique = true) // 메뉴 이름은 중복 불가
 	private String name;

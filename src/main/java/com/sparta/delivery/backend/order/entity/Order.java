@@ -3,8 +3,19 @@ package com.sparta.delivery.backend.order.entity;
 import java.time.Instant;
 
 import com.sparta.delivery.backend.common.BaseEntity;
+import com.sparta.delivery.backend.customer.entity.Customer;
 import com.sparta.delivery.backend.order.enums.OrderStatus;
-import jakarta.persistence.*;
+import com.sparta.delivery.backend.region.entity.Dong;
+import com.sparta.delivery.backend.store.entity.Store;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.Getter;
 
 @Entity

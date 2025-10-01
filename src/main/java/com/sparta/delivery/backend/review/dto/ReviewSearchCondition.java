@@ -1,6 +1,6 @@
 package com.sparta.delivery.backend.review.dto;
 
-import java.time.LocalDate;
+import java.time.Instant;
 
 import lombok.Getter;
 
@@ -11,7 +11,7 @@ public class ReviewSearchCondition {
 	private Integer maxRate;
 	private String context;
 
-	private LocalDate startDate;
-	private LocalDate endDate;
+	private Instant startDate;
+	private Instant endDate;
 
 }
