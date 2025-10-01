@@ -29,22 +29,17 @@ public class AddressService {
 
 	private final AddressRepository addressRepository;
 	private final DongRepository dongRepository;
-	private final CustomerRepository customerRepository;
 
 	@Transactional
-	public void registerAddress(ReqRegisterAddressDto requestDto, UserDetailsImpl user) {
+	public void registerAddress(ReqRegisterAddressDto requestDto, UserDetailsImpl userDetails) {
 		Dong dong = dongRepository.findByCode(requestDto.getRegionCode()).orElseThrow(
 			() -> new NotFoundException("주소지를 찾을 수 없습니다.")
-		);
-
-		Customer customer = customerRepository.findByUserId(user.getId()).orElseThrow(
-			() -> new NotFoundException("해당 User를 찾을 수 없습니다.")
 		);
 
 		Address address = Address.builder()
 			.dong(dong)
 			.address(requestDto.getAddress())
-			.customer(customer)
+			.user(userDetails.getUser())
 			.build();
 		addressRepository.save(address);
 	}
@@ -61,7 +56,7 @@ public class AddressService {
 			() -> new NotFoundException("요청한 리소스를 찾을 수 없습니다.")
 		);
 
-		if (!address.getCustomer().getUser().getId().equals(user.getId())) {
+		if (!address.getUser().getId().equals(user.getId())) {
 			throw new UnauthorizedException("권한이 없습니다.");
 		}
 
@@ -71,5 +66,18 @@ public class AddressService {
 
 		address.update(dong, requestDto.getAddress());
 		return ResAddressDto.from(address);
+	}
+
+	@Transactional
+	public void deleteAddress(UUID id, UserDetailsImpl userDetails) {
+		Address address = addressRepository.findById(id).orElseThrow(
+			() -> new NotFoundException("요청한 리소스를 찾을 수 없습니다.")
+		);
+
+		if (!address.getUser().getId().equals(userDetails.getId())) {
+			throw new UnauthorizedException("권한이 없습니다.");
+		}
+
+		address.softDelete(userDetails.getUser().getId());
 	}
 }
