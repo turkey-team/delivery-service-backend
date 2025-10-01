@@ -1,14 +1,18 @@
 package com.sparta.delivery.backend.address.controller;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sparta.delivery.backend.address.dto.ReqRegisterAddressDto;
+import com.sparta.delivery.backend.address.dto.ResAddressDto;
 import com.sparta.delivery.backend.address.service.AddressService;
 import com.sparta.delivery.backend.security.UserDetailsImpl;
 
@@ -29,5 +33,11 @@ public class AddressController {
 		addressService.registerAddress(requestDto, user);
 		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
+
+	@GetMapping
+	public List<ResAddressDto> getMyAddresses(@AuthenticationPrincipal UserDetailsImpl user) {
+		return addressService.getMyAddresses(user);
+	}
+
 
 }

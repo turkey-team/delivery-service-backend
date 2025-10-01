@@ -1,9 +1,13 @@
 package com.sparta.delivery.backend.address.service;
 
+import java.util.List;
+
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sparta.delivery.backend.address.dto.ReqRegisterAddressDto;
+import com.sparta.delivery.backend.address.dto.ResAddressDto;
 import com.sparta.delivery.backend.address.entity.Address;
 import com.sparta.delivery.backend.address.repository.AddressRepository;
 import com.sparta.delivery.backend.customer.entity.Customer;
@@ -39,7 +43,12 @@ public class AddressService {
 			.address(requestDto.getAddress())
 			.customer(customer)
 			.build();
-
 		addressRepository.save(address);
+	}
+
+	@Transactional(readOnly = true)
+	public List<ResAddressDto> getMyAddresses(UserDetailsImpl user) {
+		List<Address> findAddresses = addressRepository.findAllByUserId(user.getId());
+		return findAddresses.stream().map(ResAddressDto::from).toList();
 	}
 }
