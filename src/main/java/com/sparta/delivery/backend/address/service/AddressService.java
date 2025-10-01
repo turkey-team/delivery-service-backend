@@ -12,7 +12,6 @@ import com.sparta.delivery.backend.address.dto.ResAddressDto;
 import com.sparta.delivery.backend.address.entity.Address;
 import com.sparta.delivery.backend.address.repository.AddressRepository;
 import com.sparta.delivery.backend.global.excpetion.NotFoundException;
-import com.sparta.delivery.backend.global.excpetion.UnauthorizedException;
 import com.sparta.delivery.backend.region.entity.Dong;
 import com.sparta.delivery.backend.region.repository.DongRepository;
 import com.sparta.delivery.backend.security.UserDetailsImpl;
@@ -44,7 +43,8 @@ public class AddressService {
 
 	@Transactional(readOnly = true)
 	public List<ResAddressDto> getMyAddresses(UserDetailsImpl user) {
-		List<Address> findAddresses = addressRepository.findAllByUserIdOrderByCreatedAtDesc(user.getId());
+		List<Address> findAddresses = addressRepository.findAllByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(
+			user.getId());
 		return findAddresses.stream().map(ResAddressDto::from).toList();
 	}
 
@@ -53,10 +53,6 @@ public class AddressService {
 		Address address = addressRepository.findById(id).orElseThrow(
 			() -> new NotFoundException("요청한 리소스를 찾을 수 없습니다.")
 		);
-
-		if (!address.getUser().getId().equals(user.getId())) {
-			throw new UnauthorizedException("권한이 없습니다.");
-		}
 
 		Dong dong = dongRepository.findByCode(requestDto.getRegionCode()).orElseThrow(
 			() -> new NotFoundException("해당 주소지를 찾을 수 없습니다.")
@@ -68,13 +64,9 @@ public class AddressService {
 
 	@Transactional
 	public void deleteAddress(UUID id, UserDetailsImpl userDetails) {
-		Address address = addressRepository.findById(id).orElseThrow(
+		Address address = addressRepository.findByIdAndDeletedAtIsNull(id).orElseThrow(
 			() -> new NotFoundException("요청한 리소스를 찾을 수 없습니다.")
 		);
-
-		if (!address.getUser().getId().equals(userDetails.getId())) {
-			throw new UnauthorizedException("권한이 없습니다.");
-		}
 
 		address.softDelete(userDetails.getUser().getId());
 	}
