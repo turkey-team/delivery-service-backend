@@ -7,8 +7,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.sparta.delivery.backend.image.entity.Image;
+import com.sparta.delivery.backend.customer.entity.Customer;
+import com.sparta.delivery.backend.customer.repository.CustomerRepository;
 import com.sparta.delivery.backend.image.repository.ImageRepository;
+import com.sparta.delivery.backend.order.entity.Order;
+import com.sparta.delivery.backend.order.enums.OrderStatus;
+import com.sparta.delivery.backend.order.repository.OrderRepository;
 import com.sparta.delivery.backend.review.dto.ReviewDeleteResponseDto;
 import com.sparta.delivery.backend.review.dto.ReviewRegisterDto;
 import com.sparta.delivery.backend.review.dto.ReviewResponseDto;
@@ -17,6 +21,8 @@ import com.sparta.delivery.backend.review.dto.ReviewUpdateDto;
 import com.sparta.delivery.backend.review.dto.ReviewViewDto;
 import com.sparta.delivery.backend.review.entity.Review;
 import com.sparta.delivery.backend.review.repository.ReviewRepository;
+import com.sparta.delivery.backend.store.entity.Store;
+import com.sparta.delivery.backend.store.repository.StoreRepository;
 import com.sparta.delivery.backend.user.entity.User;
 
 import lombok.RequiredArgsConstructor;
@@ -26,10 +32,10 @@ import lombok.RequiredArgsConstructor;
 public class ReviewService {
 
 	private final ReviewRepository reviewRepository;
-	//private final CustomerRepository customerRepository;
-	//private final StoreRepository storeRepository;
+	private final CustomerRepository customerRepository;
+	private final StoreRepository storeRepository;
 	private final ImageRepository imageRepository;
-	//private final OrderRepository orderRepository;
+	private final OrderRepository orderRepository;
 
 	// review 단건 조회
 	public ReviewViewDto getReview(UUID storeId, UUID reviewId) {
@@ -54,7 +60,7 @@ public class ReviewService {
 	@Transactional
 	public ReviewResponseDto registerReview(ReviewRegisterDto registerDto, UUID storeId,
 		UUID orderId, User user) {
-		/*Customer customer = customerRepository.findByUserId(user.getId()).orElseThrow(
+		Customer customer = customerRepository.findByUserId(user.getId()).orElseThrow(
 			() -> new IllegalArgumentException("해당 User를 찾을 수 없습니다.")
 		);
 
@@ -71,26 +77,19 @@ public class ReviewService {
 
 		Store store = storeRepository.findById(storeId).orElseThrow(
 			() -> new IllegalArgumentException("해당 Store를 찾을 수 없습니다.")
-		);*/
+		);
 
-		Image image = null;
-		if (registerDto.getImageId() != null) {
-			image = imageRepository.findById(registerDto.getImageId())
-				.orElseThrow(() -> new IllegalArgumentException("해당 Image를 찾을 수 없습니다."));
-		}
-
-		/*Review review = Review.builder()
+		Review review = Review.builder()
 			.customer(customer)
-			.store(store).image(image)
+			.store(store).imageUrl(registerDto.getImageUrl())
 			.context(registerDto.getContext())
 			.rate(registerDto.getRate())
 			.build();
 
 		reviewRepository.save(review);
+		store.addReview(review.getRate());
 
-		return ReviewResponseDto.of(review);*/
-
-		return null;
+		return ReviewResponseDto.of(review);
 	}
 
 	// review 수정
@@ -99,7 +98,13 @@ public class ReviewService {
 		Review review = reviewRepository.findById(reviewId)
 			.orElseThrow(() -> new IllegalArgumentException("해당 리뷰를 찾을 수 없습니다."));
 
-		review.update(dto.getContext(), dto.getRate());
+		review.update(dto.getContext(), dto.getRate(), dto.getImageUrl());
+
+		Store store = storeRepository.findById(review.getStore().getId()).orElseThrow(
+			() -> new IllegalArgumentException("해당 Store를 찾을 수 없습니다.")
+		);
+
+		store.updateReview(review.getRate(), dto.getRate());
 
 		return ReviewResponseDto.of(review);
 	}
@@ -111,6 +116,12 @@ public class ReviewService {
 			.orElseThrow(() -> new IllegalArgumentException("해당 리뷰를 찾을 수 없습니다."));
 
 		review.softDelete(currentUserId);
+
+		Store store = storeRepository.findById(review.getStore().getId()).orElseThrow(
+			() -> new IllegalArgumentException("해당 Store를 찾을 수 없습니다.")
+		);
+
+		store.deleteReview(review.getRate());
 
 		return ReviewDeleteResponseDto.of(review);
 	}
