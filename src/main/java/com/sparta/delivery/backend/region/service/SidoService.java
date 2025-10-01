@@ -79,6 +79,7 @@ public class SidoService {
 	}
 
 	// 시·도 삭제
+	@Transactional
 	public void deleteSido(UUID sidoId) {
 		Sido sido = sidoRepository.findById(sidoId).orElseThrow(() -> {
 			log.warn("시/도 지역 검색 실패");
