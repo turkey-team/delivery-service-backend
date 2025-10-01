@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -44,6 +45,7 @@ public class AddressController {
 		return addressService.getMyAddresses(user);
 	}
 
+	@PreAuthorize("@addressPermissionEvaluator.isOwner(#id, authentication.principal)")
 	@PutMapping("/{id}")
 	public ResAddressDto updateAddress(
 		@PathVariable UUID id,
@@ -53,12 +55,11 @@ public class AddressController {
 		return addressService.updateAddress(id, requestDto, user);
 	}
 
+	@PreAuthorize("@addressPermissionEvaluator.isOwner(#id, authentication.principal)")
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> deleteAddress(@PathVariable UUID id, @AuthenticationPrincipal UserDetailsImpl user) {
 		addressService.deleteAddress(id, user);
 		return ResponseEntity.status(HttpStatus.OK).build();
 	}
-
-
 
 }
