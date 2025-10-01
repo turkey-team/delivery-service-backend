@@ -7,10 +7,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sparta.delivery.backend.region.dto.ReqCreateSidoDto;
-import com.sparta.delivery.backend.region.dto.ReqUpdateDto;
+import com.sparta.delivery.backend.region.dto.ReqUpdateSidoDto;
 import com.sparta.delivery.backend.region.dto.ResCreateSidoDto;
 import com.sparta.delivery.backend.region.dto.ResReadSidoDto;
-import com.sparta.delivery.backend.region.dto.ResUpdateDto;
+import com.sparta.delivery.backend.region.dto.ResUpdateSidoDto;
 import com.sparta.delivery.backend.region.entity.Sido;
 import com.sparta.delivery.backend.region.repository.SidoRepository;
 
@@ -57,7 +57,7 @@ public class SidoService {
 
 	// 시·도 수정
 	@Transactional
-	public ResUpdateDto updateSido(UUID sidoId, ReqUpdateDto requestDto) {
+	public ResUpdateSidoDto updateSido(UUID sidoId, ReqUpdateSidoDto requestDto) {
 		Sido sido = sidoRepository.findById(sidoId).orElseThrow(() -> {
 			log.warn("시/도 지역 검색 실패");
 			return new EntityNotFoundException("존재하지 않는 시/도입니다.");
@@ -75,7 +75,7 @@ public class SidoService {
 
 		sido.update(requestDto.getName(), requestDto.getCode());
 
-		return ResUpdateDto.from(sido);
+		return ResUpdateSidoDto.from(sido);
 	}
 
 	// 시·도 삭제

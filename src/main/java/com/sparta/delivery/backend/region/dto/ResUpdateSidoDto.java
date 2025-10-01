@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ResUpdateDto {
+public class ResUpdateSidoDto {
 
 	private UUID id;
 
@@ -22,8 +22,8 @@ public class ResUpdateDto {
 
 	private Instant updatedAt;
 
-	public static ResUpdateDto from(Sido sido) {
-		return new ResUpdateDto(
+	public static ResUpdateSidoDto from(Sido sido) {
+		return new ResUpdateSidoDto(
 			sido.getId(),
 			sido.getName(),
 			sido.getCode(),

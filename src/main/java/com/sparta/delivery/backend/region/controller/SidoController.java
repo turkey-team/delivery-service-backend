@@ -14,10 +14,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sparta.delivery.backend.region.dto.ReqCreateSidoDto;
-import com.sparta.delivery.backend.region.dto.ReqUpdateDto;
+import com.sparta.delivery.backend.region.dto.ReqUpdateSidoDto;
 import com.sparta.delivery.backend.region.dto.ResCreateSidoDto;
 import com.sparta.delivery.backend.region.dto.ResReadSidoDto;
-import com.sparta.delivery.backend.region.dto.ResUpdateDto;
+import com.sparta.delivery.backend.region.dto.ResUpdateSidoDto;
 import com.sparta.delivery.backend.region.service.SidoService;
 
 import lombok.RequiredArgsConstructor;
@@ -44,8 +44,10 @@ public class SidoController {
 	}
 
 	@PutMapping("/sido/{sidoId}")
-	public ResponseEntity<ResUpdateDto> updateSido(@PathVariable UUID sidoId, @RequestBody ReqUpdateDto requestDto) {
-		ResUpdateDto responseDto = sidoService.updateSido(sidoId, requestDto);
+	public ResponseEntity<ResUpdateSidoDto> updateSido(
+		@PathVariable UUID sidoId, @RequestBody ReqUpdateSidoDto requestDto
+	) {
+		ResUpdateSidoDto responseDto = sidoService.updateSido(sidoId, requestDto);
 
 		return ResponseEntity.ok(responseDto);
 	}

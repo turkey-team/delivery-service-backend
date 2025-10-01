@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class ReqUpdateDto {
+public class ReqUpdateSidoDto {
 
 	private String name;
 
