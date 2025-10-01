@@ -5,6 +5,10 @@ import java.util.List;
 
 import com.sparta.delivery.backend.common.BaseEntity;
 import com.sparta.delivery.backend.owner.entity.Owner;
+<<<<<<< HEAD
+=======
+import com.sparta.delivery.backend.region.entity.Dong;
+>>>>>>> decb2a3a42ac6c905d343cca0392009d632fa93e
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -14,6 +18,10 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+<<<<<<< HEAD
+=======
+import jakarta.persistence.OneToOne;
+>>>>>>> decb2a3a42ac6c905d343cca0392009d632fa93e
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -31,8 +39,9 @@ public class Store extends BaseEntity {
 	@OneToMany(mappedBy = "store")
 	private List<StoreImage> storeImages = new ArrayList<>();
 
-	@Column(name = "p_region_dong")
-	private String regionDong;
+	@OneToOne
+	@JoinColumn(name = "p_region_dong_id")
+	private Dong regionDong;
 
 	@OneToMany(mappedBy = "store", fetch = FetchType.LAZY)
 	private List<StoreCategory> storeCategories = new ArrayList<>();

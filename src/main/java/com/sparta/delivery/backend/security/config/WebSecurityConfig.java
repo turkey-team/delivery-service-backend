@@ -1,5 +1,6 @@
 package com.sparta.delivery.backend.security.config;
 
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -7,6 +8,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -17,7 +19,7 @@ import com.sparta.delivery.backend.security.filter.JwtAuthorizationFilter;
 import com.sparta.delivery.backend.security.util.JwtUtil;
 
 @Configuration
-// @EnableWebSecurity //완성 이후 활성화
+@EnableWebSecurity //완성 이후 활성화
 @EnableMethodSecurity(securedEnabled = true)
 public class WebSecurityConfig {
 
@@ -60,13 +62,17 @@ public class WebSecurityConfig {
 
 		http.authorizeHttpRequests((authorizeHttpRequests) ->
 			authorizeHttpRequests
-				.requestMatchers("/**").permitAll()	//인증,인가,회원가입까지 완성까지 전체 urn을 filter에서 제외
-				.requestMatchers("/v1/user/login").permitAll()
-				.requestMatchers("/v1/customers").permitAll() // '/api/user/'로 시작하는 요청 모두 접근 허가
+				.requestMatchers("/h2/**").permitAll()
+				.requestMatchers("/v1/customers").permitAll()
 				.requestMatchers("/v1/managers").permitAll()
 				.requestMatchers("/v1/owners").permitAll()
-				// .requestMatchers("/v1/auth/logout").permitAll()
+				.requestMatchers("/v1/auth/login").permitAll()
+				.requestMatchers("/v1/auth/logout").authenticated()
 				.anyRequest().authenticated() // 그 외 모든 요청 인증처리
+		)
+
+		.headers(headers -> headers
+			.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable)
 		);
 
 		http.addFilterBefore(jwtAuthorizationFilter(), JwtAuthenticationFilter.class);

@@ -18,7 +18,7 @@ public class Customer {
 	@UuidGenerator
     private UUID id;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "p_user_id", nullable = false)
     private User user;
 

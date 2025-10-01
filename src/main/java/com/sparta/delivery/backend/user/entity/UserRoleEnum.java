@@ -4,13 +4,19 @@ import lombok.Getter;
 
 @Getter
 public enum UserRoleEnum {
-    MANAGER("ROLE_MANAGER"),
-    CUSTOMER("ROLE_CUSTOMER"),
-    OWNER("ROLE_OWNER");
+	MANAGER(Authority.MANAGER),
+	CUSTOMER(Authority.CUSTOMER),
+	OWNER(Authority.OWNER);
+
+	private final String authority;
 
 	UserRoleEnum(String authority) {
 		this.authority = authority;
 	}
 
-	private final String authority;
+	public static class Authority {
+		public static final String MANAGER = "ROLE_MANAGER";
+		public static final String CUSTOMER = "ROLE_CUSTOMER";
+		public static final String OWNER = "ROLE_OWNER";
+	}
 }
