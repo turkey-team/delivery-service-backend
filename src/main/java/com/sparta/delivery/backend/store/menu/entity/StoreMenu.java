@@ -30,15 +30,15 @@ import lombok.Setter;
 	name = "p_store_menu",
 	uniqueConstraints = @UniqueConstraint(columnNames = {"p_store_id", "sort_order"})
 	/**
-	스토어(p_store_id) 단위로 sort_order Unique 보장
-	-> Order의 수는 겹치면 안되며 1부터 시작해야 한다.
-	1. jakarta.validation으로 @Min Annotation 사용
-	2. DB 생성 시
-	ALTER TABLE p_store_menu
-	ADD CONSTRAINT chk_sort_order CHECK (sort_order >= 1);
-	비즈니스 로직:
-	Integer maxSort = repository.findMaxSortOrderByStore(storeId);
-	menu.setSortOrder(maxSort + 1);
+		스토어(p_store_id) 단위로 sort_order Unique 보장
+		-> Order의 수는 겹치면 안되며 1부터 시작해야 한다.
+		1. jakarta.validation으로 @Min Annotation 사용
+		2. DB 생성 시
+			ALTER TABLE p_store_menu
+			ADD CONSTRAINT chk_sort_order CHECK (sort_order >= 1);
+		비즈니스 로직:
+			Integer maxSort = repository.findMaxSortOrderByStore(storeId);
+			menu.setSortOrder(maxSort + 1);
 	*/
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -73,7 +73,7 @@ public class StoreMenu extends BaseEntity {
 	@Column(name = "stock_status", length = 20)
 	private StockStatus stockStatus;
 
-	// hiddenAt 로그 여부로 숨기기/보이기 설정하려면 Instant 가 적합 
+	// hiddenAt 로그 여부로 숨기기/보이기 설정하려면 Instant 가 적합
 	@Column(name = "hidden_at")
 	private Instant hiddenAt;
 
