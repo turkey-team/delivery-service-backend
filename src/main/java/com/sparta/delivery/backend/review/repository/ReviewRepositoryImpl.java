@@ -143,7 +143,6 @@ public class ReviewRepositoryImpl implements ReviewRepoistoryCustom {
 
 	private BooleanExpression createdBetween(Instant startDate, Instant endDate) {
 		QReview review = QReview.review;
-
 		if (startDate == null && endDate == null) {
 			return null;
 		}
