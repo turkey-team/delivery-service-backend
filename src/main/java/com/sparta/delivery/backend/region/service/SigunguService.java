@@ -1,5 +1,6 @@
 package com.sparta.delivery.backend.region.service;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -7,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.sparta.delivery.backend.region.dto.ReqCreateSigunguDto;
 import com.sparta.delivery.backend.region.dto.ResCreateSigunguDto;
+import com.sparta.delivery.backend.region.dto.ResReadSigunguDto;
 import com.sparta.delivery.backend.region.entity.Sido;
 import com.sparta.delivery.backend.region.entity.Sigungu;
 import com.sparta.delivery.backend.region.repository.SidoRepository;
@@ -51,6 +53,18 @@ public class SigunguService {
 		Sigungu savedSigungu = sigunguRepository.save(sigungu);
 
 		return ResCreateSigunguDto.from(savedSigungu);
+	}
+
+	// 시·군·구 목록 조회
+	public List<ResReadSigunguDto> getAllSigungu(UUID sidoId) {
+		Sido sido = sidoRepository.findById(sidoId).orElseThrow(() -> {
+			log.warn("시/도 지역 검색 실패");
+			return new EntityNotFoundException("존재하지 않는 시/도입니다.");
+		});
+
+		return sigunguRepository.findAllBySido(sido).stream()
+			.map(ResReadSigunguDto::from)
+			.toList();
 	}
 
 }

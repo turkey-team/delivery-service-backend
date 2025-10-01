@@ -1,6 +1,5 @@
 package com.sparta.delivery.backend.region.dto;
 
-import java.time.Instant;
 import java.util.UUID;
 
 import com.sparta.delivery.backend.region.entity.Sigungu;
@@ -12,25 +11,19 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ResCreateSigunguDto {
+public class ResReadSigunguDto {
 
 	private UUID id;
-
-	private UUID sidoId;
 
 	private String name;
 
 	private String code;
 
-	private Instant createdAt;
-
-	public static ResCreateSigunguDto from(Sigungu sigungu) {
-		return new ResCreateSigunguDto(
-			sigungu.getId(),
-			sigungu.getSido().getId(),
-			sigungu.getName(),
-			sigungu.getCode(),
-			sigungu.getCreatedAt()
+	public static ResReadSigunguDto from(Sigungu Sigungu) {
+		return new ResReadSigunguDto(
+			Sigungu.getId(),
+			Sigungu.getName(),
+			Sigungu.getCode()
 		);
 	}
 
