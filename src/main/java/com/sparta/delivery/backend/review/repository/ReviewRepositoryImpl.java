@@ -15,9 +15,8 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.sparta.delivery.backend.review.dto.QReviewViewDto;
-import com.sparta.delivery.backend.review.dto.ReviewSearchCondition;
-import com.sparta.delivery.backend.review.dto.ReviewViewDto;
+import com.sparta.delivery.backend.review.dto.QResViewReviewDto;
+import com.sparta.delivery.backend.review.dto.ResViewReviewDto;
 import com.sparta.delivery.backend.review.entity.QReview;
 
 import jakarta.persistence.EntityManager;
@@ -31,10 +30,11 @@ public class ReviewRepositoryImpl implements ReviewRepoistoryCustom {
 	}
 
 	@Override
-	public Page<ReviewViewDto> findReviews(UUID storeId, ReviewSearchCondition condition, Pageable pageable) {
+	public Page<ResViewReviewDto> findReviews(UUID storeId, ReviewRepositorySearchConditionDto condition,
+		Pageable pageable) {
 		QReview review = QReview.review;
 
-		JPAQuery<ReviewViewDto> query = queryFactory.select(new QReviewViewDto(
+		JPAQuery<ResViewReviewDto> query = queryFactory.select(new QResViewReviewDto(
 				review.id, review.customer.id,
 				review.store.id, review.imageUrl,
 				review.context, review.rate
@@ -66,8 +66,8 @@ public class ReviewRepositoryImpl implements ReviewRepoistoryCustom {
 
 		query.orderBy(orders.toArray(new OrderSpecifier[0]));
 
-		QueryResults<ReviewViewDto> results = query.fetchResults();
-		List<ReviewViewDto> content = results.getResults();
+		QueryResults<ResViewReviewDto> results = query.fetchResults();
+		List<ResViewReviewDto> content = results.getResults();
 		long total = results.getTotal();
 
 		return new PageImpl<>(content, pageable, total);
@@ -75,10 +75,11 @@ public class ReviewRepositoryImpl implements ReviewRepoistoryCustom {
 	}
 
 	@Override
-	public Page<ReviewViewDto> findMyOwnReviews(UUID customerId, ReviewSearchCondition condition, Pageable pageable) {
+	public Page<ResViewReviewDto> findMyOwnReviews(UUID customerId, ReviewRepositorySearchConditionDto condition,
+		Pageable pageable) {
 		QReview review = QReview.review;
 
-		JPAQuery<ReviewViewDto> query = queryFactory.select(new QReviewViewDto(
+		JPAQuery<ResViewReviewDto> query = queryFactory.select(new QResViewReviewDto(
 				review.id, review.customer.id,
 				review.store.id, review.imageUrl,
 				review.context, review.rate
@@ -110,8 +111,8 @@ public class ReviewRepositoryImpl implements ReviewRepoistoryCustom {
 
 		query.orderBy(orders.toArray(new OrderSpecifier[0]));
 
-		QueryResults<ReviewViewDto> results = query.fetchResults();
-		List<ReviewViewDto> content = results.getResults();
+		QueryResults<ResViewReviewDto> results = query.fetchResults();
+		List<ResViewReviewDto> content = results.getResults();
 		long total = results.getTotal();
 
 		return new PageImpl<>(content, pageable, total);

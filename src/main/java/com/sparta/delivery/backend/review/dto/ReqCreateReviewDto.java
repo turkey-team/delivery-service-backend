@@ -1,9 +1,13 @@
 package com.sparta.delivery.backend.review.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
-public class ReviewRegisterDto {
+@AllArgsConstructor
+@NoArgsConstructor
+public class ReqCreateReviewDto {
 
 	private String context;
 	private int rate;
