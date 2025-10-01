@@ -3,6 +3,9 @@ package com.sparta.delivery.backend.common;
 import java.util.Optional;
 
 import org.springframework.data.domain.AuditorAware;
+import org.springframework.security.core.context.SecurityContextHolder;
+
+import com.sparta.delivery.backend.security.UserDetailsImpl;
 
 /**
  * 현재 로그인한 사용자의 ID를 반환하여
@@ -15,10 +18,9 @@ public class LoginUserAuditorAware implements AuditorAware<Long> {
 	public Optional<Long> getCurrentAuditor() {
 		// 현재 로그인한 사용자 ID 반환
 		// SecurityContext를 사용하는 경우:
-		// Long userId = ((UserDetails) SecurityContextHolder.getContext()
-		// .getAuthentication().getPrincipal()).getId();
-		// return Optional.of(userId);
-		return Optional.empty();
+		Long userId = ((UserDetailsImpl)SecurityContextHolder.getContext()
+			.getAuthentication().getPrincipal()).getId();
+		return Optional.of(userId);
 	}
 
 }

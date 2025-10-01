@@ -19,7 +19,6 @@ import com.sparta.delivery.backend.review.dto.ResResultReviewDto;
 import com.sparta.delivery.backend.review.dto.ResViewReviewDto;
 import com.sparta.delivery.backend.review.repository.ReviewRepositorySearchConditionDto;
 import com.sparta.delivery.backend.review.service.ReviewService;
-import com.sparta.delivery.backend.user.entity.User;
 
 import lombok.RequiredArgsConstructor;
 
@@ -51,24 +50,20 @@ public class ReviewController {
 
 	@PostMapping("/stores/{storeId}/review")
 	public ResResultReviewDto writeReview(@PathVariable UUID storeId, @RequestBody ReqCreateReviewDto registerDto,
-		UUID orderId, User user) {
-		// 추후 User를 Authentication UserDetails로 바꾸기
-		return reviewService.registerReview(registerDto, storeId, orderId, user);
+		UUID orderId) {
+		return reviewService.registerReview(registerDto, storeId, orderId);
 	}
 
 	@PutMapping("/stores/{storeId}/reviews/{reviewId}")
 	public ResResultReviewDto updateReview(@PathVariable UUID storeId, @PathVariable UUID reviewId,
 		@RequestBody ReqUpdateReviewDto updateDto) {
-		// review에 있는 customerID랑 Authentication UserDetails에 있는 customerId 일치 확인
 		return reviewService.updateReview(updateDto, reviewId);
 	}
 
 	@DeleteMapping("/stores/{storeId}/reviews/{reviewId}")
 	public ReqDeleteReviewDto deleteReview(@PathVariable UUID storeId,
-		@PathVariable UUID reviewId, Long currentUserId) {
-		// 추후 currentUserId Authentication UserDetails로 바꾸기
-		// review에 있는 customerID랑 Authentication UserDetails에 있는 customerId 일치 확인
-		return reviewService.deleteReview(reviewId, currentUserId);
+		@PathVariable UUID reviewId) {
+		return reviewService.deleteReview(reviewId);
 	}
 
 }

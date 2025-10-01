@@ -6,8 +6,10 @@ import java.util.UUID;
 import com.sparta.delivery.backend.review.entity.Review;
 
 import lombok.Getter;
+import lombok.ToString;
 
 @Getter
+@ToString
 public class ReqDeleteReviewDto {
 
 	private UUID reviewId;
