@@ -40,12 +40,8 @@ public class Address extends BaseEntity {
 	}
 
 	public void update(Dong dong, String address) {
-		if (dong != null) {
-			this.dong = dong;
-		}
-		if (address != null) {
-			this.address = address;
-		}
+		this.dong = dong;
+		this.address = address;
 	}
 
 }
