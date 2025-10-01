@@ -25,4 +25,13 @@ public class GlobalExceptionHandler {
 			HttpStatus.CONFLICT
 		);
 	}
+
+	@ExceptionHandler({NotFoundException.class})
+	public ResponseEntity<ApiException> handleException(NotFoundException ex) {
+		ApiException apiException = new ApiException(ex.getMessage(), HttpStatus.NOT_FOUND.value());
+		return new ResponseEntity<>(
+			apiException,
+			HttpStatus.NOT_FOUND
+		);
+	}
 }
