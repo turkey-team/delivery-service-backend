@@ -14,8 +14,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.sparta.delivery.backend.store.menu.dto.StoreMenuRequestDto;
-import com.sparta.delivery.backend.store.menu.dto.StoreMenuResponseDto;
+import com.sparta.delivery.backend.store.menu.dto.ReqSortOrderOwnerDto;
+import com.sparta.delivery.backend.store.menu.dto.ReqStoreMenuOwnerDto;
+import com.sparta.delivery.backend.store.menu.dto.ReqVisibilityOwnerDto;
+import com.sparta.delivery.backend.store.menu.dto.ResSortOrderOwnerDto;
+import com.sparta.delivery.backend.store.menu.dto.ResStoreMenuOwnerDto;
+import com.sparta.delivery.backend.store.menu.dto.ResVisibilityOwnerDto;
 import com.sparta.delivery.backend.store.menu.service.StoreMenuService;
 
 import lombok.RequiredArgsConstructor;
@@ -28,20 +32,15 @@ public class StoreMenuController {
 	private final StoreMenuService storeMenuService;
 
 	@PostMapping
-	public StoreMenuResponseDto createStoreMenu(@PathVariable UUID storeId,
-		@RequestBody StoreMenuRequestDto storeMenuRequestDto) {
-		return storeMenuService.createStoreMenu(storeId, storeMenuRequestDto);
-	}
-
-	// 메뉴 특성상 한번 생성하면, 세부 설정 몇개만 건드는 경우(숨기기, 재고 변경 등)가 많기 때문에 부분 수정하는 PATCH 적용
-	@PatchMapping("/{menuId}")
-	public StoreMenuResponseDto updateStoreMenu(@PathVariable UUID storeId,
-		@RequestBody StoreMenuRequestDto storeMenuRequestDto, @PathVariable UUID menuId) {
-		return storeMenuService.updateStoreMenu(storeId, storeMenuRequestDto, menuId);
+	public ResStoreMenuOwnerDto createStoreMenu(
+		@PathVariable UUID storeId,
+		@RequestBody ReqStoreMenuOwnerDto reqStoreMenuOwnerDto
+	) {
+		return storeMenuService.createStoreMenu(storeId, reqStoreMenuOwnerDto);
 	}
 
 	@GetMapping
-	public Page<StoreMenuResponseDto> getAllStoreMenusByStoreId(
+	public Page<ResStoreMenuOwnerDto> getAllStoreMenusByStoreId(
 		@PathVariable UUID storeId,
 		@RequestParam("page") int page,
 		@RequestParam("size") int size
@@ -50,14 +49,48 @@ public class StoreMenuController {
 	}
 
 	@GetMapping("/{menuId}")
-	public StoreMenuResponseDto getStoreMenuByStoreMenuId(@PathVariable UUID storeId,
-		@PathVariable UUID menuId) {
+	public ResStoreMenuOwnerDto getStoreMenuByStoreMenuId(
+		@PathVariable UUID storeId,
+		@PathVariable UUID menuId
+	) {
 		return storeMenuService.getStoreMenuByStoreMenuId(storeId, menuId);
 	}
 
+	// 메뉴 정보 수정
+	@PutMapping("/{menuId}")
+	public ResStoreMenuOwnerDto updateStoreMenu(
+		@PathVariable UUID storeId,
+		@PathVariable UUID menuId,
+		@RequestBody ReqStoreMenuOwnerDto reqStoreMenuOwnerDto
+	) {
+		return storeMenuService.updateStoreMenu(storeId, menuId, reqStoreMenuOwnerDto);
+	}
+
+	// 메뉴 순서 변경
+	@PatchMapping("/{menuId}/sort")
+	public ResSortOrderOwnerDto updateSortOrder(
+		@PathVariable UUID storeId,
+		@PathVariable UUID menuId,
+		@RequestBody ReqSortOrderOwnerDto reqSortOrderOwnerDto
+	) {
+		return storeMenuService.updateSortOrder(storeId, menuId, reqSortOrderOwnerDto);
+	}
+
+	// 숨기기
+	@PatchMapping("/{menuId}/visibility")
+	public ResVisibilityOwnerDto updateVisibility(
+		@PathVariable UUID storeId,
+		@PathVariable UUID menuId,
+		@RequestBody ReqVisibilityOwnerDto reqVisibilityOwnerDto
+	) {
+		return storeMenuService.updateVisibility(storeId, menuId, reqVisibilityOwnerDto);
+	}
+
 	@DeleteMapping("/{menuId}")
-	public void deleteStoreMenu(@PathVariable UUID storeId,
-		@PathVariable UUID menuId) {
+	public void deleteStoreMenu(
+		@PathVariable UUID storeId,
+		@PathVariable UUID menuId
+	) {
 		storeMenuService.deleteStoreMenu(storeId, menuId);
 	}
 }

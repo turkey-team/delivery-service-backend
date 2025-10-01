@@ -1,5 +1,6 @@
 package com.sparta.delivery.backend.store.menu.service;
 
+import java.time.Instant;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -12,8 +13,12 @@ import org.springframework.transaction.annotation.Transactional;
 import com.sparta.delivery.backend.image.entity.Image;
 import com.sparta.delivery.backend.image.repository.ImageRepository;
 import com.sparta.delivery.backend.store.entity.Store;
-import com.sparta.delivery.backend.store.menu.dto.StoreMenuRequestDto;
-import com.sparta.delivery.backend.store.menu.dto.StoreMenuResponseDto;
+import com.sparta.delivery.backend.store.menu.dto.ReqSortOrderOwnerDto;
+import com.sparta.delivery.backend.store.menu.dto.ReqStoreMenuOwnerDto;
+import com.sparta.delivery.backend.store.menu.dto.ReqVisibilityOwnerDto;
+import com.sparta.delivery.backend.store.menu.dto.ResSortOrderOwnerDto;
+import com.sparta.delivery.backend.store.menu.dto.ResStoreMenuOwnerDto;
+import com.sparta.delivery.backend.store.menu.dto.ResVisibilityOwnerDto;
 import com.sparta.delivery.backend.store.menu.entity.StoreMenu;
 import com.sparta.delivery.backend.store.menu.repository.StoreMenuRepository;
 import com.sparta.delivery.backend.store.repository.StoreRepository;
@@ -28,87 +33,136 @@ public class StoreMenuService {
 	private final StoreRepository storeRepository;
 	private final ImageRepository imageRepository;
 
+	// 생성
 	@Transactional
-	public StoreMenuResponseDto createStoreMenu(UUID storeId, StoreMenuRequestDto storeMenuRequestDto) {
-
+	public ResStoreMenuOwnerDto createStoreMenu(
+		UUID storeId,
+		ReqStoreMenuOwnerDto reqStoreMenuOwnerDto
+	) {
 		Store store = storeRepository.findById(storeId)
 			.orElseThrow(() -> new IllegalArgumentException("Store not found"));
 
 		Image image = Image.builder()
-			.imageUrl(storeMenuRequestDto.getImageUrl())
+			.imageUrl(reqStoreMenuOwnerDto.getImageUrl())
 			.build();
 		imageRepository.save(image);
 
 		StoreMenu storeMenu = StoreMenu.builder()
-			.storeMenuRequestDto(storeMenuRequestDto)
+			.reqStoreMenuOwnerDto(reqStoreMenuOwnerDto)
 			.store(store)
 			.image(image)
 			.build();
 
 		storeMenuRepository.save(storeMenu);
-		return new StoreMenuResponseDto(storeMenu);
+		return new ResStoreMenuOwnerDto(storeMenu);
+	}
+
+	// 조회
+	@Transactional(readOnly = true)
+	public ResStoreMenuOwnerDto getStoreMenuByStoreMenuId(
+		UUID storeId,
+		UUID menuId
+	) {
+		validateStore(storeId);
+		StoreMenu storeMenu = findStoreMenu(menuId);
+
+		return new ResStoreMenuOwnerDto(storeMenu);
 	}
 
 	@Transactional(readOnly = true)
-	public StoreMenuResponseDto getStoreMenuByStoreMenuId(UUID storeId, UUID menuId) {
-		Store store = storeRepository.findById(storeId)
-			.orElseThrow(() -> new IllegalArgumentException("Store not found"));
-
-		StoreMenu storeMenu = storeMenuRepository.findById(menuId)
-			.orElseThrow(() -> new IllegalArgumentException("StoreMenu not found"));
-
-		return new StoreMenuResponseDto(storeMenu);
-	}
-
-	@Transactional(readOnly = true)
-	public Page<StoreMenuResponseDto> getStoreMenusByStoreId(UUID storeId, int page, int size) {
+	public Page<ResStoreMenuOwnerDto> getStoreMenusByStoreId(
+		UUID storeId,
+		int page,
+		int size
+	) {
 		Pageable pageable = PageRequest.of(page, size, Sort.by("sortOrder").ascending());
 
 		Page<StoreMenu> storeMenuList =
 			storeMenuRepository.findAllByStoreId(storeId, pageable);
 
-		return storeMenuList.map(StoreMenuResponseDto::new);
+		return storeMenuList.map(ResStoreMenuOwnerDto::new);
+	}
+
+	// 수정
+	@Transactional
+	public ResStoreMenuOwnerDto updateStoreMenu(
+		UUID storeId,
+		UUID menuId,
+		ReqStoreMenuOwnerDto dto
+	) {
+		validateStore(storeId);
+		StoreMenu storeMenu = findStoreMenu(menuId);
+
+		// 일단 이미지 테이블에서 일괄 관리한다고 가정했을때
+		Image image = Image.builder()
+			.imageUrl(dto.getImageUrl())
+			.build();
+		imageRepository.save(image);
+
+		storeMenu.setName(dto.getName());
+		storeMenu.setPrice(dto.getPrice());
+		storeMenu.setDescription(dto.getDescription());
+		storeMenu.setPrepTime(dto.getPrepTime());
+		storeMenu.setStockStatus(dto.getStockStatus());
+		storeMenu.setImage(image);
+
+		return new ResStoreMenuOwnerDto(storeMenu);
 	}
 
 	@Transactional
-	public StoreMenuResponseDto updateStoreMenu(UUID storeId, StoreMenuRequestDto dto, UUID menuId) {
+	public ResSortOrderOwnerDto updateSortOrder(
+		UUID storeId,
+		UUID menuId,
+		ReqSortOrderOwnerDto dto
+	) {
+		validateStore(storeId);
+		StoreMenu storeMenu = findStoreMenu(menuId);
 
-		Store store = storeRepository.findById(storeId)
-			.orElseThrow(() -> new IllegalArgumentException("Store not found"));
+		storeMenu.setSortOrder(dto.getSortOrder());
 
-		StoreMenu storeMenu = storeMenuRepository.findById(menuId)
-			.orElseThrow(() -> new IllegalArgumentException("StoreMenu not found"));
+		return new ResSortOrderOwnerDto(storeMenu);
+	}
 
-		if (dto.getImageUrl() != null) {
-			Image image = storeMenu.getImage();
-			if (image == null) {
-				image = Image.builder().imageUrl(dto.getImageUrl()).build();
-				imageRepository.save(image);
-				storeMenu.setImage(image);
-			} else if (!dto.getImageUrl().equals(image.getImageUrl())) {
-				image.setImageUrl(dto.getImageUrl());
-			}
+	@Transactional
+	public ResVisibilityOwnerDto updateVisibility(
+		UUID storeId,
+		UUID menuId,
+		ReqVisibilityOwnerDto dto
+	) {
+		validateStore(storeId);
+		StoreMenu storeMenu = findStoreMenu(menuId);
+
+		if (dto.isHidden()) {
+			// 체크박스 체크됨 → 현재 시간으로 숨김 처리
+			storeMenu.setHiddenAt(Instant.now());
+		} else {
+			// 체크 해제됨 → null 처리
+			storeMenu.setHiddenAt(null);
 		}
 
-		storeMenu.setName(dto.getName() != null ? dto.getName() : storeMenu.getName());
-		storeMenu.setPrice(dto.getPrice() != storeMenu.getPrice() ? dto.getPrice() : storeMenu.getPrice());
-		storeMenu.setDescription(dto.getDescription() != null ? dto.getDescription() : storeMenu.getDescription());
-		storeMenu.setPrepTime(dto.getPrepTime() != null ? dto.getPrepTime() : storeMenu.getPrepTime());
-		storeMenu.setSortOrder(dto.getSortOrder() != storeMenu.getSortOrder() ? dto.getSortOrder() : storeMenu.getSortOrder());
-		storeMenu.setStockStatus(dto.getStockStatus() != null ? dto.getStockStatus() : storeMenu.getStockStatus());
-		storeMenu.setHiddenAt(dto.getHiddenAt() != null ? dto.getHiddenAt() : storeMenu.getHiddenAt());
-
-		return new StoreMenuResponseDto(storeMenu);
+		return new ResVisibilityOwnerDto(storeMenu);
 	}
 
+	// 삭제
 	@Transactional
-	public void deleteStoreMenu(UUID storeId, UUID menuId) {
-		Store store = storeRepository.findById(storeId)
-			.orElseThrow(() -> new IllegalArgumentException("Store not found"));
-
-		StoreMenu storeMenu = storeMenuRepository.findById(menuId)
-			.orElseThrow(() -> new IllegalArgumentException("StoreMenu not found"));
-
+	public void deleteStoreMenu(
+		UUID storeId,
+		UUID menuId
+	) {
+		validateStore(storeId);
+		StoreMenu storeMenu = findStoreMenu(menuId);
 		storeMenuRepository.delete(storeMenu);
+	}
+
+	// 가게 검증
+	private void validateStore(UUID storeId) {
+		storeRepository.findById(storeId)
+			.orElseThrow(() -> new IllegalArgumentException("Store not found"));
+	}
+
+	// 가게 검색
+	private StoreMenu findStoreMenu(UUID menuId) {
+		return storeMenuRepository.findById(menuId)
+			.orElseThrow(() -> new IllegalArgumentException("StoreMenu not found"));
 	}
 }

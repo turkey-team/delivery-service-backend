@@ -8,10 +8,12 @@ import com.sparta.delivery.backend.store.menu.enums.StockStatus;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
+@Setter
 @NoArgsConstructor
-public class StoreMenuResponseDto {
+public class ResStoreMenuOwnerDto {
 	private UUID id;
 	private String name;
 	private String imageUrl;
@@ -22,7 +24,7 @@ public class StoreMenuResponseDto {
 	private int sortOrder;
 	private Instant hiddenAt;
 
-	public StoreMenuResponseDto(StoreMenu storeMenu) {
+	public ResStoreMenuOwnerDto(StoreMenu storeMenu) {
 		this.id = storeMenu.getId();
 		this.name = storeMenu.getName();
 		this.price = storeMenu.getPrice();

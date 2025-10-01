@@ -5,7 +5,7 @@ import java.time.Instant;
 import com.sparta.delivery.backend.common.BaseEntity;
 import com.sparta.delivery.backend.image.entity.Image;
 import com.sparta.delivery.backend.store.entity.Store;
-import com.sparta.delivery.backend.store.menu.dto.StoreMenuRequestDto;
+import com.sparta.delivery.backend.store.menu.dto.ReqStoreMenuOwnerDto;
 import com.sparta.delivery.backend.store.menu.enums.StockStatus;
 
 import jakarta.persistence.Column;
@@ -78,15 +78,13 @@ public class StoreMenu extends BaseEntity {
 	private Instant hiddenAt;
 
 	@Builder
-	private StoreMenu(StoreMenuRequestDto storeMenuRequestDto, Store store, Image image) {
+	private StoreMenu(ReqStoreMenuOwnerDto reqStoreMenuOwnerDto, Store store, Image image) {
 		this.store = store;
 		this.image = image;
-		this.name = storeMenuRequestDto.getName();
-		this.price = storeMenuRequestDto.getPrice();
-		this.description = storeMenuRequestDto.getDescription();
-		this.prepTime = storeMenuRequestDto.getPrepTime();
-		this.sortOrder = storeMenuRequestDto.getSortOrder();
-		this.stockStatus = storeMenuRequestDto.getStockStatus();
-		this.hiddenAt = storeMenuRequestDto.getHiddenAt();
+		this.name = reqStoreMenuOwnerDto.getName();
+		this.price = reqStoreMenuOwnerDto.getPrice();
+		this.description = reqStoreMenuOwnerDto.getDescription();
+		this.prepTime = reqStoreMenuOwnerDto.getPrepTime();
+		this.stockStatus = reqStoreMenuOwnerDto.getStockStatus();
 	}
 }
