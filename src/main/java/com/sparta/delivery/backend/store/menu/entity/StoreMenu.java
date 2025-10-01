@@ -1,9 +1,11 @@
 package com.sparta.delivery.backend.store.menu.entity;
 
-import java.awt.*;
 import java.time.Instant;
 
 import com.sparta.delivery.backend.common.BaseEntity;
+import com.sparta.delivery.backend.image.entity.Image;
+import com.sparta.delivery.backend.store.entity.Store;
+import com.sparta.delivery.backend.store.menu.dto.StoreMenuRequestDto;
 import com.sparta.delivery.backend.store.menu.enums.StockStatus;
 
 import jakarta.persistence.Column;
@@ -15,7 +17,14 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Entity
 @Table(
 	name = "p_store_menu",
@@ -32,6 +41,7 @@ import jakarta.persistence.UniqueConstraint;
 			menu.setSortOrder(maxSort + 1);
 	*/
 )
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class StoreMenu extends BaseEntity {
 
 	// FK 매핑: p_store_id
@@ -48,7 +58,7 @@ public class StoreMenu extends BaseEntity {
 	private String name;
 
 	@Column(nullable = false)
-	private Integer price;
+	private int price;
 
 	@Column(length = 500)
 	private String description;
@@ -57,7 +67,7 @@ public class StoreMenu extends BaseEntity {
 	private String prepTime;
 
 	@Column(name = "sort_order", nullable = false)
-	private Integer sortOrder;
+	private int sortOrder;
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "stock_status", length = 20)
@@ -66,4 +76,17 @@ public class StoreMenu extends BaseEntity {
 	// hiddenAt 로그 여부로 숨기기/보이기 설정하려면 Instant 가 적합 
 	@Column(name = "hidden_at")
 	private Instant hiddenAt;
+
+	@Builder
+	private StoreMenu(StoreMenuRequestDto storeMenuRequestDto, Store store, Image image) {
+		this.store = store;
+		this.image = image;
+		this.name = storeMenuRequestDto.getName();
+		this.price = storeMenuRequestDto.getPrice();
+		this.description = storeMenuRequestDto.getDescription();
+		this.prepTime = storeMenuRequestDto.getPrepTime();
+		this.sortOrder = storeMenuRequestDto.getSortOrder();
+		this.stockStatus = storeMenuRequestDto.getStockStatus();
+		this.hiddenAt = storeMenuRequestDto.getHiddenAt();
+	}
 }
