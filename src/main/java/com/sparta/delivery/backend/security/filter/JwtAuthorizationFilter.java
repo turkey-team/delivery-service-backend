@@ -44,6 +44,8 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
 			if (!jwtUtil.validateAccessToken(tokenValue)) {
 				log.error("Token Error");
+				res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);  // 401 설정
+				res.getWriter().write("Invalid token");
 				return;
 			}
 
@@ -52,7 +54,9 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 			try {
 				setAuthentication(info.getSubject());
 			} catch (Exception e) {
-				log.error(e.getMessage());
+				log.error("setAuthentication error : " + e.getMessage());
+				res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);  // 401 설정
+				res.getWriter().write("Authentication failed");
 				return;
 			}
 		}
