@@ -97,4 +97,19 @@ public class SigunguService {
 		return ResUpdateSigunguDto.from(sigungu);
 	}
 
+	public void deleteSigungu(UUID sidoId, UUID sigunguId) {
+		Sido sido = sidoRepository.findById(sidoId).orElseThrow(() -> {
+			log.warn("시/도 지역 검색 실패");
+			return new EntityNotFoundException("존재하지 않는 시/도입니다.");
+		});
+
+		Sigungu sigungu = sigunguRepository.findByIdAndSido(sigunguId, sido).orElseThrow(() -> {
+			log.warn("시/군/구 지역 검색 실패");
+			return new EntityNotFoundException("존재하지 않는 시/군/구입니다.");
+		});
+
+		// 임시로 null을 넘김
+		sigungu.softDelete(null);
+	}
+
 }
