@@ -1,10 +1,13 @@
 package com.sparta.delivery.backend.region.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sparta.delivery.backend.region.dto.ReqCreateSidoDto;
 import com.sparta.delivery.backend.region.dto.ResCreateSidoDto;
+import com.sparta.delivery.backend.region.dto.ResReadSidoDto;
 import com.sparta.delivery.backend.region.entity.Sido;
 import com.sparta.delivery.backend.region.repository.SidoRepository;
 
@@ -39,6 +42,13 @@ public class SidoService {
 		Sido savedSido = sidoRepository.save(sido);
 
 		return ResCreateSidoDto.from(savedSido);
+	}
+
+	// 시·도 목록 조회
+	public List<ResReadSidoDto> getAllSido() {
+		return sidoRepository.findAll().stream()
+			.map(ResReadSidoDto::from)
+			.toList();
 	}
 
 }
