@@ -44,13 +44,13 @@ public class Store extends BaseEntity {
 	private Owner owner;
 
 	@OneToMany(mappedBy = "store")
-	private List<Image> images = new ArrayList<>();
+	private List<StoreImage> storeImages = new ArrayList<>();
 
 	@Column(name = "p_region_dong")
 	private String regionDong;
 
 	@OneToMany(mappedBy = "store", fetch = FetchType.LAZY)
-	 private List<Category> categories = new ArrayList<>();
+	 private List<StoreCategory> storeCategories = new ArrayList<>();
 
 	@Column(name = "name")
 	private String name;

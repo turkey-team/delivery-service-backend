@@ -8,7 +8,7 @@ import com.sparta.delivery.backend.store.dto.StoreRequestDto;
 import com.sparta.delivery.backend.store.dto.StoreResponseDto;
 import com.sparta.delivery.backend.store.entity.Store;
 import com.sparta.delivery.backend.store.repository.StoreRepository;
-import com.sparta.delivery.backend.user.entity.UserRole;
+
 
 import lombok.RequiredArgsConstructor;
 

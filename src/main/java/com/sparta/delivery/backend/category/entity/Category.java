@@ -1,10 +1,12 @@
 package com.sparta.delivery.backend.category.entity;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.sparta.delivery.backend.common.BaseEntity;
 import com.sparta.delivery.backend.store.entity.Store;
+import com.sparta.delivery.backend.store.entity.StoreCategory;
 import com.sparta.delivery.backend.user.entity.User;
 
 import jakarta.persistence.Column;
@@ -27,8 +29,8 @@ public class Category extends BaseEntity {
 	@Column(name = "name", nullable = false)
 	private String name;
 
-	@OneToMany(mappedBy = "store", fetch = FetchType.LAZY)
-	private List<Store> stores;
+	@OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
+	private List<StoreCategory> storeCategories = new ArrayList<>();
 
 	@Builder
 	public Category(String name) {
