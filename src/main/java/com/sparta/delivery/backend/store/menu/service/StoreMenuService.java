@@ -1,5 +1,6 @@
 package com.sparta.delivery.backend.store.menu.service;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -160,13 +161,7 @@ public class StoreMenuService {
 		validateStore(storeId);
 		StoreMenu storeMenu = findStoreMenu(storeId, menuId);
 
-		if (reqUpdateVisibilityDto.isHidden()) {
-			// 체크박스 체크됨 → 현재 시간으로 숨김 처리
-			storeMenu.setHiddenAt(true);
-		} else {
-			// 체크 해제됨 → null 처리
-			storeMenu.setHiddenAt(null);
-		}
+		storeMenu.setHiddenAt(reqUpdateVisibilityDto.isHidden());
 
 		return new ResUpdateVisibilityDto(storeMenu);
 	}

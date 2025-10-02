@@ -86,7 +86,7 @@ public class StoreMenu extends BaseEntity {
 		this.description = reqCreateStoreMenuDto.getDescription();
 		this.prepTime = reqCreateStoreMenuDto.getPrepTime();
 		this.stockStatus = reqCreateStoreMenuDto.getStockStatus();
-		this.setHiddenAt(reqCreateStoreMenuDto.getIsHidden());		// Boolean → Instant 변환
+		this.setHiddenAt(reqCreateStoreMenuDto.getIsHidden());
 	}
 
 	public void updateStoreMenu(ReqUpdateStoreMenuDto reqUpdateStoreMenuDto, Image image) {
@@ -97,6 +97,7 @@ public class StoreMenu extends BaseEntity {
 		this.prepTime = reqUpdateStoreMenuDto.getPrepTime();
 		this.stockStatus = reqUpdateStoreMenuDto.getStockStatus();
 	}
+
 
 	// 생성할 때는 순서 정하는게 없다. 이후에 수정해야함
 	public void setSortOrder(int sortOrder) {
