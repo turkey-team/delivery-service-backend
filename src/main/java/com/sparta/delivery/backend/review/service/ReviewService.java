@@ -3,6 +3,8 @@ package com.sparta.delivery.backend.review.service;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
@@ -18,8 +20,8 @@ import com.sparta.delivery.backend.order.entity.Order;
 import com.sparta.delivery.backend.order.enums.OrderStatus;
 import com.sparta.delivery.backend.order.repository.OrderRepository;
 import com.sparta.delivery.backend.review.dto.ReqCreateReviewDto;
+import com.sparta.delivery.backend.review.dto.ReqDeleteReviewDto;
 import com.sparta.delivery.backend.review.dto.ReqUpdateReviewDto;
-import com.sparta.delivery.backend.review.dto.ResDeleteReviewDto;
 import com.sparta.delivery.backend.review.dto.ResResultReviewDto;
 import com.sparta.delivery.backend.review.dto.ResViewReviewDto;
 import com.sparta.delivery.backend.review.entity.Review;
@@ -42,7 +44,6 @@ public class ReviewService {
 	private final OrderRepository orderRepository;
 
 	// review 단건 조회
-	@Transactional(readOnly = true)
 	public ResViewReviewDto getReview(UUID storeId, UUID reviewId) {
 		Review review = reviewRepository.findById(reviewId)
 			.filter(r -> r.getStore().getId().equals(storeId))
@@ -52,6 +53,7 @@ public class ReviewService {
 	}
 
 	// reviews list 조회
+	@Cacheable(value = "reviewList", key = "'review:store:' + #storeId", cacheManager = "reviewCacheManager")
 	@Transactional(readOnly = true)
 	public Page<ResViewReviewDto> getReviews(UUID storeId, ReviewRepositorySearchConditionDto condition,
 		Pageable pageable) {
@@ -59,7 +61,6 @@ public class ReviewService {
 	}
 
 	// 내가 작성한 reviews list 조회
-	@Transactional(readOnly = true)
 	public Page<ResViewReviewDto> getMyReviews(UUID customerId, ReviewRepositorySearchConditionDto condition,
 		Pageable pageable) {
 		return reviewRepository.findMyOwnReviews(customerId, condition, pageable);
@@ -80,6 +81,7 @@ public class ReviewService {
 	}
 
 	// review 등록
+	@CacheEvict(value = "reviewList", key = "'review:store:' + #storeId", cacheManager = "reviewCacheManager")
 	@Transactional
 	public ResResultReviewDto registerReview(ReqCreateReviewDto registerDto, UUID storeId,
 		UUID orderId) {
@@ -117,8 +119,9 @@ public class ReviewService {
 	}
 
 	// review 수정
+	@CacheEvict(value = "reviewList", key = "'review:store:' + #storeId", cacheManager = "reviewCacheManager")
 	@Transactional
-	public ResResultReviewDto updateReview(ReqUpdateReviewDto dto, UUID reviewId) {
+	public ResResultReviewDto updateReview(ReqUpdateReviewDto dto, UUID reviewId, UUID storeId) {
 		Review review = reviewRepository.findById(reviewId)
 			.orElseThrow(() -> new IllegalArgumentException("해당 리뷰를 찾을 수 없습니다."));
 
@@ -142,8 +145,9 @@ public class ReviewService {
 	}
 
 	// review 삭제
+	@CacheEvict(value = "reviewList", key = "'review:store:' + #storeId", cacheManager = "reviewCacheManager")
 	@Transactional
-	public ResDeleteReviewDto deleteReview(UUID reviewId) {
+	public ReqDeleteReviewDto deleteReview(UUID reviewId, UUID storeId) {
 		Review review = reviewRepository.findById(reviewId)
 			.orElseThrow(() -> new NoSuchElementException("해당 리뷰를 찾을 수 없습니다."));
 
@@ -165,7 +169,7 @@ public class ReviewService {
 
 		store.deleteReview(review.getRate());
 
-		return ResDeleteReviewDto.of(review);
+		return ReqDeleteReviewDto.of(review);
 	}
 
 }
