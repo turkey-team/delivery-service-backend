@@ -15,8 +15,6 @@ public class ResReadDongDto {
 
 	private UUID id;
 
-	private UUID sigunguId;
-
 	private String name;
 
 	private String code;
@@ -24,7 +22,6 @@ public class ResReadDongDto {
 	public static ResReadDongDto from(Dong dong) {
 		return new ResReadDongDto(
 			dong.getId(),
-			dong.getSigungu().getId(),
 			dong.getName(),
 			dong.getCode()
 		);

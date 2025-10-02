@@ -1,5 +1,6 @@
 package com.sparta.delivery.backend.region.repository;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,5 +13,7 @@ public interface DongRepository extends JpaRepository<Dong, UUID> {
 	boolean existsByNameAndSigungu(String name, Sigungu sigungu);
 
 	boolean existsByCode(String code);
+
+	List<Dong> findAllBySigungu(Sigungu sigungu);
 
 }

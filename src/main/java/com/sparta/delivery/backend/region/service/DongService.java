@@ -1,5 +1,6 @@
 package com.sparta.delivery.backend.region.service;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -7,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.sparta.delivery.backend.region.dto.ReqCreateDongDto;
 import com.sparta.delivery.backend.region.dto.ResCreateDongDto;
+import com.sparta.delivery.backend.region.dto.ResReadDongDto;
 import com.sparta.delivery.backend.region.entity.Dong;
 import com.sparta.delivery.backend.region.entity.Sigungu;
 import com.sparta.delivery.backend.region.repository.DongRepository;
@@ -51,6 +53,18 @@ public class DongService {
 		Dong savedDong = dongRepository.save(dong);
 
 		return ResCreateDongDto.from(savedDong);
+	}
+
+	// 동 목록 조회
+	public List<ResReadDongDto> getAllDong(UUID sigunguId) {
+		Sigungu sigungu = sigunguRepository.findById(sigunguId).orElseThrow(() -> {
+			log.warn("시/군/구 지역 검색 실패");
+			return new EntityNotFoundException("존재하지 않는 시/군/구입니다.");
+		});
+
+		return dongRepository.findAllBySigungu(sigungu).stream()
+			.map(ResReadDongDto::from)
+			.toList();
 	}
 
 }
