@@ -50,17 +50,16 @@ public class AddressController {
 	@PutMapping("/{id}")
 	public ResAddressDto updateAddress(
 		@PathVariable UUID id,
-		@Valid @RequestBody ReqUpdateAddressDto requestDto,
-		@AuthenticationPrincipal UserDetailsImpl user
+		@Valid @RequestBody ReqUpdateAddressDto requestDto
 	) {
-		return addressService.updateAddress(id, requestDto, user);
+		return addressService.updateAddress(id, requestDto);
 	}
 
 	@PreAuthorize("@addressPermissionEvaluator.isOwner(#id, authentication.principal)")
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> deleteAddress(@PathVariable UUID id, @AuthenticationPrincipal UserDetailsImpl user) {
 		addressService.deleteAddress(id, user);
-		return ResponseEntity.status(HttpStatus.OK).build();
+		return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
 	}
 
 }
