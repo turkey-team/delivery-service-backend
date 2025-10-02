@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class AiPromptCreateRequestDto {
+public class ReqCreateAiPromptDto {
 
 	private String reqMessage;
 

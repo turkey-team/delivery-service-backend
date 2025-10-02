@@ -4,9 +4,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.sparta.delivery.backend.ai.dto.AiPromptCreateRequestDto;
-import com.sparta.delivery.backend.ai.dto.AiPromptCreateResponseDto;
-import com.sparta.delivery.backend.ai.dto.AiPromptReadResponseDto;
+import com.sparta.delivery.backend.ai.dto.ReqCreateAiPromptDto;
+import com.sparta.delivery.backend.ai.dto.ResCreateAiPromptDto;
+import com.sparta.delivery.backend.ai.dto.ResReadAiPromptDto;
 import com.sparta.delivery.backend.ai.entity.AiPrompt;
 import com.sparta.delivery.backend.ai.repository.AiPromptRepository;
 
@@ -19,7 +19,7 @@ public class AiPromptService {
 	private final AiPromptRepository aiPromptRepository;
 	private final GoogleAiService googleAiService;
 
-	public AiPromptCreateResponseDto createAiPrompt(AiPromptCreateRequestDto requestDto) {
+	public ResCreateAiPromptDto createAiPrompt(ReqCreateAiPromptDto requestDto) {
 		String resMessage = googleAiService.createAiPrompt(requestDto.getReqMessage());
 
 		AiPrompt aiPrompt = AiPrompt.builder()
@@ -29,12 +29,12 @@ public class AiPromptService {
 
 		AiPrompt savedAiPrompt = aiPromptRepository.save(aiPrompt);
 
-		return AiPromptCreateResponseDto.from(savedAiPrompt);
+		return ResCreateAiPromptDto.from(savedAiPrompt);
 	}
 
-	public Page<AiPromptReadResponseDto> getAllAiPrompts(Pageable pageable) {
+	public Page<ResReadAiPromptDto> getAllAiPrompts(Pageable pageable) {
 		return aiPromptRepository.findAll(pageable)
-			.map(AiPromptReadResponseDto::from);
+			.map(ResReadAiPromptDto::from);
 	}
 
 }
