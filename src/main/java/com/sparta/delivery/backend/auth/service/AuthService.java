@@ -1,9 +1,9 @@
 package com.sparta.delivery.backend.auth.service;
 
-import java.util.Map;
+import static com.sparta.delivery.backend.global.infra.redis.RedisKeyConstants.*;
+
 import java.util.concurrent.TimeUnit;
 
-import org.apache.coyote.Response;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -22,9 +22,6 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
-	private static final String BLACKLIST_PREFIX_LOGOUT = "BL:LO:";
-	private static final String BLACKLIST_PREFIX_ROTATED = "BL:RT:";
-
 	private final PasswordEncoder passwordEncoder;
 	private final UserRepository repository;
 	private final RedisTemplate<String, String> redisTemplate;
@@ -34,7 +31,7 @@ public class AuthService {
 	public void logout(LogoutRequestDto requestDto) {
 		// 로그아웃 블랙리스트 등록
 		Claims claims = jwtUtil.getUserInfoFromRefreshToken(requestDto.getRefreshToken());
-		addToBlacklist(requestDto.getRefreshToken(), claims, BLACKLIST_PREFIX_LOGOUT);
+		addToBlacklist(requestDto.getRefreshToken(), claims, BLACKLIST_LOGOUT_PREFIX);
 	}
 
 	public RefreshTokenResponseDto refreshToken(RefreshTokenRequestDto requestDto) {
@@ -60,7 +57,7 @@ public class AuthService {
 		String newRefreshToken = jwtUtil.createRefreshToken(username);
 
 		// 기존 토큰 블랙리스트 등록
-		addToBlacklist(requestDto.getRefreshToken(), claims, BLACKLIST_PREFIX_ROTATED);
+		addToBlacklist(requestDto.getRefreshToken(), claims, BLACKLIST_ROTATE_PREFIX);
 
 		return new RefreshTokenResponseDto(newAccessToken, newRefreshToken);
 	}
