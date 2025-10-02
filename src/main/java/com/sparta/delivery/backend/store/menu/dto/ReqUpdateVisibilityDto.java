@@ -8,5 +8,5 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class ReqUpdateVisibilityDto {
-	private boolean hidden;
+	private boolean isHidden;
 }

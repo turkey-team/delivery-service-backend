@@ -1,6 +1,7 @@
 package com.sparta.delivery.backend.store.menu.entity;
 
 import java.time.Instant;
+import java.util.UUID;
 
 import com.sparta.delivery.backend.common.BaseEntity;
 import com.sparta.delivery.backend.image.entity.Image;
@@ -85,7 +86,6 @@ public class StoreMenu extends BaseEntity {
 		this.description = reqCreateStoreMenuDto.getDescription();
 		this.prepTime = reqCreateStoreMenuDto.getPrepTime();
 		this.stockStatus = reqCreateStoreMenuDto.getStockStatus();
-		this.setSortOrder(reqCreateStoreMenuDto.getSortOrder());	// 순서는 1 이상
 		this.setHiddenAt(reqCreateStoreMenuDto.getIsHidden());		// Boolean → Instant 변환
 	}
 
@@ -98,8 +98,9 @@ public class StoreMenu extends BaseEntity {
 		this.stockStatus = reqUpdateStoreMenuDto.getStockStatus();
 	}
 
+	// 생성할 때는 순서 정하는게 없다. 이후에 수정해야함
 	public void setSortOrder(int sortOrder) {
-		if (sortOrder < 1) throw new IllegalArgumentException();
+		if (sortOrder < 1) throw new IllegalArgumentException("sortOrder는 1 이상이어야 합니다.");
 		this.sortOrder = sortOrder;
 	}
 
@@ -110,5 +111,10 @@ public class StoreMenu extends BaseEntity {
 
 	public String getImageUrl() {
 		return image != null ? image.getImageUrl() : null;
+	}
+
+	// sortOrder 가 음수로 변경 → 조회 시 제외됨
+	public void softDelete(UUID deletedByUserId) {
+		this.sortOrder = -Math.abs(this.sortOrder);
 	}
 }
