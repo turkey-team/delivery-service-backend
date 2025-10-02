@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.sparta.delivery.backend.region.dto.ReqCreateDongDto;
 import com.sparta.delivery.backend.region.dto.ResCreateDongDto;
 import com.sparta.delivery.backend.region.dto.ResReadDongDto;
+import com.sparta.delivery.backend.region.dto.ResUpdateDongDto;
 import com.sparta.delivery.backend.region.service.DongService;
 
 import lombok.RequiredArgsConstructor;
@@ -39,6 +41,15 @@ public class DongController {
 		List<ResReadDongDto> responseDtoList = dongService.getAllDong(sigunguId);
 
 		return ResponseEntity.ok(responseDtoList);
+	}
+
+	@PutMapping("/sigungu/{sigunguId}/dong/{dongId}")
+	public ResponseEntity<ResUpdateDongDto> updateDong(
+		@PathVariable UUID sigunguId, @PathVariable UUID dongId, @RequestBody ReqCreateDongDto requestDto
+	) {
+		ResUpdateDongDto responseDto = dongService.updateDong(sigunguId, dongId, requestDto);
+
+		return ResponseEntity.ok(responseDto);
 	}
 
 }
