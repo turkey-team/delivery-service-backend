@@ -135,7 +135,7 @@ public class ReviewRepositoryImpl implements ReviewRepoistoryCustom {
 
 	private BooleanExpression containsContext(String context) {
 		QReview review = QReview.review;
-		if (context.isEmpty()) {
+		if (context.isEmpty() || context == null) {
 			return null;
 		}
 
