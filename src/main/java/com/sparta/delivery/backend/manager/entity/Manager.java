@@ -1,5 +1,6 @@
 package com.sparta.delivery.backend.manager.entity;
 
+import com.sparta.delivery.backend.common.BaseEntity;
 import com.sparta.delivery.backend.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -12,18 +13,14 @@ import org.hibernate.annotations.UuidGenerator;
 @Table(name = "p_manager")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Manager {
+public class Manager extends BaseEntity {
 
-    @Id
-    @UuidGenerator
-    private UUID id;
-
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "p_user_id", nullable = false)
     private User user;
 
-    @Column(name = "username", length = 50, nullable = false, unique = true)
-    private String username;
+    @Column(name = "name", length = 50, nullable = false, unique = true)
+    private String name;
 
     @Column(name = "phone_number", length = 20)
     private String phoneNumber;
@@ -32,17 +29,10 @@ public class Manager {
     private String email;
 
     @Builder
-    private Manager(User user, String username, String phoneNumber, String email) {
+    private Manager(User user, String name, String phoneNumber, String email) {
         this.user = user;
-        this.username = username;
+        this.name = name;
         this.phoneNumber = phoneNumber;
         this.email = email;
-    }
-
-    @PrePersist
-    public void generateId() {
-        if (this.id == null) {
-            this.id = UUID.randomUUID();
-        }
     }
 }

@@ -6,9 +6,11 @@ import java.util.UUID;
 import com.sparta.delivery.backend.review.entity.Review;
 
 import lombok.Getter;
+import lombok.ToString;
 
 @Getter
-public class ReviewResponseDto {
+@ToString
+public class ResResultReviewDto {
 
 	private UUID reviewId;
 	private String context;
@@ -16,14 +18,16 @@ public class ReviewResponseDto {
 	private String imageUrl;
 
 	private Instant createdAt;
+	private Instant updatedAt;
 
-	public static ReviewResponseDto of(Review review) {
-		ReviewResponseDto dto = new ReviewResponseDto();
+	public static ResResultReviewDto of(Review review) {
+		ResResultReviewDto dto = new ResResultReviewDto();
 		dto.reviewId = review.getId();
 		dto.imageUrl = review.getImageUrl();
 		dto.context = review.getContext();
 		dto.rate = review.getRate();
 		dto.createdAt = review.getCreatedAt();
+		dto.updatedAt = review.getUpdatedAt();
 
 		return dto;
 	}

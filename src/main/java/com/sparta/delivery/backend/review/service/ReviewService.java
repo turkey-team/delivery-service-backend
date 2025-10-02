@@ -1,29 +1,33 @@
 package com.sparta.delivery.backend.review.service;
 
+import java.util.NoSuchElementException;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sparta.delivery.backend.customer.entity.Customer;
 import com.sparta.delivery.backend.customer.repository.CustomerRepository;
+import com.sparta.delivery.backend.global.excpetion.UnauthorizedException;
 import com.sparta.delivery.backend.image.repository.ImageRepository;
 import com.sparta.delivery.backend.order.entity.Order;
 import com.sparta.delivery.backend.order.enums.OrderStatus;
 import com.sparta.delivery.backend.order.repository.OrderRepository;
-import com.sparta.delivery.backend.review.dto.ReviewDeleteResponseDto;
-import com.sparta.delivery.backend.review.dto.ReviewRegisterDto;
-import com.sparta.delivery.backend.review.dto.ReviewResponseDto;
-import com.sparta.delivery.backend.review.dto.ReviewSearchCondition;
-import com.sparta.delivery.backend.review.dto.ReviewUpdateDto;
-import com.sparta.delivery.backend.review.dto.ReviewViewDto;
+import com.sparta.delivery.backend.review.dto.ReqCreateReviewDto;
+import com.sparta.delivery.backend.review.dto.ReqDeleteReviewDto;
+import com.sparta.delivery.backend.review.dto.ReqUpdateReviewDto;
+import com.sparta.delivery.backend.review.dto.ResResultReviewDto;
+import com.sparta.delivery.backend.review.dto.ResViewReviewDto;
 import com.sparta.delivery.backend.review.entity.Review;
 import com.sparta.delivery.backend.review.repository.ReviewRepository;
+import com.sparta.delivery.backend.review.repository.ReviewRepositorySearchConditionDto;
+import com.sparta.delivery.backend.security.UserDetailsImpl;
 import com.sparta.delivery.backend.store.entity.Store;
 import com.sparta.delivery.backend.store.repository.StoreRepository;
-import com.sparta.delivery.backend.user.entity.User;
 
 import lombok.RequiredArgsConstructor;
 
@@ -38,45 +42,62 @@ public class ReviewService {
 	private final OrderRepository orderRepository;
 
 	// review 단건 조회
-	public ReviewViewDto getReview(UUID storeId, UUID reviewId) {
+	public ResViewReviewDto getReview(UUID storeId, UUID reviewId) {
 		Review review = reviewRepository.findById(reviewId)
 			.filter(r -> r.getStore().getId().equals(storeId))
-			.orElseThrow(() -> new IllegalArgumentException("해당 리뷰를 찾을 수 없습니다."));
+			.orElseThrow(() -> new NoSuchElementException("해당 리뷰를 찾을 수 없습니다."));
 
-		return ReviewViewDto.of(review);
+		return ResViewReviewDto.of(review);
 	}
 
 	// reviews list 조회
-	public Page<ReviewViewDto> getReviews(UUID storeId, ReviewSearchCondition condition, Pageable pageable) {
+	public Page<ResViewReviewDto> getReviews(UUID storeId, ReviewRepositorySearchConditionDto condition,
+		Pageable pageable) {
 		return reviewRepository.findReviews(storeId, condition, pageable);
 	}
 
 	// 내가 작성한 reviews list 조회
-	public Page<ReviewViewDto> getMyReviews(UUID customerId, ReviewSearchCondition condition, Pageable pageable) {
+	public Page<ResViewReviewDto> getMyReviews(UUID customerId, ReviewRepositorySearchConditionDto condition,
+		Pageable pageable) {
 		return reviewRepository.findMyOwnReviews(customerId, condition, pageable);
+	}
+
+	private Long getAuthenticationUserId() {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+		if (authentication == null) {
+			throw new IllegalStateException("로그인 정보가 없습니다.");
+		}
+
+		UserDetailsImpl userDetails = (UserDetailsImpl)authentication.getPrincipal();
+		Long userId = userDetails.getId();
+		System.out.println("userId = " + userId);
+
+		return userId;
 	}
 
 	// review 등록
 	@Transactional
-	public ReviewResponseDto registerReview(ReviewRegisterDto registerDto, UUID storeId,
-		UUID orderId, User user) {
-		Customer customer = customerRepository.findByUserId(user.getId()).orElseThrow(
-			() -> new IllegalArgumentException("해당 User를 찾을 수 없습니다.")
+	public ResResultReviewDto registerReview(ReqCreateReviewDto registerDto, UUID storeId,
+		UUID orderId) {
+
+		Customer customer = customerRepository.findByUserId(getAuthenticationUserId()).orElseThrow(
+			() -> new IllegalStateException("해당 User를 찾을 수 없습니다.")
 		);
 
 		Order order = orderRepository.findById(orderId)
-			.orElseThrow(() -> new IllegalArgumentException("해당 Order를 찾을 수 없습니다."));
+			.orElseThrow(() -> new NoSuchElementException("해당 Order를 찾을 수 없습니다."));
 
 		if (!order.getOrderStatus().equals(OrderStatus.SUCCESS)) {
-			throw new IllegalArgumentException("배송 완료된 주문만 리뷰 작성 가능");
+			throw new IllegalStateException("배송 완료된 주문만 리뷰 작성 가능");
 		}
 
 		if (!order.getCustomer().getId().equals(customer.getId())) {
-			throw new IllegalStateException("주문한 고객만 리뷰 작성 가능");
+			throw new UnauthorizedException("주문한 고객만 리뷰 작성 가능");
 		}
 
 		Store store = storeRepository.findById(storeId).orElseThrow(
-			() -> new IllegalArgumentException("해당 Store를 찾을 수 없습니다.")
+			() -> new NoSuchElementException("해당 Store를 찾을 수 없습니다.")
 		);
 
 		Review review = Review.builder()
@@ -89,41 +110,59 @@ public class ReviewService {
 		reviewRepository.save(review);
 		store.addReview(review.getRate());
 
-		return ReviewResponseDto.of(review);
+		return ResResultReviewDto.of(review);
 	}
 
 	// review 수정
 	@Transactional
-	public ReviewResponseDto updateReview(ReviewUpdateDto dto, UUID reviewId) {
+	public ResResultReviewDto updateReview(ReqUpdateReviewDto dto, UUID reviewId) {
 		Review review = reviewRepository.findById(reviewId)
 			.orElseThrow(() -> new IllegalArgumentException("해당 리뷰를 찾을 수 없습니다."));
+
+		Customer customer = customerRepository.findByUserId(getAuthenticationUserId()).orElseThrow(
+			() -> new IllegalStateException("해당 User를 찾을 수 없습니다.")
+		);
+
+		if (!review.getCustomer().getId().equals(customer.getId())) {
+			throw new UnauthorizedException("본인이 작성한 리뷰만 수정 가능합니다.");
+		}
 
 		review.update(dto.getContext(), dto.getRate(), dto.getImageUrl());
 
 		Store store = storeRepository.findById(review.getStore().getId()).orElseThrow(
-			() -> new IllegalArgumentException("해당 Store를 찾을 수 없습니다.")
+			() -> new NoSuchElementException("해당 Store를 찾을 수 없습니다.")
 		);
 
 		store.updateReview(review.getRate(), dto.getRate());
 
-		return ReviewResponseDto.of(review);
+		return ResResultReviewDto.of(review);
 	}
 
 	// review 삭제
 	@Transactional
-	public ReviewDeleteResponseDto deleteReview(UUID reviewId, Long currentUserId) {
+	public ReqDeleteReviewDto deleteReview(UUID reviewId) {
 		Review review = reviewRepository.findById(reviewId)
-			.orElseThrow(() -> new IllegalArgumentException("해당 리뷰를 찾을 수 없습니다."));
+			.orElseThrow(() -> new NoSuchElementException("해당 리뷰를 찾을 수 없습니다."));
 
-		review.softDelete(currentUserId);
+		Long userId = getAuthenticationUserId();
+
+		Customer customer = customerRepository.findByUserId(userId).orElseThrow(
+			() -> new IllegalStateException("해당 User를 찾을 수 없습니다.")
+		);
+
+		if (!review.getCustomer().getId().equals(customer.getId())) {
+			throw new UnauthorizedException("본인이 작성한 리뷰만 삭제 가능합니다.");
+		}
+
+		review.softDelete(userId);
 
 		Store store = storeRepository.findById(review.getStore().getId()).orElseThrow(
-			() -> new IllegalArgumentException("해당 Store를 찾을 수 없습니다.")
+			() -> new NoSuchElementException("해당 Store를 찾을 수 없습니다.")
 		);
 
 		store.deleteReview(review.getRate());
 
-		return ReviewDeleteResponseDto.of(review);
+		return ReqDeleteReviewDto.of(review);
 	}
 
 }

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.sparta.delivery.backend.customer.dto.ReqCreateCustomerDto;
 import com.sparta.delivery.backend.customer.service.CustomerService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -19,7 +20,7 @@ public class CustomerController {
 	private final CustomerService customerService;
 
 	@PostMapping
-	public ResponseEntity<Void> createCustomer(@RequestBody ReqCreateCustomerDto requestDto) {
+	public ResponseEntity<Void> createCustomer(@Valid @RequestBody ReqCreateCustomerDto requestDto) {
 		customerService.createCustomer(requestDto);
 		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}

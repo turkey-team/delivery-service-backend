@@ -5,13 +5,13 @@ import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import com.sparta.delivery.backend.review.dto.ReviewSearchCondition;
-import com.sparta.delivery.backend.review.dto.ReviewViewDto;
+import com.sparta.delivery.backend.review.dto.ResViewReviewDto;
 
 public interface ReviewRepoistoryCustom {
 
-	Page<ReviewViewDto> findReviews(UUID storeId, ReviewSearchCondition condition, Pageable pageable);
+	Page<ResViewReviewDto> findReviews(UUID storeId, ReviewRepositorySearchConditionDto condition, Pageable pageable);
 
-	Page<ReviewViewDto> findMyOwnReviews(UUID customerId, ReviewSearchCondition condition, Pageable pageable);
+	Page<ResViewReviewDto> findMyOwnReviews(UUID customerId, ReviewRepositorySearchConditionDto condition,
+		Pageable pageable);
 
 }

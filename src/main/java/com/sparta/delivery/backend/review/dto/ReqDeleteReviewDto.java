@@ -6,9 +6,11 @@ import java.util.UUID;
 import com.sparta.delivery.backend.review.entity.Review;
 
 import lombok.Getter;
+import lombok.ToString;
 
 @Getter
-public class ReviewDeleteResponseDto {
+@ToString
+public class ReqDeleteReviewDto {
 
 	private UUID reviewId;
 	private String context;
@@ -18,8 +20,8 @@ public class ReviewDeleteResponseDto {
 	private Instant createdAt;
 	private Instant deletedAt;
 
-	public static ReviewDeleteResponseDto of(Review review) {
-		ReviewDeleteResponseDto dto = new ReviewDeleteResponseDto();
+	public static ReqDeleteReviewDto of(Review review) {
+		ReqDeleteReviewDto dto = new ReqDeleteReviewDto();
 		dto.reviewId = review.getId();
 		dto.imageUrl = review.getImageUrl();
 		dto.context = review.getContext();
