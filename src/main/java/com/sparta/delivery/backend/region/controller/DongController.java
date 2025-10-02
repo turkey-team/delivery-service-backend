@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -50,6 +51,13 @@ public class DongController {
 		ResUpdateDongDto responseDto = dongService.updateDong(sigunguId, dongId, requestDto);
 
 		return ResponseEntity.ok(responseDto);
+	}
+
+	@DeleteMapping("/sigungu/{sigunguId}/dong/{dongId}")
+	public ResponseEntity<Void> deleteDong(@PathVariable UUID sigunguId, @PathVariable UUID dongId) {
+		dongService.deleteDong(sigunguId, dongId);
+
+		return ResponseEntity.noContent().build();
 	}
 
 }

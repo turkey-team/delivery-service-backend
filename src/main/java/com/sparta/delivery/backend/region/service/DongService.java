@@ -96,4 +96,21 @@ public class DongService {
 		return ResUpdateDongDto.from(dong);
 	}
 
+	// 동 삭제
+	@Transactional
+	public void deleteDong(UUID sigunguId, UUID dongId) {
+		Sigungu sigungu = sigunguRepository.findById(sigunguId).orElseThrow(() -> {
+			log.warn("시/군/구 지역 검색 실패");
+			return new EntityNotFoundException("존재하지 않는 시/군/구입니다.");
+		});
+
+		Dong dong = dongRepository.findByIdAndSigungu(dongId, sigungu).orElseThrow(() -> {
+			log.warn("동 지역 검색 실패");
+			return new EntityNotFoundException("존재하지 않는 동입니다.");
+		});
+
+		// 임시로 null을 넘김
+		dong.softDelete(null);
+	}
+
 }
