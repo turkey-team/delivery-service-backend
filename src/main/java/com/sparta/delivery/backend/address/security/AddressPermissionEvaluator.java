@@ -9,9 +9,7 @@ import com.sparta.delivery.backend.address.repository.AddressRepository;
 import com.sparta.delivery.backend.security.UserDetailsImpl;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 @Component("addressPermissionEvaluator")

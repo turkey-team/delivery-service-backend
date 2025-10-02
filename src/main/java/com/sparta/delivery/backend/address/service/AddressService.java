@@ -17,9 +17,7 @@ import com.sparta.delivery.backend.region.repository.DongRepository;
 import com.sparta.delivery.backend.security.UserDetailsImpl;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AddressService {
@@ -49,8 +47,8 @@ public class AddressService {
 	}
 
 	@Transactional
-	public ResAddressDto updateAddress(UUID id, ReqUpdateAddressDto requestDto, UserDetailsImpl user) {
-		Address address = addressRepository.findById(id).orElseThrow(
+	public ResAddressDto updateAddress(UUID id, ReqUpdateAddressDto requestDto) {
+		Address address = addressRepository.findByIdAndDeletedAtIsNull(id).orElseThrow(
 			() -> new NotFoundException("요청한 리소스를 찾을 수 없습니다.")
 		);
 
