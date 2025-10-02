@@ -1,5 +1,6 @@
 package com.sparta.delivery.backend.customer.entity;
 
+import com.sparta.delivery.backend.common.BaseEntity;
 import com.sparta.delivery.backend.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -12,12 +13,7 @@ import org.hibernate.annotations.UuidGenerator;
 @Table(name = "p_customer")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Customer {
-
-    @Id
-	@UuidGenerator
-    private UUID id;
-
+public class Customer extends BaseEntity {
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "p_user_id", nullable = false)
     private User user;

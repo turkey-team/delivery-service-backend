@@ -1,15 +1,15 @@
 package com.sparta.delivery.backend.store.menu.dto;
 
-import java.time.Instant;
-
 import com.sparta.delivery.backend.store.menu.enums.StockStatus;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
+@Setter
 @NoArgsConstructor
-public class StoreMenuRequestDto {
+public class ReqCreateStoreMenuDto {
 	/*
 	이름
 	사진
@@ -27,5 +27,5 @@ public class StoreMenuRequestDto {
 	private String prepTime;
 	private StockStatus stockStatus;
 	private int sortOrder;
-	private Instant hiddenAt;
+	private Boolean isHidden; // 체크박스로 정보가 넘어오기때문에 true false 를 instant 로 변환처리
 }
