@@ -5,9 +5,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sparta.delivery.backend.customer.dto.ReqCreateCustomerDto;
+import com.sparta.delivery.backend.customer.dto.ResGetCustomerDto;
 import com.sparta.delivery.backend.customer.entity.Customer;
 import com.sparta.delivery.backend.customer.repository.CustomerRepository;
 import com.sparta.delivery.backend.global.excpetion.DuplicateUsernameException;
+import com.sparta.delivery.backend.security.UserDetailsImpl;
 import com.sparta.delivery.backend.user.entity.User;
 import com.sparta.delivery.backend.user.entity.UserRoleEnum;
 import com.sparta.delivery.backend.user.repository.UserRepository;
@@ -43,5 +45,12 @@ public class CustomerService {
 			.phoneNumber(requestDto.getPhoneNumber())
 			.build();
 		customerRepository.save(customer);
+	}
+
+	public ResGetCustomerDto getCustomerById(UserDetailsImpl userDetails) {
+		Customer customer = customerRepository.findByUserIdAndDeletedAtIsNull(userDetails.getId())
+			.orElseThrow(() -> new IllegalArgumentException("잘못된 유저 아이디 입니다."));
+
+		return ResGetCustomerDto.from(customer);
 	}
 }

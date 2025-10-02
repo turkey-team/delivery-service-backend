@@ -34,4 +34,8 @@ public class Customer extends BaseEntity {
         this.email = email;
         this.phoneNumber = phoneNumber;
     }
+
+	public String getUsername() {
+		return this.user.getUsername();
+	}
 }
