@@ -5,8 +5,8 @@ import java.time.Instant;
 import com.sparta.delivery.backend.common.BaseEntity;
 import com.sparta.delivery.backend.image.entity.Image;
 import com.sparta.delivery.backend.store.entity.Store;
-import com.sparta.delivery.backend.store.menu.dto.ReqStoreMenuCreateDto;
-import com.sparta.delivery.backend.store.menu.dto.ReqStoreMenuUpdateDto;
+import com.sparta.delivery.backend.store.menu.dto.ReqCreateStoreMenuDto;
+import com.sparta.delivery.backend.store.menu.dto.ReqUpdateStoreMenuDto;
 import com.sparta.delivery.backend.store.menu.enums.StockStatus;
 
 import jakarta.persistence.Column;
@@ -77,25 +77,25 @@ public class StoreMenu extends BaseEntity {
 	private Instant hiddenAt;
 
 	@Builder
-	private StoreMenu(ReqStoreMenuCreateDto reqStoreMenuCreateDto, Store store, Image image) {
+	private StoreMenu(ReqCreateStoreMenuDto reqCreateStoreMenuDto, Store store, Image image) {
 		this.store = store;
 		this.image = image;
-		this.name = reqStoreMenuCreateDto.getName();
-		this.price = reqStoreMenuCreateDto.getPrice();
-		this.description = reqStoreMenuCreateDto.getDescription();
-		this.prepTime = reqStoreMenuCreateDto.getPrepTime();
-		this.stockStatus = reqStoreMenuCreateDto.getStockStatus();
-		this.setSortOrder(reqStoreMenuCreateDto.getSortOrder());	// 순서는 1 이상
-		this.setHiddenAt(reqStoreMenuCreateDto.getIsHidden());		// Boolean → Instant 변환
+		this.name = reqCreateStoreMenuDto.getName();
+		this.price = reqCreateStoreMenuDto.getPrice();
+		this.description = reqCreateStoreMenuDto.getDescription();
+		this.prepTime = reqCreateStoreMenuDto.getPrepTime();
+		this.stockStatus = reqCreateStoreMenuDto.getStockStatus();
+		this.setSortOrder(reqCreateStoreMenuDto.getSortOrder());	// 순서는 1 이상
+		this.setHiddenAt(reqCreateStoreMenuDto.getIsHidden());		// Boolean → Instant 변환
 	}
 
-	public void updateStoreMenu(ReqStoreMenuUpdateDto reqStoreMenuUpdateDto, Image image) {
+	public void updateStoreMenu(ReqUpdateStoreMenuDto reqUpdateStoreMenuDto, Image image) {
 		this.image = image;
-		this.name = reqStoreMenuUpdateDto.getName();
-		this.price = reqStoreMenuUpdateDto.getPrice();
-		this.description = reqStoreMenuUpdateDto.getDescription();
-		this.prepTime = reqStoreMenuUpdateDto.getPrepTime();
-		this.stockStatus = reqStoreMenuUpdateDto.getStockStatus();
+		this.name = reqUpdateStoreMenuDto.getName();
+		this.price = reqUpdateStoreMenuDto.getPrice();
+		this.description = reqUpdateStoreMenuDto.getDescription();
+		this.prepTime = reqUpdateStoreMenuDto.getPrepTime();
+		this.stockStatus = reqUpdateStoreMenuDto.getStockStatus();
 	}
 
 	public void setSortOrder(int sortOrder) {

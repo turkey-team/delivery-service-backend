@@ -7,6 +7,6 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ReqVisibilityDto {
-	private boolean hidden;
+public class ReqUpdateSortOrderDto {
+	private int sortOrder;
 }
