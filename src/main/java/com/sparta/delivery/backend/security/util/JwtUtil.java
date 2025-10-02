@@ -123,13 +123,7 @@ public class JwtUtil {
 		throw new NullPointerException("Not Found Token");
 	}
 
-	// Access 토큰 검증
 	public boolean validateAccessToken(String token) {
-		if (token == null || token.isEmpty()) {
-			logger.error("Token is null or empty");
-			return false;
-		}
-
 		try {
 			Jwts.parserBuilder().setSigningKey(accessKey).build().parseClaimsJws(token);
 			return true;
@@ -145,13 +139,7 @@ public class JwtUtil {
 		return false;
 	}
 
-	// Refresh 토큰 검증
 	public boolean validateRefreshToken(String token) {
-		if (token == null || token.isEmpty()) {
-			logger.error("Token is null or empty");
-			return false;
-		}
-
 		try {
 			Jwts.parserBuilder().setSigningKey(refreshKey).build().parseClaimsJws(token);
 			return true;

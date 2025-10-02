@@ -1,15 +1,13 @@
-package com.sparta.delivery.backend.customer.service;
+package com.sparta.delivery.backend.owner.service;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.sparta.delivery.backend.customer.dto.ReqCreateCustomerDto;
-import com.sparta.delivery.backend.customer.dto.ResGetCustomerDto;
-import com.sparta.delivery.backend.customer.entity.Customer;
-import com.sparta.delivery.backend.customer.repository.CustomerRepository;
 import com.sparta.delivery.backend.global.excpetion.DuplicateUsernameException;
-import com.sparta.delivery.backend.security.UserDetailsImpl;
+import com.sparta.delivery.backend.owner.dto.ReqCreateOwnerDto;
+import com.sparta.delivery.backend.owner.entity.Owner;
+import com.sparta.delivery.backend.owner.repository.OwnerRepository;
 import com.sparta.delivery.backend.user.entity.User;
 import com.sparta.delivery.backend.user.entity.UserRoleEnum;
 import com.sparta.delivery.backend.user.repository.UserRepository;
@@ -19,14 +17,14 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class CustomerService {
-	private final CustomerRepository customerRepository;
+public class OwnerService {
+	private final OwnerRepository ownerRepository;
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 
-	//TODO: 이메일 인증 필요
+	//TODO: 1. 사업자 등록번호 검증, 2. 이메일 인증
 	@Transactional
-	public void createCustomer(ReqCreateCustomerDto requestDto) {
+	public void createOwner(ReqCreateOwnerDto requestDto) {
 		//같은 메일로 다른 사용자 요청 가능하도록 할지 정책 결정필요
 		userRepository.findByUsername(requestDto.getUsername())
 			.ifPresent(user -> {
@@ -38,19 +36,14 @@ public class CustomerService {
 			.password(passwordEncoder.encode(requestDto.getPassword()))
 			.role(UserRoleEnum.CUSTOMER)
 			.build();
-		Customer customer = Customer.builder()
+		Owner owner = Owner.builder()
 			.user(user)
-			.email(requestDto.getEmail())
 			.nickname(requestDto.getNickname())
 			.phoneNumber(requestDto.getPhoneNumber())
+			.email(requestDto.getEmail())
+			.businessNumber(requestDto.getBusinessNumber())
 			.build();
-		customerRepository.save(customer);
-	}
 
-	public ResGetCustomerDto getCustomerById(UserDetailsImpl userDetails) {
-		Customer customer = customerRepository.findByUserIdAndDeletedAtIsNull(userDetails.getId())
-			.orElseThrow(() -> new IllegalArgumentException("잘못된 유저 아이디 입니다."));
-
-		return ResGetCustomerDto.from(customer);
+		ownerRepository.save(owner);
 	}
 }

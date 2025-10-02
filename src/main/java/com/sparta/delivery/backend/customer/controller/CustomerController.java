@@ -1,15 +1,24 @@
 package com.sparta.delivery.backend.customer.controller;
 
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sparta.delivery.backend.customer.dto.ReqCreateCustomerDto;
+import com.sparta.delivery.backend.customer.dto.ResGetCustomerDto;
+import com.sparta.delivery.backend.customer.entity.Customer;
 import com.sparta.delivery.backend.customer.service.CustomerService;
+import com.sparta.delivery.backend.security.UserDetailsImpl;
+import com.sparta.delivery.backend.user.entity.UserRoleEnum;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -19,8 +28,15 @@ public class CustomerController {
 	private final CustomerService customerService;
 
 	@PostMapping
-	public ResponseEntity<Void> createCustomer(@RequestBody ReqCreateCustomerDto requestDto) {
+	public ResponseEntity<Void> createCustomer(@Valid @RequestBody ReqCreateCustomerDto requestDto) {
 		customerService.createCustomer(requestDto);
 		return ResponseEntity.status(HttpStatus.CREATED).build();
+	}
+
+	@Secured(UserRoleEnum.Authority.CUSTOMER)
+	@GetMapping("/me")
+	public ResponseEntity<ResGetCustomerDto> getCustomer(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+		ResGetCustomerDto response = customerService.getCustomerById(userDetails);
+		return ResponseEntity.ok(response);
 	}
 }
