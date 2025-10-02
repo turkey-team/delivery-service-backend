@@ -49,6 +49,7 @@ public class SidoService {
 	}
 
 	// 시·도 목록 조회
+	@Transactional(readOnly = true)
 	public List<ResReadSidoDto> getAllSido() {
 		return sidoRepository.findAll().stream()
 			.map(ResReadSidoDto::from)
