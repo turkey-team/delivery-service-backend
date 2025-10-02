@@ -3,6 +3,7 @@ package com.sparta.delivery.backend.ai.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.sparta.delivery.backend.ai.dto.ReqCreateAiPromptDto;
 import com.sparta.delivery.backend.ai.dto.ResCreateAiPromptDto;
@@ -19,6 +20,7 @@ public class AiPromptService {
 	private final AiPromptRepository aiPromptRepository;
 	private final GoogleAiService googleAiService;
 
+	@Transactional
 	public ResCreateAiPromptDto createAiPrompt(ReqCreateAiPromptDto requestDto) {
 		String resMessage = googleAiService.createAiPrompt(requestDto.getReqMessage());
 
@@ -32,6 +34,7 @@ public class AiPromptService {
 		return ResCreateAiPromptDto.from(savedAiPrompt);
 	}
 
+	@Transactional(readOnly = true)
 	public Page<ResReadAiPromptDto> getAllAiPrompts(Pageable pageable) {
 		return aiPromptRepository.findAll(pageable)
 			.map(ResReadAiPromptDto::from);
