@@ -28,7 +28,7 @@ public class DongController {
 
 	private final DongService dongService;
 
-	@PostMapping("/sigungu/{sigunguId}/dong")
+	@PostMapping("/sigungus/{sigunguId}/dongs")
 	public ResponseEntity<ResCreateDongDto> createDong(
 		@PathVariable UUID sigunguId, @RequestBody ReqCreateDongDto requestDto
 	) {
@@ -37,14 +37,14 @@ public class DongController {
 		return ResponseEntity.ok(responseDto);
 	}
 
-	@GetMapping("/sigungu/{sigunguId}/dong")
+	@GetMapping("/sigungus/{sigunguId}/dongs")
 	public ResponseEntity<List<ResReadDongDto>> getAllDong(@PathVariable UUID sigunguId) {
 		List<ResReadDongDto> responseDtoList = dongService.getAllDong(sigunguId);
 
 		return ResponseEntity.ok(responseDtoList);
 	}
 
-	@PutMapping("/sigungu/{sigunguId}/dong/{dongId}")
+	@PutMapping("/sigungus/{sigunguId}/dongs/{dongId}")
 	public ResponseEntity<ResUpdateDongDto> updateDong(
 		@PathVariable UUID sigunguId, @PathVariable UUID dongId, @RequestBody ReqCreateDongDto requestDto
 	) {
@@ -53,7 +53,7 @@ public class DongController {
 		return ResponseEntity.ok(responseDto);
 	}
 
-	@DeleteMapping("/sigungu/{sigunguId}/dong/{dongId}")
+	@DeleteMapping("/sigungus/{sigunguId}/dongs/{dongId}")
 	public ResponseEntity<Void> deleteDong(@PathVariable UUID sigunguId, @PathVariable UUID dongId) {
 		dongService.deleteDong(sigunguId, dongId);
 
