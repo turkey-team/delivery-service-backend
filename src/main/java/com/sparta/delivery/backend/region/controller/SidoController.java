@@ -29,21 +29,21 @@ public class SidoController {
 
 	private final SidoService sidoService;
 
-	@PostMapping("/sido")
+	@PostMapping("/sidos")
 	public ResponseEntity<ResCreateSidoDto> createSido(@RequestBody ReqCreateSidoDto requestDto) {
 		ResCreateSidoDto responseDto = sidoService.createSido(requestDto);
 
 		return ResponseEntity.ok(responseDto);
 	}
 
-	@GetMapping("/sido")
+	@GetMapping("/sidos")
 	public ResponseEntity<List<ResReadSidoDto>> getAllSido() {
 		List<ResReadSidoDto> responseDtoList = sidoService.getAllSido();
 
 		return ResponseEntity.ok(responseDtoList);
 	}
 
-	@PutMapping("/sido/{sidoId}")
+	@PutMapping("/sidos/{sidoId}")
 	public ResponseEntity<ResUpdateSidoDto> updateSido(
 		@PathVariable UUID sidoId, @RequestBody ReqUpdateSidoDto requestDto
 	) {
@@ -52,7 +52,7 @@ public class SidoController {
 		return ResponseEntity.ok(responseDto);
 	}
 
-	@DeleteMapping("/sido/{sidoId}")
+	@DeleteMapping("/sidos/{sidoId}")
 	public ResponseEntity<Void> deleteSido(@PathVariable UUID sidoId) {
 		sidoService.deleteSido(sidoId);
 

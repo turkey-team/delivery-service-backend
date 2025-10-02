@@ -29,7 +29,7 @@ public class SigunguController {
 
 	private final SigunguService sigunguService;
 
-	@PostMapping("/sido/{sidoId}/sigungu")
+	@PostMapping("/sidos/{sidoId}/sigungus")
 	public ResponseEntity<ResCreateSigunguDto> createSigungu(
 		@PathVariable UUID sidoId, @RequestBody ReqCreateSigunguDto requestDto
 	) {
@@ -38,14 +38,14 @@ public class SigunguController {
 		return ResponseEntity.ok(responseDto);
 	}
 
-	@GetMapping("/sido/{sidoId}/sigungu")
+	@GetMapping("/sidos/{sidoId}/sigungus")
 	public ResponseEntity<List<ResReadSigunguDto>> getAllSigungu(@PathVariable UUID sidoId) {
 		List<ResReadSigunguDto> responseDtoList = sigunguService.getAllSigungu(sidoId);
 
 		return ResponseEntity.ok(responseDtoList);
 	}
 
-	@PutMapping("/sido/{sidoId}/sigungu/{sigunguId}")
+	@PutMapping("/sidos/{sidoId}/sigungus/{sigunguId}")
 	public ResponseEntity<ResUpdateSigunguDto> updateSigungu(
 		@PathVariable UUID sidoId, @PathVariable UUID sigunguId, @RequestBody ReqUpdateSigunguDto requestDto
 	) {
@@ -54,7 +54,7 @@ public class SigunguController {
 		return ResponseEntity.ok(responseDto);
 	}
 
-	@DeleteMapping("/sido/{sidoId}/sigungu/{sigunguId}")
+	@DeleteMapping("/sidos/{sidoId}/sigungus/{sigunguId}")
 	public ResponseEntity<Void> deleteSigungu(@PathVariable UUID sidoId, @PathVariable UUID sigunguId) {
 		sigunguService.deleteSigungu(sidoId, sigunguId);
 
