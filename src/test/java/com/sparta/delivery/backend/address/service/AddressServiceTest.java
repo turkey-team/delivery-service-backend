@@ -148,16 +148,16 @@ class AddressServiceTest {
 				"새로운 주소 789"
 			);
 
-			given(addressRepository.findById(addressId))
+			given(addressRepository.findByIdAndDeletedAtIsNull(addressId))
 				.willReturn(Optional.of(address));
 
 			given(dongRepository.findByCode(requestDto.getRegionCode()))
 				.willReturn(Optional.of(dong));
 
-			ResAddressDto result = addressService.updateAddress(addressId, requestDto, userDetails);
+			ResAddressDto result = addressService.updateAddress(addressId, requestDto);
 
 			assertThat(result).isNotNull();
-			then(addressRepository).should(times(1)).findById(addressId);
+			then(addressRepository).should(times(1)).findByIdAndDeletedAtIsNull(addressId);
 			then(dongRepository).should(times(1)).findByCode(requestDto.getRegionCode());
 		}
 
@@ -170,10 +170,10 @@ class AddressServiceTest {
 				"새로운 주소 789"
 			);
 
-			given(addressRepository.findById(addressId))
+			given(addressRepository.findByIdAndDeletedAtIsNull(addressId))
 				.willReturn(Optional.empty());
 
-			assertThatThrownBy(() -> addressService.updateAddress(addressId, requestDto, userDetails))
+			assertThatThrownBy(() -> addressService.updateAddress(addressId, requestDto))
 				.isInstanceOf(NotFoundException.class)
 				.hasMessage("요청한 리소스를 찾을 수 없습니다.");
 
@@ -189,13 +189,13 @@ class AddressServiceTest {
 				"새로운 주소 789"
 			);
 
-			given(addressRepository.findById(addressId))
+			given(addressRepository.findByIdAndDeletedAtIsNull(addressId))
 				.willReturn(Optional.of(address));
 
 			given(dongRepository.findByCode(requestDto.getRegionCode()))
 				.willReturn(Optional.empty());
 
-			assertThatThrownBy(() -> addressService.updateAddress(addressId, requestDto, userDetails))
+			assertThatThrownBy(() -> addressService.updateAddress(addressId, requestDto))
 				.isInstanceOf(NotFoundException.class)
 				.hasMessage("해당 주소지를 찾을 수 없습니다.");
 		}
