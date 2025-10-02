@@ -1,13 +1,13 @@
-package com.sparta.delivery.backend.customer.service;
+package com.sparta.delivery.backend.manager.service;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.sparta.delivery.backend.customer.dto.ReqCreateCustomerDto;
-import com.sparta.delivery.backend.customer.entity.Customer;
-import com.sparta.delivery.backend.customer.repository.CustomerRepository;
 import com.sparta.delivery.backend.global.excpetion.DuplicateUsernameException;
+import com.sparta.delivery.backend.manager.dto.ReqCreateManagerDto;
+import com.sparta.delivery.backend.manager.entity.Manager;
+import com.sparta.delivery.backend.manager.repository.ManagerRepository;
 import com.sparta.delivery.backend.user.entity.User;
 import com.sparta.delivery.backend.user.entity.UserRoleEnum;
 import com.sparta.delivery.backend.user.repository.UserRepository;
@@ -17,14 +17,13 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class CustomerService {
-	private final CustomerRepository customerRepository;
+public class ManagerService {
+	private final ManagerRepository managerRepository;
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 
-	//TODO: 이메일 인증 필요
 	@Transactional
-	public void createCustomer(ReqCreateCustomerDto requestDto) {
+	public void createManager(ReqCreateManagerDto requestDto) {
 		//같은 메일로 다른 사용자 요청 가능하도록 할지 정책 결정필요
 		userRepository.findByUsername(requestDto.getUsername())
 			.ifPresent(user -> {
@@ -34,14 +33,15 @@ public class CustomerService {
 		User user = User.builder()
 			.username(requestDto.getUsername())
 			.password(passwordEncoder.encode(requestDto.getPassword()))
-			.role(UserRoleEnum.CUSTOMER)
+			.role(UserRoleEnum.MANAGER)
 			.build();
-		Customer customer = Customer.builder()
+		Manager manager = Manager.builder()
 			.user(user)
-			.email(requestDto.getEmail())
-			.nickname(requestDto.getNickname())
+			.name(requestDto.getName())
 			.phoneNumber(requestDto.getPhoneNumber())
+			.email(requestDto.getEmail())
 			.build();
-		customerRepository.save(customer);
+
+		managerRepository.save(manager);
 	}
 }
