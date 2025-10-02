@@ -10,7 +10,7 @@ import lombok.ToString;
 
 @Getter
 @ToString
-public class ReqDeleteReviewDto {
+public class ResDeleteReviewDto {
 
 	private UUID reviewId;
 	private String context;
@@ -19,15 +19,17 @@ public class ReqDeleteReviewDto {
 
 	private Instant createdAt;
 	private Instant deletedAt;
+	private Long deletedBy;
 
-	public static ReqDeleteReviewDto of(Review review) {
-		ReqDeleteReviewDto dto = new ReqDeleteReviewDto();
+	public static ResDeleteReviewDto of(Review review) {
+		ResDeleteReviewDto dto = new ResDeleteReviewDto();
 		dto.reviewId = review.getId();
 		dto.imageUrl = review.getImageUrl();
 		dto.context = review.getContext();
 		dto.rate = review.getRate();
 		dto.createdAt = review.getCreatedAt();
 		dto.deletedAt = review.getDeletedAt();
+		dto.deletedBy = review.getDeletedBy();
 
 		return dto;
 	}

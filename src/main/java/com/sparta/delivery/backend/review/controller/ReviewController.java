@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sparta.delivery.backend.review.dto.ReqCreateReviewDto;
-import com.sparta.delivery.backend.review.dto.ReqDeleteReviewDto;
 import com.sparta.delivery.backend.review.dto.ReqUpdateReviewDto;
+import com.sparta.delivery.backend.review.dto.ResDeleteReviewDto;
 import com.sparta.delivery.backend.review.dto.ResResultReviewDto;
 import com.sparta.delivery.backend.review.dto.ResViewReviewDto;
 import com.sparta.delivery.backend.review.repository.ReviewRepositorySearchConditionDto;
@@ -61,7 +61,7 @@ public class ReviewController {
 	}
 
 	@DeleteMapping("/stores/{storeId}/reviews/{reviewId}")
-	public ReqDeleteReviewDto deleteReview(@PathVariable UUID storeId,
+	public ResDeleteReviewDto deleteReview(@PathVariable UUID storeId,
 		@PathVariable UUID reviewId) {
 		return reviewService.deleteReview(reviewId);
 	}
