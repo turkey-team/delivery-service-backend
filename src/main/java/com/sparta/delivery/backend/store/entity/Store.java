@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sparta.delivery.backend.common.BaseEntity;
+import com.sparta.delivery.backend.image.entity.Image;
 import com.sparta.delivery.backend.owner.entity.Owner;
-
 import com.sparta.delivery.backend.region.entity.Dong;
 
 import jakarta.persistence.Column;
@@ -16,11 +16,10 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-
 import jakarta.persistence.OneToOne;
-
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -85,6 +84,32 @@ public class Store extends BaseEntity {
 			this.reviewRate = (this.reviewRate * this.reviewCnt - rate) / (this.reviewCnt - 1);
 			this.reviewCnt--;
 		}
+	}
+
+	@Builder
+	public Store(Owner owner, String name
+		, String addressDetails
+		, double reviewRate
+		, Integer minOrderPrice
+		, int deliveryFee
+		, Dong regionDong
+		, StoreStatusEnum status
+		, String phoneNumber)
+	{
+		this.owner = owner;
+		this.name = name;
+		this.addressDetails = addressDetails;
+		this.reviewRate = reviewRate;
+		this.minOrderPrice = minOrderPrice;
+		this.deliveryFee = deliveryFee;
+		this.regionDong = regionDong;
+		this.status = status;
+		this.phoneNumber = phoneNumber;
+	}
+
+	public StoreImage addImage(Store store, Image image, StoreImageStatusEnum status)
+	{
+		return StoreImage.builder().store(store).image(image).status(status).build();
 	}
 
 }

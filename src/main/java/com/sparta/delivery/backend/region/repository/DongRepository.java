@@ -7,4 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.sparta.delivery.backend.region.entity.Dong;
 
 public interface DongRepository extends JpaRepository<Dong, UUID> {
+	Dong findByCode(String code);
 }

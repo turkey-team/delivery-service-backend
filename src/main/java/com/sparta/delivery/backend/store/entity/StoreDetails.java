@@ -8,6 +8,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -31,4 +32,13 @@ public class StoreDetails extends BaseEntity {
 
 	@Column(name = "business_number", length = 12)
 	private String businessNumber;
+
+	@Builder
+	public StoreDetails(Store store, String operationHours, String holiday, String description, String businessNumber) {
+		this.store = store;
+		this.operationHours = operationHours;
+		this.holiday = holiday;
+		this.description = description;
+		this.businessNumber = businessNumber;
+	}
 }
