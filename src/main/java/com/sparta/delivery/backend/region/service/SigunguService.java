@@ -36,7 +36,7 @@ public class SigunguService {
 			return new EntityNotFoundException("존재하지 않는 시/도입니다.");
 		});
 
-		if (sigunguRepository.existsByName(requestDto.getName())) {
+		if (sigunguRepository.existsByNameAndSido(requestDto.getName(), sido)) {
 			log.warn("시/군/구 지역 이름 중복");
 			throw new IllegalArgumentException("이미 존재하는 시/군/구 이름입니다.");
 		}
@@ -82,7 +82,7 @@ public class SigunguService {
 			return new EntityNotFoundException("존재하지 않는 시/군/구입니다.");
 		});
 
-		if (sigunguRepository.existsByNameAndIdNot(requestDto.getName(), sigungu.getId())) {
+		if (sigunguRepository.existsByNameAndSidoAndIdNot(requestDto.getName(), sido, sigungu.getId())) {
 			log.warn("시/군/구 지역 이름 중복");
 			throw new IllegalArgumentException("이미 존재하는 시/군/구 이름입니다.");
 		}
@@ -97,6 +97,7 @@ public class SigunguService {
 		return ResUpdateSigunguDto.from(sigungu);
 	}
 
+	// 시·군·구 삭제
 	@Transactional
 	public void deleteSigungu(UUID sidoId, UUID sigunguId) {
 		Sido sido = sidoRepository.findById(sidoId).orElseThrow(() -> {

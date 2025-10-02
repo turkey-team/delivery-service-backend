@@ -11,7 +11,7 @@ import com.sparta.delivery.backend.region.entity.Sigungu;
 
 public interface SigunguRepository extends JpaRepository<Sigungu, UUID> {
 
-	boolean existsByName(String name);
+	boolean existsByNameAndSido(String name, Sido sido);
 
 	boolean existsByCode(String code);
 
@@ -19,8 +19,8 @@ public interface SigunguRepository extends JpaRepository<Sigungu, UUID> {
 
 	Optional<Sigungu> findByIdAndSido(UUID sigunguId, Sido sido);
 
-	boolean existsByNameAndIdNot(String name, UUID sidoId);
+	boolean existsByNameAndSidoAndIdNot(String name, Sido sido, UUID sigunguId);
 
-	boolean existsByCodeAndIdNot(String code, UUID sidoId);
+	boolean existsByCodeAndIdNot(String code, UUID sigunguId);
 
 }
