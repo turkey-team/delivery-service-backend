@@ -12,13 +12,11 @@ import jakarta.persistence.Table;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
 @Getter
 @NoArgsConstructor
 @Table(name = "p_review")
-@Setter
 public class Review extends BaseEntity {
 
 	@ManyToOne(fetch = FetchType.LAZY)
