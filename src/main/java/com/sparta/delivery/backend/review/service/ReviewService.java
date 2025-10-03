@@ -3,19 +3,17 @@ package com.sparta.delivery.backend.review.service;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
-import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sparta.delivery.backend.customer.entity.Customer;
 import com.sparta.delivery.backend.customer.repository.CustomerRepository;
 import com.sparta.delivery.backend.global.excpetion.UnauthorizedException;
-import com.sparta.delivery.backend.image.repository.ImageRepository;
 import com.sparta.delivery.backend.order.entity.Order;
 import com.sparta.delivery.backend.order.enums.OrderStatus;
 import com.sparta.delivery.backend.order.repository.OrderRepository;
@@ -27,7 +25,6 @@ import com.sparta.delivery.backend.review.dto.ResViewReviewDto;
 import com.sparta.delivery.backend.review.entity.Review;
 import com.sparta.delivery.backend.review.repository.ReviewRepository;
 import com.sparta.delivery.backend.review.repository.ReviewRepositorySearchConditionDto;
-import com.sparta.delivery.backend.security.UserDetailsImpl;
 import com.sparta.delivery.backend.store.entity.Store;
 import com.sparta.delivery.backend.store.repository.StoreRepository;
 
@@ -40,10 +37,13 @@ public class ReviewService {
 	private final ReviewRepository reviewRepository;
 	private final CustomerRepository customerRepository;
 	private final StoreRepository storeRepository;
-	private final ImageRepository imageRepository;
 	private final OrderRepository orderRepository;
+	private final CacheManager cacheManager;
+
+	private static final String REVIEW_CACHE_NAME = "reviewList";
 
 	// review 단건 조회
+	@Transactional(readOnly = true)
 	public ResViewReviewDto getReview(UUID storeId, UUID reviewId) {
 		Review review = reviewRepository.findById(reviewId)
 			.filter(r -> r.getStore().getId().equals(storeId))
@@ -53,7 +53,10 @@ public class ReviewService {
 	}
 
 	// reviews list 조회
-	@Cacheable(value = "reviewList", key = "'review:store:' + #storeId", cacheManager = "reviewCacheManager")
+	@Cacheable(
+		value = "reviewList",
+		key = "'review:store:' + #storeId",
+		cacheManager = "reviewCacheManager")
 	@Transactional(readOnly = true)
 	public Page<ResViewReviewDto> getReviews(UUID storeId, ReviewRepositorySearchConditionDto condition,
 		Pageable pageable) {
@@ -66,31 +69,29 @@ public class ReviewService {
 		return reviewRepository.findMyOwnReviews(customerId, condition, pageable);
 	}
 
-	private Long getAuthenticationUserId() {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-		if (authentication == null) {
-			throw new IllegalStateException("로그인 정보가 없습니다.");
+	private void evictReviewCache(UUID storeId) {
+		Cache cache = cacheManager.getCache(REVIEW_CACHE_NAME);
+		if (cache != null) {
+			String key = "review:store:" + storeId;
+			cache.evict(key);
+			System.out.println("Redis 캐시 삭제됨 -> key : " + key);
 		}
-
-		UserDetailsImpl userDetails = (UserDetailsImpl)authentication.getPrincipal();
-		Long userId = userDetails.getId();
-		System.out.println("userId = " + userId);
-
-		return userId;
 	}
 
 	// review 등록
-	@CacheEvict(value = "reviewList", key = "'review:store:' + #storeId", cacheManager = "reviewCacheManager")
+	/*@CacheEvict(
+		value = "reviewList",
+		key = "'review:store:' + #storeId",
+		cacheManager = "reviewCacheManager"
+	)*/
 	@Transactional
-	public ResResultReviewDto registerReview(ReqCreateReviewDto registerDto, UUID storeId,
-		UUID orderId) {
+	public ResResultReviewDto registerReview(ReqCreateReviewDto registerDto, UUID storeId, Long userId) {
 
-		Customer customer = customerRepository.findByUserId(getAuthenticationUserId()).orElseThrow(
+		Customer customer = customerRepository.findByUserId(userId).orElseThrow(
 			() -> new IllegalStateException("해당 User를 찾을 수 없습니다.")
 		);
 
-		Order order = orderRepository.findById(orderId)
+		Order order = orderRepository.findById(registerDto.getOrderId())
 			.orElseThrow(() -> new NoSuchElementException("해당 Order를 찾을 수 없습니다."));
 
 		if (!order.getOrderStatus().equals(OrderStatus.SUCCESS)) {
@@ -114,18 +115,24 @@ public class ReviewService {
 
 		reviewRepository.save(review);
 		store.addReview(review.getRate());
+		evictReviewCache(storeId);
 
 		return ResResultReviewDto.of(review);
 	}
 
 	// review 수정
-	@CacheEvict(value = "reviewList", key = "'review:store:' + #storeId", cacheManager = "reviewCacheManager")
+	/*@CacheEvict(
+		value = "reviewList",
+		key = "'review:store:' + #review.store.id",
+		cacheManager = "reviewCacheManager"
+	)*/
 	@Transactional
-	public ResResultReviewDto updateReview(ReqUpdateReviewDto dto, UUID reviewId, UUID storeId) {
+	public ResResultReviewDto updateReview(ReqUpdateReviewDto dto, UUID reviewId,
+		Long userId) {
 		Review review = reviewRepository.findById(reviewId)
 			.orElseThrow(() -> new IllegalArgumentException("해당 리뷰를 찾을 수 없습니다."));
 
-		Customer customer = customerRepository.findByUserId(getAuthenticationUserId()).orElseThrow(
+		Customer customer = customerRepository.findByUserId(userId).orElseThrow(
 			() -> new IllegalStateException("해당 User를 찾을 수 없습니다.")
 		);
 
@@ -133,25 +140,27 @@ public class ReviewService {
 			throw new UnauthorizedException("본인이 작성한 리뷰만 수정 가능합니다.");
 		}
 
+		int oldRate = review.getRate();
+
 		review.update(dto.getContext(), dto.getRate(), dto.getImageUrl());
 
-		Store store = storeRepository.findById(review.getStore().getId()).orElseThrow(
-			() -> new NoSuchElementException("해당 Store를 찾을 수 없습니다.")
-		);
-
-		store.updateReview(review.getRate(), dto.getRate());
+		Store store = review.getStore();
+		store.updateReview(oldRate, dto.getRate());
+		evictReviewCache(store.getId());
 
 		return ResResultReviewDto.of(review);
 	}
 
 	// review 삭제
-	@CacheEvict(value = "reviewList", key = "'review:store:' + #storeId", cacheManager = "reviewCacheManager")
+	/*@CacheEvict(
+		value = "reviewList",
+		key = "'review:store:' + #review.store.id",
+		cacheManager = "reviewCacheManager"
+	)*/
 	@Transactional
-	public ReqDeleteReviewDto deleteReview(UUID reviewId, UUID storeId) {
+	public ReqDeleteReviewDto deleteReview(UUID reviewId, Long userId) {
 		Review review = reviewRepository.findById(reviewId)
 			.orElseThrow(() -> new NoSuchElementException("해당 리뷰를 찾을 수 없습니다."));
-
-		Long userId = getAuthenticationUserId();
 
 		Customer customer = customerRepository.findByUserId(userId).orElseThrow(
 			() -> new IllegalStateException("해당 User를 찾을 수 없습니다.")
@@ -163,11 +172,9 @@ public class ReviewService {
 
 		review.softDelete(userId);
 
-		Store store = storeRepository.findById(review.getStore().getId()).orElseThrow(
-			() -> new NoSuchElementException("해당 Store를 찾을 수 없습니다.")
-		);
-
+		Store store = review.getStore();
 		store.deleteReview(review.getRate());
+		evictReviewCache(store.getId());
 
 		return ReqDeleteReviewDto.of(review);
 	}

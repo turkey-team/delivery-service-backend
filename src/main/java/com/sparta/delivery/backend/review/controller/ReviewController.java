@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,6 +20,7 @@ import com.sparta.delivery.backend.review.dto.ResResultReviewDto;
 import com.sparta.delivery.backend.review.dto.ResViewReviewDto;
 import com.sparta.delivery.backend.review.repository.ReviewRepositorySearchConditionDto;
 import com.sparta.delivery.backend.review.service.ReviewService;
+import com.sparta.delivery.backend.security.UserDetailsImpl;
 
 import lombok.RequiredArgsConstructor;
 
@@ -49,21 +51,26 @@ public class ReviewController {
 	}
 
 	@PostMapping("/stores/{storeId}/review")
-	public ResResultReviewDto writeReview(@PathVariable UUID storeId, @RequestBody ReqCreateReviewDto registerDto,
-		UUID orderId) {
-		return reviewService.registerReview(registerDto, storeId, orderId);
+	public ResResultReviewDto writeReview(@PathVariable UUID storeId,
+		@RequestBody ReqCreateReviewDto registerDto,
+		@AuthenticationPrincipal UserDetailsImpl userDetails) {
+		Long userId = userDetails.getId();
+		return reviewService.registerReview(registerDto, storeId, userId);
 	}
 
 	@PutMapping("/stores/{storeId}/reviews/{reviewId}")
 	public ResResultReviewDto updateReview(@PathVariable UUID storeId, @PathVariable UUID reviewId,
-		@RequestBody ReqUpdateReviewDto updateDto) {
-		return reviewService.updateReview(updateDto, reviewId, storeId);
+		@RequestBody ReqUpdateReviewDto updateDto,
+		@AuthenticationPrincipal UserDetailsImpl userDetails) {
+		Long userId = userDetails.getId();
+		return reviewService.updateReview(updateDto, reviewId, userId);
 	}
 
 	@DeleteMapping("/stores/{storeId}/reviews/{reviewId}")
 	public ReqDeleteReviewDto deleteReview(@PathVariable UUID storeId,
-		@PathVariable UUID reviewId) {
-		return reviewService.deleteReview(reviewId, storeId);
+		@PathVariable UUID reviewId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+		Long userId = userDetails.getId();
+		return reviewService.deleteReview(reviewId, userId);
 	}
 
 }
