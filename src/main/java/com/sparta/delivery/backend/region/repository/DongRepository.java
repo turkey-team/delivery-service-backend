@@ -22,5 +22,7 @@ public interface DongRepository extends JpaRepository<Dong, UUID> {
 	boolean existsByCodeAndIdNot(String code, UUID dongId);
 
 	Optional<Dong> findByIdAndSigungu(UUID dongId, Sigungu sigungu);
-
+  
+  Optional<Dong> findByCode(String code);
+  
 }
