@@ -3,6 +3,8 @@ package com.sparta.delivery.backend.review.service;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
@@ -51,6 +53,8 @@ public class ReviewService {
 	}
 
 	// reviews list 조회
+	@Cacheable(value = "reviewList", key = "'review:store:' + #storeId", cacheManager = "reviewCacheManager")
+	@Transactional(readOnly = true)
 	public Page<ResViewReviewDto> getReviews(UUID storeId, ReviewRepositorySearchConditionDto condition,
 		Pageable pageable) {
 		return reviewRepository.findReviews(storeId, condition, pageable);
@@ -77,6 +81,7 @@ public class ReviewService {
 	}
 
 	// review 등록
+	@CacheEvict(value = "reviewList", key = "'review:store:' + #storeId", cacheManager = "reviewCacheManager")
 	@Transactional
 	public ResResultReviewDto registerReview(ReqCreateReviewDto registerDto, UUID storeId,
 		UUID orderId) {
@@ -114,8 +119,9 @@ public class ReviewService {
 	}
 
 	// review 수정
+	@CacheEvict(value = "reviewList", key = "'review:store:' + #storeId", cacheManager = "reviewCacheManager")
 	@Transactional
-	public ResResultReviewDto updateReview(ReqUpdateReviewDto dto, UUID reviewId) {
+	public ResResultReviewDto updateReview(ReqUpdateReviewDto dto, UUID reviewId, UUID storeId) {
 		Review review = reviewRepository.findById(reviewId)
 			.orElseThrow(() -> new IllegalArgumentException("해당 리뷰를 찾을 수 없습니다."));
 
@@ -139,8 +145,9 @@ public class ReviewService {
 	}
 
 	// review 삭제
+	@CacheEvict(value = "reviewList", key = "'review:store:' + #storeId", cacheManager = "reviewCacheManager")
 	@Transactional
-	public ReqDeleteReviewDto deleteReview(UUID reviewId) {
+	public ReqDeleteReviewDto deleteReview(UUID reviewId, UUID storeId) {
 		Review review = reviewRepository.findById(reviewId)
 			.orElseThrow(() -> new NoSuchElementException("해당 리뷰를 찾을 수 없습니다."));
 

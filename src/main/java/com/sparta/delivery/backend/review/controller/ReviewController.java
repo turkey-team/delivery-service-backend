@@ -57,13 +57,13 @@ public class ReviewController {
 	@PutMapping("/stores/{storeId}/reviews/{reviewId}")
 	public ResResultReviewDto updateReview(@PathVariable UUID storeId, @PathVariable UUID reviewId,
 		@RequestBody ReqUpdateReviewDto updateDto) {
-		return reviewService.updateReview(updateDto, reviewId);
+		return reviewService.updateReview(updateDto, reviewId, storeId);
 	}
 
 	@DeleteMapping("/stores/{storeId}/reviews/{reviewId}")
 	public ReqDeleteReviewDto deleteReview(@PathVariable UUID storeId,
 		@PathVariable UUID reviewId) {
-		return reviewService.deleteReview(reviewId);
+		return reviewService.deleteReview(reviewId, storeId);
 	}
 
 }
