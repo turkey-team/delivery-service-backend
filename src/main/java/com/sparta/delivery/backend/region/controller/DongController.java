@@ -19,6 +19,7 @@ import com.sparta.delivery.backend.region.dto.ResReadDongDto;
 import com.sparta.delivery.backend.region.dto.ResUpdateDongDto;
 import com.sparta.delivery.backend.region.service.DongService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -30,7 +31,7 @@ public class DongController {
 
 	@PostMapping("/sigungus/{sigunguId}/dongs")
 	public ResponseEntity<ResCreateDongDto> createDong(
-		@PathVariable UUID sigunguId, @RequestBody ReqCreateDongDto requestDto
+		@PathVariable UUID sigunguId, @Valid @RequestBody ReqCreateDongDto requestDto
 	) {
 		ResCreateDongDto responseDto = dongService.createDong(sigunguId, requestDto);
 
@@ -46,7 +47,7 @@ public class DongController {
 
 	@PutMapping("/sigungus/{sigunguId}/dongs/{dongId}")
 	public ResponseEntity<ResUpdateDongDto> updateDong(
-		@PathVariable UUID sigunguId, @PathVariable UUID dongId, @RequestBody ReqCreateDongDto requestDto
+		@PathVariable UUID sigunguId, @PathVariable UUID dongId, @Valid @RequestBody ReqCreateDongDto requestDto
 	) {
 		ResUpdateDongDto responseDto = dongService.updateDong(sigunguId, dongId, requestDto);
 

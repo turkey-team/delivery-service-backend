@@ -20,6 +20,7 @@ import com.sparta.delivery.backend.region.dto.ResReadSidoDto;
 import com.sparta.delivery.backend.region.dto.ResUpdateSidoDto;
 import com.sparta.delivery.backend.region.service.SidoService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -30,7 +31,7 @@ public class SidoController {
 	private final SidoService sidoService;
 
 	@PostMapping("/sidos")
-	public ResponseEntity<ResCreateSidoDto> createSido(@RequestBody ReqCreateSidoDto requestDto) {
+	public ResponseEntity<ResCreateSidoDto> createSido(@Valid @RequestBody ReqCreateSidoDto requestDto) {
 		ResCreateSidoDto responseDto = sidoService.createSido(requestDto);
 
 		return ResponseEntity.ok(responseDto);
@@ -45,7 +46,7 @@ public class SidoController {
 
 	@PutMapping("/sidos/{sidoId}")
 	public ResponseEntity<ResUpdateSidoDto> updateSido(
-		@PathVariable UUID sidoId, @RequestBody ReqUpdateSidoDto requestDto
+		@PathVariable UUID sidoId, @Valid @RequestBody ReqUpdateSidoDto requestDto
 	) {
 		ResUpdateSidoDto responseDto = sidoService.updateSido(sidoId, requestDto);
 

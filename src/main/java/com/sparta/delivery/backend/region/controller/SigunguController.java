@@ -20,6 +20,7 @@ import com.sparta.delivery.backend.region.dto.ResReadSigunguDto;
 import com.sparta.delivery.backend.region.dto.ResUpdateSigunguDto;
 import com.sparta.delivery.backend.region.service.SigunguService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -31,7 +32,7 @@ public class SigunguController {
 
 	@PostMapping("/sidos/{sidoId}/sigungus")
 	public ResponseEntity<ResCreateSigunguDto> createSigungu(
-		@PathVariable UUID sidoId, @RequestBody ReqCreateSigunguDto requestDto
+		@PathVariable UUID sidoId, @Valid @RequestBody ReqCreateSigunguDto requestDto
 	) {
 		ResCreateSigunguDto responseDto = sigunguService.createSigungu(sidoId, requestDto);
 
@@ -47,7 +48,7 @@ public class SigunguController {
 
 	@PutMapping("/sidos/{sidoId}/sigungus/{sigunguId}")
 	public ResponseEntity<ResUpdateSigunguDto> updateSigungu(
-		@PathVariable UUID sidoId, @PathVariable UUID sigunguId, @RequestBody ReqUpdateSigunguDto requestDto
+		@PathVariable UUID sidoId, @PathVariable UUID sigunguId, @Valid @RequestBody ReqUpdateSigunguDto requestDto
 	) {
 		ResUpdateSigunguDto responseDto = sigunguService.updateSigungu(sidoId, sigunguId, requestDto);
 
