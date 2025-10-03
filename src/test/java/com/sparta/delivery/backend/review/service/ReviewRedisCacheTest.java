@@ -23,6 +23,7 @@ public class ReviewRedisCacheTest {
 	private CacheManager cacheManager;
 
 	private UUID storeId;
+	private Long userId;
 
 	private Pageable pageable;
 
@@ -36,6 +37,8 @@ public class ReviewRedisCacheTest {
 		user.setPassword("password");
 		user.setRole(UserRoleEnum.CUSTOMER);
 		user = userRepository.save(user);
+
+		userId = user.getId();
 
 		// Spring SecurityContext에 인증 정보 등록
 		UserDetailsImpl userDetails = new UserDetailsImpl(user); // User를 감싸는 UserDetailsImpl 생성
@@ -86,6 +89,7 @@ public class ReviewRedisCacheTest {
 		}
 	}
 
+	// 리뷰 리스트 + Redis 적용 테스트
 	@Test
 	void cacheableTest() {
 		Cache cache = cacheManager.getCache("reviewList");
@@ -116,6 +120,7 @@ public class ReviewRedisCacheTest {
 		}
 	}
 
+	// 리뷰 등록 수정 삭제 + Cache Evict 적용 테스트
 	@Test
 	void cacheEvictOnReviewCreateUpdateDelete() {
 		Cache cache = cacheManager.getCache("reviewList");
@@ -140,7 +145,9 @@ public class ReviewRedisCacheTest {
 		ReqCreateReviewDto newReview = new ReqCreateReviewDto();
 		newReview.setContext("새 리뷰");
 		newReview.setRate(4);
-		reviewService.registerReview(newReview, storeId, orderId);
+		newReview.setOrderId(orderId);
+		ResResultReviewDto resResultReviewDto = reviewService.registerReview(newReview, storeId, userId);
+		System.out.println("등록된 리뷰 = " + resResultReviewDto);
 		printCacheStatus(cache, key, "리뷰 등록 후 캐시");
 		assertNull(cache.get(key), "리뷰 등록 후 캐시는 무효화되어야 함");
 
@@ -154,14 +161,133 @@ public class ReviewRedisCacheTest {
 		ReqUpdateReviewDto updateDto = new ReqUpdateReviewDto();
 		updateDto.setContext("수정 리뷰");
 		updateDto.setRate(5);
-		reviewService.updateReview(updateDto, review.getId(), storeId);
+		ResResultReviewDto dto = reviewService.updateReview(updateDto, review.getId(), userId);
+		System.out.println("수정된 리뷰 = " + dto);
 		printCacheStatus(cache, key, "리뷰 수정 후 캐시");
 		assertNull(cache.get(key), "리뷰 수정 후 캐시는 무효화되어야 함");
 
 		// 리뷰 삭제 → 캐시 무효화 확인
-		reviewService.deleteReview(review.getId(), storeId);
+		ReqDeleteReviewDto reqDeleteReviewDto = reviewService.deleteReview(review.getId(), userId);
+		System.out.println("삭제된 리뷰 = " + reqDeleteReviewDto);
 		printCacheStatus(cache, key, "리뷰 삭제 후 캐시");
 		assertNull(cache.get(key), "리뷰 삭제 후 캐시는 무효화되어야 함");
+	}
+
+	// Order가 완료되지 않았을때 예외 테스트
+	@Test
+	void registerReview_withIncompleteOrder_shouldThrowException() {
+		// 배송 완료가 아닌 주문 생성
+		Order incompleteOrder = new Order();
+		incompleteOrder.setCustomer(customerRepository.findAll().get(0));
+		incompleteOrder.setOrderStatus(OrderStatus.ORDERING); // 미완료 상태
+		orderRepository.save(incompleteOrder);
+
+		ReqCreateReviewDto reviewDto = new ReqCreateReviewDto();
+		reviewDto.setContext("리뷰 내용");
+		reviewDto.setRate(5);
+		reviewDto.setOrderId(incompleteOrder.getId());
+
+		// 예외 발생 확인
+		IllegalStateException exception = assertThrows(IllegalStateException.class, () ->
+			reviewService.registerReview(reviewDto, storeId, userId)
+		);
+
+		System.out.println("예외 메시지: " + exception.getMessage());
+		assertEquals("배송 완료된 주문만 리뷰 작성 가능", exception.getMessage());
+	}
+
+	// 주문을 한 사용자가 아닌 다른 사람이 리뷰 작성하는 예외 테스트
+	@Test
+	void registerReview_withWrongCustomer_shouldThrowException() {
+		// 다른 사용자 생성
+		User otherUser = new User();
+		otherUser.setUsername("otherUser");
+		otherUser.setPassword("password");
+		otherUser.setRole(UserRoleEnum.CUSTOMER);
+		userRepository.save(otherUser);
+
+		Customer otherCustomer = new Customer();
+		otherCustomer.setUser(otherUser);
+		otherCustomer.setNickname("다른 고객");
+		customerRepository.save(otherCustomer);
+
+		// 다른 고객으로 주문 생성
+		Order orderByOther = new Order();
+		orderByOther.setCustomer(otherCustomer);
+		orderByOther.setOrderStatus(OrderStatus.SUCCESS);
+		orderRepository.save(orderByOther);
+
+		ReqCreateReviewDto reviewDto = new ReqCreateReviewDto();
+		reviewDto.setContext("리뷰 내용");
+		reviewDto.setRate(5);
+		reviewDto.setOrderId(orderByOther.getId());
+
+		// 예외 발생 확인
+		UnauthorizedException exception = assertThrows(UnauthorizedException.class, () ->
+			reviewService.registerReview(reviewDto, storeId, userId) // 원래 userId로 시도
+		);
+
+		System.out.println("예외 메시지: " + exception.getMessage());
+		assertEquals("주문한 고객만 리뷰 작성 가능", exception.getMessage());
+	}
+
+	// 다른 사용자가 내 리뷰 수정 예외 테스트
+	@Test
+	void updateReview_byOtherCustomer_shouldThrowException() {
+		// 다른 사용자 생성
+		final User otherUser = new User();
+		otherUser.setUsername("otherUser");
+		otherUser.setPassword("password");
+		otherUser.setRole(UserRoleEnum.CUSTOMER);
+		userRepository.save(otherUser);
+
+		Customer otherCustomer = new Customer();
+		otherCustomer.setUser(otherUser);
+		otherCustomer.setNickname("다른 고객");
+		customerRepository.save(otherCustomer);
+
+		// 기존 리뷰 가져오기
+		final Review existingReview = reviewRepository.findAll().get(0);
+
+		// 리뷰 수정 DTO
+		ReqUpdateReviewDto updateDto = new ReqUpdateReviewDto();
+		updateDto.setContext("변경 시도");
+		updateDto.setRate(3);
+
+		// 다른 사용자로 리뷰 수정 시도 → UnauthorizedException 발생
+		UnauthorizedException exception = assertThrows(UnauthorizedException.class, () ->
+			reviewService.updateReview(updateDto, existingReview.getId(), otherUser.getId())
+		);
+
+		System.out.println("예외 메시지: " + exception.getMessage());
+		assertEquals("본인이 작성한 리뷰만 수정 가능합니다.", exception.getMessage());
+	}
+
+	// 다른 사용자가 내 리뷰 삭제 예외 테스트
+	@Test
+	void deleteReview_byOtherCustomer_shouldThrowException() {
+		// 다른 사용자 생성
+		final User otherUser = new User();
+		otherUser.setUsername("otherUser");
+		otherUser.setPassword("password");
+		otherUser.setRole(UserRoleEnum.CUSTOMER);
+		userRepository.save(otherUser);
+
+		Customer otherCustomer = new Customer();
+		otherCustomer.setUser(otherUser);
+		otherCustomer.setNickname("다른 고객");
+		customerRepository.save(otherCustomer);
+
+		// 기존 리뷰 가져오기
+		final Review existingReview = reviewRepository.findAll().get(0);
+
+		// 다른 사용자로 리뷰 삭제 시도 → UnauthorizedException 발생
+		UnauthorizedException exception = assertThrows(UnauthorizedException.class, () ->
+			reviewService.deleteReview(existingReview.getId(), otherUser.getId())
+		);
+
+		System.out.println("예외 메시지: " + exception.getMessage());
+		assertEquals("본인이 작성한 리뷰만 삭제 가능합니다.", exception.getMessage());
 	}*/
 
 }

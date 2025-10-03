@@ -19,6 +19,7 @@ public class RedisCacheConfig {
 
 	@Bean
 	public CacheManager reviewCacheManager(RedisConnectionFactory redisConnectionFactory) {
+		System.out.println(">>> RedisCacheManager(reviewCacheManager) 생성됨 <<<");
 		RedisCacheConfiguration redisCacheConfiguration = RedisCacheConfiguration
 			.defaultCacheConfig()
 			.serializeKeysWith(
