@@ -14,6 +14,7 @@ import com.sparta.delivery.backend.ai.dto.ResCreateAiPromptDto;
 import com.sparta.delivery.backend.ai.dto.ResReadAiPromptDto;
 import com.sparta.delivery.backend.ai.service.AiPromptService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -24,7 +25,7 @@ public class AiPromptController {
 	private final AiPromptService aiPromptService;
 
 	@PostMapping
-	public ResponseEntity<ResCreateAiPromptDto> createAiPrompt(@RequestBody ReqCreateAiPromptDto requestDto) {
+	public ResponseEntity<ResCreateAiPromptDto> createAiPrompt(@Valid @RequestBody ReqCreateAiPromptDto requestDto) {
 		ResCreateAiPromptDto responseDto = aiPromptService.createAiPrompt(requestDto);
 
 		return ResponseEntity.ok(responseDto);
