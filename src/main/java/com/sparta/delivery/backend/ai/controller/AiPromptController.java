@@ -3,6 +3,7 @@ package com.sparta.delivery.backend.ai.controller;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,8 +24,9 @@ import lombok.RequiredArgsConstructor;
 public class AiPromptController {
 
 	private final AiPromptService aiPromptService;
-
+	
 	@PostMapping
+	@PreAuthorize("hasRole('OWNER')")
 	public ResponseEntity<ResCreateAiPromptDto> createAiPrompt(@Valid @RequestBody ReqCreateAiPromptDto requestDto) {
 		ResCreateAiPromptDto responseDto = aiPromptService.createAiPrompt(requestDto);
 
@@ -32,6 +34,7 @@ public class AiPromptController {
 	}
 
 	@GetMapping
+	@PreAuthorize("hasRole('MANAGER')")
 	public ResponseEntity<Page<ResReadAiPromptDto>> getAllAiPrompt(Pageable pageable) {
 		Page<ResReadAiPromptDto> responseDtoList = aiPromptService.getAllAiPrompts(pageable);
 
