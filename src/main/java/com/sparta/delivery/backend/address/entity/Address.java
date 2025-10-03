@@ -1,8 +1,8 @@
 package com.sparta.delivery.backend.address.entity;
 
 import com.sparta.delivery.backend.common.BaseEntity;
-import com.sparta.delivery.backend.customer.entity.Customer;
 import com.sparta.delivery.backend.region.entity.Dong;
+import com.sparta.delivery.backend.user.entity.User;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -29,23 +29,19 @@ public class Address extends BaseEntity {
 	private String address;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "p_customer_id", nullable = false)
-	private Customer customer;
+	@JoinColumn(name = "p_user_id", nullable = false)
+	private User user;
 
 	@Builder
-	private Address(Dong dong, String address, Customer customer) {
+	private Address(Dong dong, String address, User user) {
 		this.dong = dong;
 		this.address = address;
-		this.customer = customer;
+		this.user = user;
 	}
 
 	public void update(Dong dong, String address) {
-		if (dong != null) {
-			this.dong = dong;
-		}
-		if (address != null) {
-			this.address = address;
-		}
+		this.dong = dong;
+		this.address = address;
 	}
 
 }
