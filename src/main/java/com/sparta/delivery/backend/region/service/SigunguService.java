@@ -58,6 +58,7 @@ public class SigunguService {
 	}
 
 	// 시·군·구 목록 조회
+	@Transactional(readOnly = true)
 	public List<ResReadSigunguDto> getAllSigungu(UUID sidoId) {
 		Sido sido = sidoRepository.findById(sidoId).orElseThrow(() -> {
 			log.warn("시/도 지역 검색 실패");

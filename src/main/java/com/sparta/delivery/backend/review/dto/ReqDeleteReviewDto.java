@@ -19,6 +19,7 @@ public class ReqDeleteReviewDto {
 
 	private Instant createdAt;
 	private Instant deletedAt;
+	private Long deletedBy;
 
 	public static ReqDeleteReviewDto of(Review review) {
 		ReqDeleteReviewDto dto = new ReqDeleteReviewDto();
@@ -28,6 +29,7 @@ public class ReqDeleteReviewDto {
 		dto.rate = review.getRate();
 		dto.createdAt = review.getCreatedAt();
 		dto.deletedAt = review.getDeletedAt();
+		dto.deletedBy = review.getDeletedBy();
 
 		return dto;
 	}

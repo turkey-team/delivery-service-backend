@@ -18,7 +18,9 @@ public class ResResultReviewDto {
 	private String imageUrl;
 
 	private Instant createdAt;
+	private Long createdBy;
 	private Instant updatedAt;
+	private Long updatedBy;
 
 	public static ResResultReviewDto of(Review review) {
 		ResResultReviewDto dto = new ResResultReviewDto();
@@ -27,7 +29,9 @@ public class ResResultReviewDto {
 		dto.context = review.getContext();
 		dto.rate = review.getRate();
 		dto.createdAt = review.getCreatedAt();
+		dto.createdBy = review.getCreatedBy();
 		dto.updatedAt = review.getUpdatedAt();
+		dto.updatedBy = review.getUpdatedBy();
 
 		return dto;
 	}
