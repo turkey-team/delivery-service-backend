@@ -7,9 +7,11 @@ import com.sparta.delivery.backend.reply.entity.Reply;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Getter
 @NoArgsConstructor
+@ToString
 public class ResDeleteReplyDto {
 
 	private UUID replyId;
@@ -27,7 +29,7 @@ public class ResDeleteReplyDto {
 		dto.replyId = reply.getId();
 		dto.reviewId = reply.getReview().getId();
 		dto.context = reply.getContext();
-		dto.writerName = reply.getOwner().getNickname();
+		dto.writerName = reply.getWriterName();
 		dto.createdAt = reply.getCreatedAt();
 		dto.createdBy = reply.getCreatedBy();
 		dto.deletedAt = reply.getDeletedAt();
