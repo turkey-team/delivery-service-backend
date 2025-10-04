@@ -41,6 +41,7 @@ public class DongService {
 			.toList();
 
 		if (names.size() != requestDtoList.size()) {
+			log.warn("동 지역 이름 중복");
 			throw new IllegalArgumentException("요청에 중복된 시/도 이름이 포함되어 있습니다.");
 		}
 
@@ -54,6 +55,7 @@ public class DongService {
 			.toList();
 
 		if (codes.size() != requestDtoList.size()) {
+			log.warn("동 지역 코드 중복");
 			throw new IllegalArgumentException("요청에 중복된 시/도 코드가 포함되어 있습니다.");
 		}
 
@@ -71,9 +73,7 @@ public class DongService {
 			)
 			.toList();
 
-		List<Dong> savedDongList = dongRepository.saveAll(dongList);
-
-		return savedDongList.stream()
+		return dongRepository.saveAll(dongList).stream()
 			.map(ResCreateDongDto::from)
 			.toList();
 	}
