@@ -94,14 +94,13 @@ public class SidoService {
 
 	// 시·도 삭제
 	@Transactional
-	public void deleteSido(UUID sidoId) {
+	public void deleteSido(UUID sidoId, Long loginUserId) {
 		Sido sido = sidoRepository.findById(sidoId).orElseThrow(() -> {
 			log.warn("시/도 지역 검색 실패");
 			return new EntityNotFoundException("존재하지 않는 시/도입니다.");
 		});
 
-		// 임시로 null을 넘김
-		sido.softDelete(null);
+		sido.softDelete(loginUserId);
 	}
 
 }

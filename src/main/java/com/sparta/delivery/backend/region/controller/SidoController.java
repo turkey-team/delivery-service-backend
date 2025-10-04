@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,6 +21,7 @@ import com.sparta.delivery.backend.region.dto.ResCreateSidoDto;
 import com.sparta.delivery.backend.region.dto.ResReadSidoDto;
 import com.sparta.delivery.backend.region.dto.ResUpdateSidoDto;
 import com.sparta.delivery.backend.region.service.SidoService;
+import com.sparta.delivery.backend.security.UserDetailsImpl;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -56,8 +58,10 @@ public class SidoController {
 	}
 
 	@DeleteMapping("/sidos/{sidoId}")
-	public ResponseEntity<Void> deleteSido(@PathVariable UUID sidoId) {
-		sidoService.deleteSido(sidoId);
+	public ResponseEntity<Void> deleteSido(
+		@PathVariable UUID sidoId, @AuthenticationPrincipal UserDetailsImpl loginUser
+	) {
+		sidoService.deleteSido(sidoId, loginUser.getId());
 
 		return ResponseEntity.noContent().build();
 	}

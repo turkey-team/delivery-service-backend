@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,6 +21,7 @@ import com.sparta.delivery.backend.region.dto.ResCreateSigunguDto;
 import com.sparta.delivery.backend.region.dto.ResReadSigunguDto;
 import com.sparta.delivery.backend.region.dto.ResUpdateSigunguDto;
 import com.sparta.delivery.backend.region.service.SigunguService;
+import com.sparta.delivery.backend.security.UserDetailsImpl;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -57,8 +59,10 @@ public class SigunguController {
 	}
 
 	@DeleteMapping("/sidos/{sidoId}/sigungus/{sigunguId}")
-	public ResponseEntity<Void> deleteSigungu(@PathVariable UUID sidoId, @PathVariable UUID sigunguId) {
-		sigunguService.deleteSigungu(sidoId, sigunguId);
+	public ResponseEntity<Void> deleteSigungu(
+		@PathVariable UUID sidoId, @PathVariable UUID sigunguId, @AuthenticationPrincipal UserDetailsImpl loginUser
+	) {
+		sigunguService.deleteSigungu(sidoId, sigunguId, loginUser.getId());
 
 		return ResponseEntity.noContent().build();
 	}

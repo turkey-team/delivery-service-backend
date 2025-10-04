@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,6 +20,7 @@ import com.sparta.delivery.backend.region.dto.ResCreateDongDto;
 import com.sparta.delivery.backend.region.dto.ResReadDongDto;
 import com.sparta.delivery.backend.region.dto.ResUpdateDongDto;
 import com.sparta.delivery.backend.region.service.DongService;
+import com.sparta.delivery.backend.security.UserDetailsImpl;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -56,8 +58,10 @@ public class DongController {
 	}
 
 	@DeleteMapping("/sigungus/{sigunguId}/dongs/{dongId}")
-	public ResponseEntity<Void> deleteDong(@PathVariable UUID sigunguId, @PathVariable UUID dongId) {
-		dongService.deleteDong(sigunguId, dongId);
+	public ResponseEntity<Void> deleteDong(
+		@PathVariable UUID sigunguId, @PathVariable UUID dongId, @AuthenticationPrincipal UserDetailsImpl loginUser
+	) {
+		dongService.deleteDong(sigunguId, dongId, loginUser.getId());
 
 		return ResponseEntity.noContent().build();
 	}

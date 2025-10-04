@@ -113,7 +113,7 @@ public class SigunguService {
 
 	// 시·군·구 삭제
 	@Transactional
-	public void deleteSigungu(UUID sidoId, UUID sigunguId) {
+	public void deleteSigungu(UUID sidoId, UUID sigunguId, Long loginUserId) {
 		Sido sido = sidoRepository.findById(sidoId).orElseThrow(() -> {
 			log.warn("시/도 지역 검색 실패");
 			return new EntityNotFoundException("존재하지 않는 시/도입니다.");
@@ -124,8 +124,7 @@ public class SigunguService {
 			return new EntityNotFoundException("존재하지 않는 시/군/구입니다.");
 		});
 
-		// 임시로 null을 넘김
-		sigungu.softDelete(null);
+		sigungu.softDelete(loginUserId);
 	}
 
 }
