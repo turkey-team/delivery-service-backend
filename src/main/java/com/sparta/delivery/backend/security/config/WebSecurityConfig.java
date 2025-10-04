@@ -68,7 +68,6 @@ public class WebSecurityConfig {
 					//TODO: 추후 개발 완성전 manager등록 API 필터 거치도록 변경
 					.requestMatchers("/v1/managers").permitAll()
 					.requestMatchers("/v1/owners").permitAll()
-					.requestMatchers("/v1/**").permitAll()
 					.requestMatchers("/v1/auth/login").permitAll()
 					.requestMatchers("/v1/auth/logout").authenticated()
 					.anyRequest().authenticated() // 그 외 모든 요청 인증처리

@@ -6,6 +6,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -49,6 +50,16 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler({MethodArgumentNotValidException.class})
 	public ResponseEntity<ApiException> handleException(MethodArgumentNotValidException ex) {
 		String errorMessage = ex.getBindingResult().getAllErrors().get(0).getDefaultMessage();
+		ApiException apiException = new ApiException(errorMessage, HttpStatus.BAD_REQUEST.value());
+		return new ResponseEntity<>(
+			apiException,
+			HttpStatus.BAD_REQUEST
+		);
+	}
+
+	@ExceptionHandler({HandlerMethodValidationException.class})
+	public ResponseEntity<ApiException> handleException(HandlerMethodValidationException ex) {
+		String errorMessage = ex.getAllErrors().get(0).getDefaultMessage();
 		ApiException apiException = new ApiException(errorMessage, HttpStatus.BAD_REQUEST.value());
 		return new ResponseEntity<>(
 			apiException,

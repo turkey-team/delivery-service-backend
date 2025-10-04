@@ -35,7 +35,8 @@ public class SidoController {
 
 	@PostMapping("/sidos")
 	public ResponseEntity<List<ResCreateSidoDto>> createSidos(
-		@RequestBody List<@Valid ReqCreateSidoDto> requestDtoList) {
+		@RequestBody List<@Valid ReqCreateSidoDto> requestDtoList
+	) {
 		List<ResCreateSidoDto> responseDtoList = sidoService.createSidos(requestDtoList);
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(responseDtoList);
