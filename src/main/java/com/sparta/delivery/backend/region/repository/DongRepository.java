@@ -11,9 +11,9 @@ import com.sparta.delivery.backend.region.entity.Sigungu;
 
 public interface DongRepository extends JpaRepository<Dong, UUID> {
 
-	boolean existsByNameAndSigungu(String name, Sigungu sigungu);
+	boolean existsByNameInAndSigungu(List<String> names, Sigungu sigungu);
 
-	boolean existsByCode(String code);
+	boolean existsByCodeIn(List<String> codes);
 
 	List<Dong> findAllBySigungu(Sigungu sigungu);
 
@@ -22,7 +22,7 @@ public interface DongRepository extends JpaRepository<Dong, UUID> {
 	boolean existsByCodeAndIdNot(String code, UUID dongId);
 
 	Optional<Dong> findByIdAndSigungu(UUID dongId, Sigungu sigungu);
-  
-  Optional<Dong> findByCode(String code);
-  
+
+	Optional<Dong> findByCode(String code);
+
 }

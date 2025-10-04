@@ -29,31 +29,44 @@ public class DongService {
 
 	// 동 생성
 	@Transactional
-	public ResCreateDongDto createDong(UUID sigunguId, ReqCreateDongDto requestDto) {
+	public List<ResCreateDongDto> createDongs(UUID sigunguId, List<ReqCreateDongDto> requestDtoList) {
 		Sigungu sigungu = sigunguRepository.findById(sigunguId).orElseThrow(() -> {
 			log.warn("시/군/구 지역 검색 실패");
 			return new EntityNotFoundException("존재하지 않는 시/군/구입니다.");
 		});
 
-		if (dongRepository.existsByNameAndSigungu(requestDto.getName(), sigungu)) {
+		List<String> names = requestDtoList.stream()
+			.map(ReqCreateDongDto::getName)
+			.toList();
+
+		if (dongRepository.existsByNameInAndSigungu(names, sigungu)) {
 			log.warn("동 지역 이름 중복");
-			throw new IllegalArgumentException("이미 존재하는 동 이름입니다.");
+			throw new IllegalArgumentException("이미 존재하는 동 이름이 포함되어 있습니다.");
 		}
 
-		if (dongRepository.existsByCode(requestDto.getCode())) {
+		List<String> codes = requestDtoList.stream()
+			.map(ReqCreateDongDto::getCode)
+			.toList();
+
+		if (dongRepository.existsByCodeIn(codes)) {
 			log.warn("동 지역 코드 중복");
-			throw new IllegalArgumentException("이미 존재하는 동 코드입니다.");
+			throw new IllegalArgumentException("이미 존재하는 동 코드가 포함되어 있습니다.");
 		}
 
-		Dong dong = Dong.builder()
-			.sigungu(sigungu)
-			.name(requestDto.getName())
-			.code(requestDto.getCode())
-			.build();
+		List<Dong> dongList = requestDtoList.stream()
+			.map(requestDto -> Dong.builder()
+				.sigungu(sigungu)
+				.name(requestDto.getName())
+				.code(requestDto.getCode())
+				.build()
+			)
+			.toList();
 
-		Dong savedDong = dongRepository.save(dong);
+		List<Dong> savedDongList = dongRepository.saveAll(dongList);
 
-		return ResCreateDongDto.from(savedDong);
+		return savedDongList.stream()
+			.map(ResCreateDongDto::from)
+			.toList();
 	}
 
 	// 동 목록 조회

@@ -27,25 +27,38 @@ public class SidoService {
 
 	// 시·도 생성
 	@Transactional
-	public ResCreateSidoDto createSido(ReqCreateSidoDto requestDto) {
-		if (sidoRepository.existsByName(requestDto.getName())) {
+	public List<ResCreateSidoDto> createSidos(List<ReqCreateSidoDto> requestDtoList) {
+		List<String> names = requestDtoList.stream()
+			.map(ReqCreateSidoDto::getName)
+			.toList();
+
+		if (sidoRepository.existsByNameIn(names)) {
 			log.warn("시/도 지역 이름 중복");
-			throw new IllegalArgumentException("이미 존재하는 시/도 이름입니다.");
+			throw new IllegalArgumentException("이미 존재하는 시/도 이름이 포함되어 있습니다.");
 		}
 
-		if (sidoRepository.existsByCode(requestDto.getCode())) {
+		List<String> codes = requestDtoList.stream()
+			.map(ReqCreateSidoDto::getCode)
+			.toList();
+
+		if (sidoRepository.existsByCodeIn(codes)) {
 			log.warn("시/도 지역 코드 중복");
-			throw new IllegalArgumentException("이미 존재하는 시/도 코드입니다.");
+			throw new IllegalArgumentException("이미 존재하는 시/도 코드가 포함되어 있습니다.");
 		}
 
-		Sido sido = Sido.builder()
-			.name(requestDto.getName())
-			.code(requestDto.getCode())
-			.build();
+		List<Sido> sidoList = requestDtoList.stream()
+			.map(requestDto -> Sido.builder()
+				.name(requestDto.getName())
+				.code(requestDto.getCode())
+				.build()
+			)
+			.toList();
 
-		Sido savedSido = sidoRepository.save(sido);
+		List<Sido> savedSidoList = sidoRepository.saveAll(sidoList);
 
-		return ResCreateSidoDto.from(savedSido);
+		return savedSidoList.stream()
+			.map(ResCreateSidoDto::from)
+			.toList();
 	}
 
 	// 시·도 목록 조회

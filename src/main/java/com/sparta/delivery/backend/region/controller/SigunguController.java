@@ -3,6 +3,7 @@ package com.sparta.delivery.backend.region.controller;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,12 +32,12 @@ public class SigunguController {
 	private final SigunguService sigunguService;
 
 	@PostMapping("/sidos/{sidoId}/sigungus")
-	public ResponseEntity<ResCreateSigunguDto> createSigungu(
-		@PathVariable UUID sidoId, @Valid @RequestBody ReqCreateSigunguDto requestDto
+	public ResponseEntity<List<ResCreateSigunguDto>> createSigungus(
+		@PathVariable UUID sidoId, @RequestBody List<@Valid ReqCreateSigunguDto> requestDtoList
 	) {
-		ResCreateSigunguDto responseDto = sigunguService.createSigungu(sidoId, requestDto);
+		List<ResCreateSigunguDto> responseDtoList = sigunguService.createSigungus(sidoId, requestDtoList);
 
-		return ResponseEntity.ok(responseDto);
+		return ResponseEntity.status(HttpStatus.CREATED).body(responseDtoList);
 	}
 
 	@GetMapping("/sidos/{sidoId}/sigungus")

@@ -3,6 +3,7 @@ package com.sparta.delivery.backend.region.controller;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,12 +31,12 @@ public class DongController {
 	private final DongService dongService;
 
 	@PostMapping("/sigungus/{sigunguId}/dongs")
-	public ResponseEntity<ResCreateDongDto> createDong(
-		@PathVariable UUID sigunguId, @Valid @RequestBody ReqCreateDongDto requestDto
+	public ResponseEntity<List<ResCreateDongDto>> createDongs(
+		@PathVariable UUID sigunguId, @RequestBody List<@Valid ReqCreateDongDto> requestDtoList
 	) {
-		ResCreateDongDto responseDto = dongService.createDong(sigunguId, requestDto);
+		List<ResCreateDongDto> responseDtoList = dongService.createDongs(sigunguId, requestDtoList);
 
-		return ResponseEntity.ok(responseDto);
+		return ResponseEntity.status(HttpStatus.CREATED).body(responseDtoList);
 	}
 
 	@GetMapping("/sigungus/{sigunguId}/dongs")

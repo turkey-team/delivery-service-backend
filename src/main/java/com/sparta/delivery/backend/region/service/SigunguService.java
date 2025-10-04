@@ -30,31 +30,44 @@ public class SigunguService {
 
 	// 시·군·구 생성
 	@Transactional
-	public ResCreateSigunguDto createSigungu(UUID sidoId, ReqCreateSigunguDto requestDto) {
+	public List<ResCreateSigunguDto> createSigungus(UUID sidoId, List<ReqCreateSigunguDto> requestDtoList) {
 		Sido sido = sidoRepository.findById(sidoId).orElseThrow(() -> {
 			log.warn("시/도 지역 검색 실패");
 			return new EntityNotFoundException("존재하지 않는 시/도입니다.");
 		});
 
-		if (sigunguRepository.existsByNameAndSido(requestDto.getName(), sido)) {
+		List<String> names = requestDtoList.stream()
+			.map(ReqCreateSigunguDto::getName)
+			.toList();
+
+		if (sigunguRepository.existsByNameInAndSido(names, sido)) {
 			log.warn("시/군/구 지역 이름 중복");
-			throw new IllegalArgumentException("이미 존재하는 시/군/구 이름입니다.");
+			throw new IllegalArgumentException("이미 존재하는 시/군/구 이름이 포함되어 있습니다.");
 		}
 
-		if (sigunguRepository.existsByCode(requestDto.getCode())) {
+		List<String> codes = requestDtoList.stream()
+			.map(ReqCreateSigunguDto::getCode)
+			.toList();
+
+		if (sigunguRepository.existsByCodeIn(codes)) {
 			log.warn("시/군/구 지역 코드 중복");
-			throw new IllegalArgumentException("이미 존재하는 시/군/구 코드입니다.");
+			throw new IllegalArgumentException("이미 존재하는 시/군/구 코드가 포함되어 있습니다.");
 		}
 
-		Sigungu sigungu = Sigungu.builder()
-			.sido(sido)
-			.name(requestDto.getName())
-			.code(requestDto.getCode())
-			.build();
+		List<Sigungu> sigunguList = requestDtoList.stream()
+			.map(requestDto -> Sigungu.builder()
+				.sido(sido)
+				.name(requestDto.getName())
+				.code(requestDto.getCode())
+				.build()
+			)
+			.toList();
 
-		Sigungu savedSigungu = sigunguRepository.save(sigungu);
+		List<Sigungu> savedSigunguList = sigunguRepository.saveAll(sigunguList);
 
-		return ResCreateSigunguDto.from(savedSigungu);
+		return savedSigunguList.stream()
+			.map(ResCreateSigunguDto::from)
+			.toList();
 	}
 
 	// 시·군·구 목록 조회
