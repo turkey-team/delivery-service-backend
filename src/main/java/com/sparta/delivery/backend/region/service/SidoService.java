@@ -32,7 +32,7 @@ public class SidoService {
 			.map(ReqCreateSidoDto::getName)
 			.toList();
 
-		if (sidoRepository.existsByNameIn(names)) {
+		if (sidoRepository.existsByNameInAndDeletedAtIsNull(names)) {
 			log.warn("시/도 지역 이름 중복");
 			throw new IllegalArgumentException("이미 존재하는 시/도 이름이 포함되어 있습니다.");
 		}
@@ -41,7 +41,7 @@ public class SidoService {
 			.map(ReqCreateSidoDto::getCode)
 			.toList();
 
-		if (sidoRepository.existsByCodeIn(codes)) {
+		if (sidoRepository.existsByCodeInAndDeletedAtIsNull(codes)) {
 			log.warn("시/도 지역 코드 중복");
 			throw new IllegalArgumentException("이미 존재하는 시/도 코드가 포함되어 있습니다.");
 		}
@@ -64,7 +64,7 @@ public class SidoService {
 	// 시·도 목록 조회
 	@Transactional(readOnly = true)
 	public List<ResReadSidoDto> getAllSido() {
-		return sidoRepository.findAll().stream()
+		return sidoRepository.findAllByDeletedAtIsNull().stream()
 			.map(ResReadSidoDto::from)
 			.toList();
 	}
@@ -72,17 +72,17 @@ public class SidoService {
 	// 시·도 수정
 	@Transactional
 	public ResUpdateSidoDto updateSido(UUID sidoId, ReqUpdateSidoDto requestDto) {
-		Sido sido = sidoRepository.findById(sidoId).orElseThrow(() -> {
+		Sido sido = sidoRepository.findByIdAndDeletedAtIsNull(sidoId).orElseThrow(() -> {
 			log.warn("시/도 지역 검색 실패");
 			return new EntityNotFoundException("존재하지 않는 시/도입니다.");
 		});
 
-		if (sidoRepository.existsByNameAndIdNot(requestDto.getName(), sidoId)) {
+		if (sidoRepository.existsByNameAndIdNotAndDeletedAtIsNull(requestDto.getName(), sidoId)) {
 			log.warn("시/도 지역 이름 중복");
 			throw new IllegalArgumentException("이미 존재하는 시/도 이름입니다.");
 		}
 
-		if (sidoRepository.existsByCodeAndIdNot(requestDto.getCode(), sidoId)) {
+		if (sidoRepository.existsByCodeAndIdNotAndDeletedAtIsNull(requestDto.getCode(), sidoId)) {
 			log.warn("시/도 지역 코드 중복");
 			throw new IllegalArgumentException("이미 존재하는 시/도 코드입니다.");
 		}
@@ -95,7 +95,7 @@ public class SidoService {
 	// 시·도 삭제
 	@Transactional
 	public void deleteSido(UUID sidoId, Long loginUserId) {
-		Sido sido = sidoRepository.findById(sidoId).orElseThrow(() -> {
+		Sido sido = sidoRepository.findByIdAndDeletedAtIsNull(sidoId).orElseThrow(() -> {
 			log.warn("시/도 지역 검색 실패");
 			return new EntityNotFoundException("존재하지 않는 시/도입니다.");
 		});

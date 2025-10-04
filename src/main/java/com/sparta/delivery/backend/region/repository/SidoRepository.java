@@ -1,6 +1,7 @@
 package com.sparta.delivery.backend.region.repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,12 +10,16 @@ import com.sparta.delivery.backend.region.entity.Sido;
 
 public interface SidoRepository extends JpaRepository<Sido, UUID> {
 
-	boolean existsByNameIn(List<String> names);
+	boolean existsByNameInAndDeletedAtIsNull(List<String> names);
 
-	boolean existsByCodeIn(List<String> codes);
+	boolean existsByCodeInAndDeletedAtIsNull(List<String> codes);
 
-	boolean existsByNameAndIdNot(String name, UUID sidoId);
+	List<Sido> findAllByDeletedAtIsNull();
 
-	boolean existsByCodeAndIdNot(String code, UUID sidoId);
+	Optional<Sido> findByIdAndDeletedAtIsNull(UUID sidoId);
+
+	boolean existsByNameAndIdNotAndDeletedAtIsNull(String name, UUID sidoId);
+
+	boolean existsByCodeAndIdNotAndDeletedAtIsNull(String code, UUID sidoId);
 
 }
