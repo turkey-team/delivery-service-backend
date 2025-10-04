@@ -35,7 +35,7 @@ public class Reply extends BaseEntity {
 	@JoinColumn(name = "p_manager_id")
 	private Manager manager;
 
-	@Column(name = "context", nullable = false)
+	@Column(name = "context", nullable = false, length = 500)
 	private String context;
 
 	@Builder

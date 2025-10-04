@@ -17,6 +17,8 @@ import com.sparta.delivery.backend.global.excpetion.UnauthorizedException;
 import com.sparta.delivery.backend.order.entity.Order;
 import com.sparta.delivery.backend.order.enums.OrderStatus;
 import com.sparta.delivery.backend.order.repository.OrderRepository;
+import com.sparta.delivery.backend.owner.entity.Owner;
+import com.sparta.delivery.backend.reply.service.ReplyService;
 import com.sparta.delivery.backend.review.dto.ReqCreateReviewDto;
 import com.sparta.delivery.backend.review.dto.ReqDeleteReviewDto;
 import com.sparta.delivery.backend.review.dto.ReqUpdateReviewDto;
@@ -29,9 +31,11 @@ import com.sparta.delivery.backend.store.entity.Store;
 import com.sparta.delivery.backend.store.repository.StoreRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ReviewService {
 
 	private final ReviewRepository reviewRepository;
@@ -39,6 +43,7 @@ public class ReviewService {
 	private final StoreRepository storeRepository;
 	private final OrderRepository orderRepository;
 	private final CacheManager cacheManager;
+	private final ReplyService replyService;
 
 	private static final String REVIEW_CACHE_NAME = "reviewList";
 
@@ -116,6 +121,10 @@ public class ReviewService {
 		reviewRepository.save(review);
 		store.addReview(review.getRate());
 		evictReviewCache(storeId);
+
+		Owner owner = store.getOwner();
+		log.info("registerReview 완료 - 비동기 호출 직전 thread: {}", Thread.currentThread().getName());
+		replyService.generateReplyAsync(review, owner);
 
 		return ResResultReviewDto.of(review);
 	}

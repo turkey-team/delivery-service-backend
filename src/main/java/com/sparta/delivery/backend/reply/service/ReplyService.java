@@ -5,6 +5,8 @@ import java.util.NoSuchElementException;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,15 +25,79 @@ import com.sparta.delivery.backend.review.entity.Review;
 import com.sparta.delivery.backend.review.repository.ReviewRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ReplyService {
 
 	private final ReplyRepository replyRepository;
 	private final ReviewRepository reviewRepository;
 	private final OwnerRepository ownerRepository;
 	private final ManagerRepository managerRepository;
+
+	private final ChatClient chatClient;
+
+	private static final int MAX_RETRY = 3;
+
+	@Async
+	public void generateReplyAsync(Review review, Owner owner) {
+		log.info("generateReplyAsync 시작 - thread: {}", Thread.currentThread().getName());
+		createReplyTransactionalWithRetry(review, owner);
+	}
+
+	@Transactional
+	public void createReplyTransactionalWithRetry(Review review, Owner owner) {
+		int attempt = 0;
+
+		while (attempt < MAX_RETRY) {
+			try {
+				// 이미 답글 존재 시 중복 방지
+				if (replyRepository.existsByReviewId(review.getId())) {
+					log.info("이미 답글 존재 - reviewId: {}", review.getId());
+					return;
+				}
+
+				// AI 호출
+				String autoreplyContext = chatClient.prompt()
+					.user("""
+						다음 고객 리뷰에 대해 점주의 입장에서 공손하고
+						친절한 답글을 작성해주세요.
+						너무 공통적인 답글보다는 리뷰에 맞는 답글이면 좋겠습니다.
+						너무 길지 않게 (500글자 이내) 답변해주세요.
+						고객 리뷰: %s
+						""".formatted(review.getContext()))
+					.call().content();
+
+				// 답글 저장
+				Reply reply = Reply.builder()
+					.context(autoreplyContext)
+					.review(review)
+					.owner(owner)
+					.build();
+
+				replyRepository.save(reply);
+				log.info("AI 답글 생성 성공 - reviewId: {}", review.getId());
+				break;
+
+			} catch (Exception e) {
+				attempt++;
+				log.error("AI 답글 생성 실패 ({}회차) - reviewId: {}", attempt, review.getId(), e);
+
+				if (attempt >= MAX_RETRY) {
+					log.error("최종 실패 - reviewId: {}", review.getId());
+				} else {
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException ie) {
+						Thread.currentThread().interrupt();
+						log.error("재시도 중 인터럽트 발생", ie);
+					}
+				}
+			}
+		}
+	}
 
 	// 답글 조회
 	@Transactional(readOnly = true)
