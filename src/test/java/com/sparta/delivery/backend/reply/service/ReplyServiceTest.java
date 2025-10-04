@@ -1,25 +1,9 @@
 package com.sparta.delivery.backend.reply.service;
 
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import com.sparta.delivery.backend.customer.entity.Customer;
-import com.sparta.delivery.backend.manager.entity.Manager;
-import com.sparta.delivery.backend.manager.repository.ManagerRepository;
-import com.sparta.delivery.backend.owner.entity.Owner;
-import com.sparta.delivery.backend.owner.repository.OwnerRepository;
-import com.sparta.delivery.backend.reply.repository.ReplyRepository;
-import com.sparta.delivery.backend.review.entity.Review;
-import com.sparta.delivery.backend.review.repository.ReviewRepository;
-import com.sparta.delivery.backend.store.entity.Store;
-import com.sparta.delivery.backend.user.entity.User;
-
-@ExtendWith(MockitoExtension.class)
+//@ExtendWith(MockitoExtension.class)
 class ReplyServiceTest {
 
-	@InjectMocks
+	/*@InjectMocks
 	private ReplyService replyService;
 
 	@Mock
@@ -48,7 +32,7 @@ class ReplyServiceTest {
 	private Long testManagerId = 2L;
 	private Long testCustomerId = 3L;
 
-	/*@BeforeEach
+	@BeforeEach
 	void setUp() {
 		// Owner User & Owner
 		ownerUser = new User();
@@ -115,7 +99,7 @@ class ReplyServiceTest {
 	@Test
 	void testCreateReply_manager() {
 		ReqCreateReplyDto dto = new ReqCreateReplyDto();
-		dto.setContext("매니저 답글 내용");
+		//dto.setContext("매니저 답글 내용");
 
 		when(reviewRepository.findById(testReview.getId())).thenReturn(Optional.of(testReview));
 		when(managerRepository.findByUserId(testManagerId)).thenReturn(Optional.of(testManager));
@@ -170,8 +154,8 @@ class ReplyServiceTest {
 
 		// 고객은 Owner도 Manager도 아님
 		when(reviewRepository.findById(testReview.getId())).thenReturn(Optional.of(testReview));
-		*//*when(ownerRepository.findByUserId(testUserId)).thenReturn(Optional.empty());
-		when(managerRepository.findByUserId(testUserId)).thenReturn(Optional.empty());*//*
+		when(ownerRepository.findByUserId(testOwnerId)).thenReturn(Optional.empty());
+		when(managerRepository.findByUserId(testManagerId)).thenReturn(Optional.empty());
 
 		UnauthorizedException exception = assertThrows(UnauthorizedException.class,
 			() -> replyService.createReply(dto, testReview.getId(), testCustomerId));

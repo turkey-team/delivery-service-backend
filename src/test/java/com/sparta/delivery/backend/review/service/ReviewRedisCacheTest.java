@@ -2,6 +2,7 @@ package com.sparta.delivery.backend.review.service;
 
 //@SpringBootTest
 //@ActiveProfiles("test")
+//@EnableAsync
 public class ReviewRedisCacheTest {
 
 	/*@Autowired
@@ -26,6 +27,8 @@ public class ReviewRedisCacheTest {
 	private Long userId;
 
 	private Pageable pageable;
+	@Autowired
+	private ReplyRepository replyRepository;
 
 	@BeforeEach
 	void setUp() {
@@ -100,7 +103,7 @@ public class ReviewRedisCacheTest {
 
 		// 캐시 없는 상태에서 조회 호출
 		ReviewRepositorySearchConditionDto condition = new ReviewRepositorySearchConditionDto();
-		condition.setContext("내용");
+		condition.setContext("");
 		reviewService.getReviews(storeId, condition, pageable);
 
 		// 캐시에 데이터가 저장되었는지 확인
@@ -122,7 +125,7 @@ public class ReviewRedisCacheTest {
 
 	// 리뷰 등록 수정 삭제 + Cache Evict 적용 테스트
 	@Test
-	void cacheEvictOnReviewCreateUpdateDelete() {
+	void cacheEvictOnReviewCreateUpdateDelete() throws InterruptedException {
 		Cache cache = cacheManager.getCache("reviewList");
 		String key =
 			"review:store:" + storeId;
@@ -143,13 +146,20 @@ public class ReviewRedisCacheTest {
 
 		// 리뷰 등록 → 캐시 무효화 확인
 		ReqCreateReviewDto newReview = new ReqCreateReviewDto();
-		newReview.setContext("새 리뷰");
+		newReview.setContext("너는 이걸 짬뽕이라고 만들어놓았냐? 맛도 싱겁고 국수도 다 안 익은채로 왔잖아!");
 		newReview.setRate(4);
 		newReview.setOrderId(orderId);
 		ResResultReviewDto resResultReviewDto = reviewService.registerReview(newReview, storeId, userId);
 		System.out.println("등록된 리뷰 = " + resResultReviewDto);
 		printCacheStatus(cache, key, "리뷰 등록 후 캐시");
 		assertNull(cache.get(key), "리뷰 등록 후 캐시는 무효화되어야 함");
+
+		await().atMost(10, TimeUnit.SECONDS).until(() ->
+			!replyRepository.findByReviewId(resResultReviewDto.getReviewId()).isEmpty()
+		);
+
+		List<Reply> replies = replyRepository.findByReviewId(resResultReviewDto.getReviewId());
+		System.out.println("autoReply = " + replies.get(0).getContext());
 
 		// 캐시 다시 조회 → 캐시 재생성
 		reviewService.getReviews(storeId, condition, pageable);
