@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,6 +35,7 @@ public class SigunguController {
 	private final SigunguService sigunguService;
 
 	@PostMapping("/sidos/{sidoId}/sigungus")
+	@PreAuthorize("hasRole('MANAGER')")
 	public ResponseEntity<List<ResCreateSigunguDto>> createSigungus(
 		@PathVariable UUID sidoId, @RequestBody List<@Valid ReqCreateSigunguDto> requestDtoList
 	) {
@@ -43,6 +45,7 @@ public class SigunguController {
 	}
 
 	@GetMapping("/sidos/{sidoId}/sigungus")
+	@PreAuthorize("hasAnyRole('MANAGER', 'OWNER', 'CUSTOMER')")
 	public ResponseEntity<List<ResReadSigunguDto>> getAllSigungu(@PathVariable UUID sidoId) {
 		List<ResReadSigunguDto> responseDtoList = sigunguService.getAllSigungu(sidoId);
 
@@ -50,6 +53,7 @@ public class SigunguController {
 	}
 
 	@PutMapping("/sidos/{sidoId}/sigungus/{sigunguId}")
+	@PreAuthorize("hasRole('MANAGER')")
 	public ResponseEntity<ResUpdateSigunguDto> updateSigungu(
 		@PathVariable UUID sidoId, @PathVariable UUID sigunguId, @Valid @RequestBody ReqUpdateSigunguDto requestDto
 	) {
@@ -59,6 +63,7 @@ public class SigunguController {
 	}
 
 	@DeleteMapping("/sidos/{sidoId}/sigungus/{sigunguId}")
+	@PreAuthorize("hasRole('MANAGER')")
 	public ResponseEntity<Void> deleteSigungu(
 		@PathVariable UUID sidoId, @PathVariable UUID sigunguId, @AuthenticationPrincipal UserDetailsImpl loginUser
 	) {

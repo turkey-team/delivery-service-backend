@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,6 +35,7 @@ public class SidoController {
 	private final SidoService sidoService;
 
 	@PostMapping("/sidos")
+	@PreAuthorize("hasRole('MANAGER')")
 	public ResponseEntity<List<ResCreateSidoDto>> createSidos(
 		@RequestBody List<@Valid ReqCreateSidoDto> requestDtoList
 	) {
@@ -43,6 +45,7 @@ public class SidoController {
 	}
 
 	@GetMapping("/sidos")
+	@PreAuthorize("hasAnyRole('MANAGER', 'OWNER', 'CUSTOMER')")
 	public ResponseEntity<List<ResReadSidoDto>> getAllSido() {
 		List<ResReadSidoDto> responseDtoList = sidoService.getAllSido();
 
@@ -50,6 +53,7 @@ public class SidoController {
 	}
 
 	@PutMapping("/sidos/{sidoId}")
+	@PreAuthorize("hasRole('MANAGER')")
 	public ResponseEntity<ResUpdateSidoDto> updateSido(
 		@PathVariable UUID sidoId, @Valid @RequestBody ReqUpdateSidoDto requestDto
 	) {
@@ -59,6 +63,7 @@ public class SidoController {
 	}
 
 	@DeleteMapping("/sidos/{sidoId}")
+	@PreAuthorize("hasRole('MANAGER')")
 	public ResponseEntity<Void> deleteSido(
 		@PathVariable UUID sidoId, @AuthenticationPrincipal UserDetailsImpl loginUser
 	) {
