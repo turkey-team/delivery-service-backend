@@ -30,7 +30,12 @@ public class SidoService {
 	public List<ResCreateSidoDto> createSidos(List<ReqCreateSidoDto> requestDtoList) {
 		List<String> names = requestDtoList.stream()
 			.map(ReqCreateSidoDto::getName)
+			.distinct()
 			.toList();
+
+		if (names.size() != requestDtoList.size()) {
+			throw new IllegalArgumentException("요청에 중복된 시/도 이름이 포함되어 있습니다.");
+		}
 
 		if (sidoRepository.existsByNameInAndDeletedAtIsNull(names)) {
 			log.warn("시/도 지역 이름 중복");
@@ -39,7 +44,12 @@ public class SidoService {
 
 		List<String> codes = requestDtoList.stream()
 			.map(ReqCreateSidoDto::getCode)
+			.distinct()
 			.toList();
+
+		if (codes.size() != requestDtoList.size()) {
+			throw new IllegalArgumentException("요청에 중복된 시/도 코드가 포함되어 있습니다.");
+		}
 
 		if (sidoRepository.existsByCodeInAndDeletedAtIsNull(codes)) {
 			log.warn("시/도 지역 코드 중복");

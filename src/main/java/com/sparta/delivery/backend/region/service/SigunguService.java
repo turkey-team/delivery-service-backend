@@ -38,7 +38,12 @@ public class SigunguService {
 
 		List<String> names = requestDtoList.stream()
 			.map(ReqCreateSigunguDto::getName)
+			.distinct()
 			.toList();
+
+		if (names.size() != requestDtoList.size()) {
+			throw new IllegalArgumentException("요청에 중복된 시/도 이름이 포함되어 있습니다.");
+		}
 
 		if (sigunguRepository.existsByNameInAndSidoAndDeletedAtIsNull(names, sido)) {
 			log.warn("시/군/구 지역 이름 중복");
@@ -47,7 +52,12 @@ public class SigunguService {
 
 		List<String> codes = requestDtoList.stream()
 			.map(ReqCreateSigunguDto::getCode)
+			.distinct()
 			.toList();
+
+		if (codes.size() != requestDtoList.size()) {
+			throw new IllegalArgumentException("요청에 중복된 시/도 코드가 포함되어 있습니다.");
+		}
 
 		if (sigunguRepository.existsByCodeInAndDeletedAtIsNull(codes)) {
 			log.warn("시/군/구 지역 코드 중복");

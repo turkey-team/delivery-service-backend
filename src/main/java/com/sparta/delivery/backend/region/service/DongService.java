@@ -37,7 +37,12 @@ public class DongService {
 
 		List<String> names = requestDtoList.stream()
 			.map(ReqCreateDongDto::getName)
+			.distinct()
 			.toList();
+
+		if (names.size() != requestDtoList.size()) {
+			throw new IllegalArgumentException("요청에 중복된 시/도 이름이 포함되어 있습니다.");
+		}
 
 		if (dongRepository.existsByNameInAndSigunguAndDeletedAtIsNull(names, sigungu)) {
 			log.warn("동 지역 이름 중복");
@@ -47,6 +52,10 @@ public class DongService {
 		List<String> codes = requestDtoList.stream()
 			.map(ReqCreateDongDto::getCode)
 			.toList();
+
+		if (codes.size() != requestDtoList.size()) {
+			throw new IllegalArgumentException("요청에 중복된 시/도 코드가 포함되어 있습니다.");
+		}
 
 		if (dongRepository.existsByCodeInAndDeletedAtIsNull(codes)) {
 			log.warn("동 지역 코드 중복");
