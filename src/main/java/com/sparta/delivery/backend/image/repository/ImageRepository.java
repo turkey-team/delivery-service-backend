@@ -7,6 +7,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.sparta.delivery.backend.image.entity.Image;
 
+import jakarta.validation.constraints.NotBlank;
+
 public interface ImageRepository extends JpaRepository<Image, UUID> {
 	Optional<Image> findById(UUID id);
+
+	Optional<Image> findByImageUrl(String url);
 }

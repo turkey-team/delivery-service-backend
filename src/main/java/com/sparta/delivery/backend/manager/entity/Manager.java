@@ -1,6 +1,7 @@
 package com.sparta.delivery.backend.manager.entity;
 
 import com.sparta.delivery.backend.common.BaseEntity;
+import com.sparta.delivery.backend.store.entity.Store;
 import com.sparta.delivery.backend.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -28,6 +29,10 @@ public class Manager extends BaseEntity {
     @Column(name = "email", length = 320, unique = true)
     private String email;
 
+	@ManyToOne
+	@JoinColumn(name = "p_store_id")
+	private Store store;
+
     @Builder
     private Manager(User user, String name, String phoneNumber, String email) {
         this.user = user;
@@ -35,4 +40,15 @@ public class Manager extends BaseEntity {
         this.phoneNumber = phoneNumber;
         this.email = email;
     }
+
+	public void setStore(Store store) {
+		if (this.store != null) {
+			//기존근무가게가있을경우 삭제
+			this.store.getManagers().remove(this);
+		}
+		//근무지 저장
+		this.store = store;
+		//가게에 매니저 추가
+		store.getManagers().add(this);
+	}
 }

@@ -5,8 +5,10 @@ import java.util.List;
 
 import com.sparta.delivery.backend.common.BaseEntity;
 import com.sparta.delivery.backend.image.entity.Image;
+import com.sparta.delivery.backend.manager.entity.Manager;
 import com.sparta.delivery.backend.owner.entity.Owner;
 import com.sparta.delivery.backend.region.entity.Dong;
+import com.sparta.delivery.backend.store.dto.ReqUpdateStoreInfoDto;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -67,6 +69,9 @@ public class Store extends BaseEntity {
 	@Column(name = "phone_number")
 	private String phoneNumber;
 
+	@OneToMany(mappedBy = "store", fetch = FetchType.LAZY)
+	private List<Manager> managers = new ArrayList<>();
+
 	public void addReview(int rate) {
 		this.reviewRate = (this.reviewRate * this.reviewCnt + rate) / (this.reviewCnt + 1);
 		this.reviewCnt++;
@@ -112,4 +117,21 @@ public class Store extends BaseEntity {
 		return StoreImage.builder().store(store).image(image).status(status).build();
 	}
 
+	public void updateStoreInfo(ReqUpdateStoreInfoDto requestDto, Dong dong){
+		this.name = requestDto.getStoreName();
+		this.addressDetails = requestDto.getAddressDetails();
+		this.phoneNumber = requestDto.getPhoneNumber();
+		this.addressDetails = requestDto.getAddressDetails();
+		this.regionDong = dong;
+	}
+
+	public void updateStoreDetails(int deliveryFee, Integer minOrderPrice) {
+		this.deliveryFee = deliveryFee;
+		this.minOrderPrice = minOrderPrice;
+	}
+
+	public void updateStoreStatus(StoreStatusEnum status)
+	{
+		this.status = status;
+	}
 }

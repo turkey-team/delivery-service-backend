@@ -1,12 +1,12 @@
 package com.sparta.delivery.backend.store.dto;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
+
+import org.hibernate.validator.constraints.Length;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -50,10 +50,11 @@ public class ReqCreateStoreDto {
 
 	//details
 	private String description;
+	@NotBlank(message = "영업시간을 설정해주세요.")
 	private String operatingHours;
 	private String holiday;
 	@NotBlank(message = "사업자등록증번호는 필수로 입력해주세요.")
-	@Size(min=10,max = 12)
+	@Length(min=10,max = 12)
 	private String businessNumber;
 
 }

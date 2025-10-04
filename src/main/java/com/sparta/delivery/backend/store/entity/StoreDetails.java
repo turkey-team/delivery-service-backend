@@ -1,6 +1,7 @@
 package com.sparta.delivery.backend.store.entity;
 
 import com.sparta.delivery.backend.common.BaseEntity;
+import com.sparta.delivery.backend.store.dto.ReqUpdateStoreInfoDto;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -40,5 +41,15 @@ public class StoreDetails extends BaseEntity {
 		this.holiday = holiday;
 		this.description = description;
 		this.businessNumber = businessNumber;
+	}
+
+	public void updateStoreBusinessNumber(String businessNumber) {
+		this.businessNumber = businessNumber;
+	}
+
+	public void updateStoreDetails(String description, String holiday, String operationHours) {
+		this.description = description;
+		this.holiday = holiday;
+		this.operationHours = operationHours;
 	}
 }

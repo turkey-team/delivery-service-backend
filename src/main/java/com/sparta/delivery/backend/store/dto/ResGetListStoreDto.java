@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ResGetListStoreDto {
 	private UUID storeId;
-	private String Name;
+	private String name;
 	private int reviewCnt;
 	private double reviewRate;
 	private int deliveryFee;
@@ -22,9 +22,9 @@ public class ResGetListStoreDto {
 	private StoreStatusEnum status;
 
 	@Builder
-	public ResGetListStoreDto(UUID storeId, String storeName, double reviewRate, int reviewCnt, int deliveryFee, Integer minOrderPrice, StoreStatusEnum status){
+	public ResGetListStoreDto(UUID storeId, String name, double reviewRate, int reviewCnt, int deliveryFee, Integer minOrderPrice, StoreStatusEnum status){
 		this.storeId = storeId;
-		this.Name = storeName;
+		this.name = name;
 		this.reviewCnt = reviewCnt;
 		this.reviewRate = reviewRate;
 		this.deliveryFee = deliveryFee;

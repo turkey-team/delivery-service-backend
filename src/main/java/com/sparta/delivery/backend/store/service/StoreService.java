@@ -2,28 +2,43 @@ package com.sparta.delivery.backend.store.service;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.sparta.delivery.backend.category.entity.Category;
 import com.sparta.delivery.backend.category.repository.CategoryRepository;
 import com.sparta.delivery.backend.image.entity.Image;
 import com.sparta.delivery.backend.image.repository.ImageRepository;
+import com.sparta.delivery.backend.manager.entity.Manager;
 import com.sparta.delivery.backend.owner.entity.Owner;
 import com.sparta.delivery.backend.owner.repository.OwnerRepository;
 import com.sparta.delivery.backend.region.entity.Dong;
 import com.sparta.delivery.backend.region.repository.DongRepository;
 import com.sparta.delivery.backend.store.dto.ReqCreateStoreDto;
+import com.sparta.delivery.backend.store.dto.ReqDeleteStoreDto;
 import com.sparta.delivery.backend.store.dto.ReqUpdateStoreDetailsDto;
 import com.sparta.delivery.backend.store.dto.ReqUpdateStoreInfoDto;
+import com.sparta.delivery.backend.store.dto.ReqUpdateStoreStatusDto;
 import com.sparta.delivery.backend.store.dto.ResCreateStoreDto;
+import com.sparta.delivery.backend.store.dto.ResDeleteStoreDto;
+import com.sparta.delivery.backend.store.dto.ResGetListStoreDto;
 import com.sparta.delivery.backend.store.dto.ResGetStoreDto;
 import com.sparta.delivery.backend.store.dto.ResUpdateStoreDetailsDto;
 import com.sparta.delivery.backend.store.dto.ResUpdateStoreInfoDto;
+import com.sparta.delivery.backend.store.dto.ResUpdateStoreStatusDto;
 import com.sparta.delivery.backend.store.entity.Store;
 import com.sparta.delivery.backend.store.entity.StoreCategory;
 import com.sparta.delivery.backend.store.entity.StoreDetails;
@@ -37,7 +52,6 @@ import com.sparta.delivery.backend.store.repository.StoreRepository;
 import com.sparta.delivery.backend.user.entity.User;
 import com.sparta.delivery.backend.user.entity.UserRoleEnum;
 
-import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -74,8 +88,6 @@ public class StoreService {
 		//Category
 		List<Category> categories = categoryRepository.findAllById(requestDto.getCategories());
 
-		List<StoreCategory> storeCategories = new ArrayList<>();
-
 		// 2. 이미지 등록
 		List<String> storeImageUrls = requestDto.getImages().stream()
 			.filter(img -> "store".equalsIgnoreCase(img.getType()))
@@ -110,14 +122,7 @@ public class StoreService {
 		storeRepository.save(store);
 
 		// 3-2 카테고리 중간 테이블에 저장
-		for(Category category : categories){
-			StoreCategory storeCategory = StoreCategory.builder().category(category).store(store).build();
-			storeCategories.add(storeCategory);
-			category.getStoreCategories().add(storeCategory);
-			store.getStoreCategories().add(storeCategory);
-		}
-
-		storeCategoryRepository.saveAll(storeCategories);
+		saveStoreCategories(categories, store);
 
 		// 3-2. 이미지 중간 테이블에 저장
 		//매장
@@ -164,7 +169,284 @@ public class StoreService {
 		return resGetStoreDto;
 	}
 
+	@Transactional
+	public ResUpdateStoreInfoDto updateStoreInfo(UUID storeId, ReqUpdateStoreInfoDto requestDto, User user) {
 
+		// Store 검증
+		Store store = storeRepository.findById(storeId).orElseThrow(()-> new IllegalArgumentException("존재하지 않는 가게입니다."));
+		StoreDetails storeDetails = storeDetailsRepository.findByStoreId(storeId).orElseThrow(()-> new IllegalArgumentException("존재하지 않는 가게입니다."));
+
+		checkUserIsOwner(user, store);
+
+		Dong dong = dongRepository.findByCode(requestDto.getRegionDong());
+
+		// 현재 등록된 카테고리 조회
+		List<StoreCategory> currentCategories = store.getStoreCategories();
+
+		Set<UUID> existingCategoryIds = currentCategories.stream()
+			.filter(sc -> !sc.isDeleted())  // 삭제되지 않은 카테고리만
+			.map(sc -> sc.getCategory().getId())
+			.collect(Collectors.toSet());
+
+		// 수정할 카테고리 조회
+		Set<UUID> reqCategoryIds = requestDto.getCategories().stream().collect(Collectors.toSet());
+
+		// 수정이 필요하면
+		if (!reqCategoryIds.isEmpty()){
+
+			List<StoreCategory> categoryToDeleteList = currentCategories.stream().filter(sc-> !reqCategoryIds.contains(sc.getCategory().getId()) && !sc.isDeleted()).collect(Collectors.toList());
+
+			for(StoreCategory sc : categoryToDeleteList){
+				// 삭제대상
+				sc.softDelete(user.getId());
+				//연관관계제거
+				sc.getStore().getStoreCategories().remove(sc);
+				sc.getCategory().getStoreCategories().remove(sc);
+				storeCategoryRepository.save(sc);
+			}
+
+			// 요청 카테고리 저장
+			Set<UUID> newCategoriesSet = new HashSet<>(reqCategoryIds);
+
+			// 기존 카테고리를 필터링
+			newCategoriesSet.removeAll(existingCategoryIds);
+
+			// DB에서 찾기
+			List<Category> newCategoryList = categoryRepository.findAllById(newCategoriesSet);
+
+			List<StoreCategory> newStoreCategoryList = new ArrayList<>();
+			for(Category c : newCategoryList){
+				// 생성
+				StoreCategory sc = StoreCategory.builder().store(store).category(c).build();
+
+				// 연관관계 설정
+				store.getStoreCategories().add(sc);
+				c.getStoreCategories().add(sc);
+
+				newStoreCategoryList.add(sc);
+			}
+
+			//저장
+			storeCategoryRepository.saveAll(newStoreCategoryList);
+		}
+
+		// 기존 Image 중 삭제되지않은 store 타입만 조회
+		List<StoreImage> currentImages = store.getStoreImages().stream().filter(si -> si.getStatus()==StoreImageStatusEnum.STORE && !si.isDeleted()).collect(Collectors.toList());
+
+		// requestDto에서 가게 이미지만 추출
+		List<ReqUpdateStoreInfoDto.ImageDto> reqImages = requestDto.getImages().stream().filter(img -> "store".equalsIgnoreCase(img.getType())).toList();
+
+		// imageId가 있음 -> 기존 이미지
+		List<ReqUpdateStoreInfoDto.ImageDto> existingImages = reqImages.stream().filter(img -> img.getImageId() != null).toList();
+		// imageId가 없음 -> 신규 이미지
+		List<ReqUpdateStoreInfoDto.ImageDto> newImages = reqImages.stream().filter(img -> img.getImageId() == null).toList();
+
+		// dto 중 id 있는 이미지들을 DB에 imageId로 조회
+		Map<UUID, Image> existingImageMap = imageRepository.findAllById(
+			existingImages.stream()
+				.map(ReqUpdateStoreInfoDto.ImageDto::getImageId)
+				.toList()
+		).stream().collect(Collectors.toMap(Image::getId, img -> img));
+
+		Map<String, Image> newImageMap = new HashMap<>();
+		// URL로 검색해서 있으면 Image로 받거나 아님 Image로 신규 저장
+		for (ReqUpdateStoreInfoDto.ImageDto dto : newImages) {
+			Image image = imageRepository.findByImageUrl(dto.getUrl())
+				.orElseGet(() -> imageRepository.save(Image.builder().imageUrl(dto.getUrl()).build()));
+			newImageMap.put(dto.getUrl(), image);
+		}
+
+		Set<UUID> requestedImageIds = reqImages.stream()
+			.map(img -> {
+				if (img.getImageId() != null) return img.getImageId();
+				else return newImageMap.get(img.getUrl()).getId();
+			})
+			.filter(Objects::nonNull)
+			.collect(Collectors.toSet());
+
+		// 삭제 대상 이미지 리스트 만들기
+		List<StoreImage> imageToDeleteList = currentImages.stream()
+			.filter(currentImage -> !requestedImageIds.contains(currentImage.getImage().getId()))
+			.toList();
+
+		for (StoreImage currentImage : imageToDeleteList) {
+			// 삭제대상
+			//Image 연관관계 제거 및 삭제
+			currentImage.softDelete(user.getId());
+			currentImage.getImage().softDelete(user.getId());
+			imageRepository.save(currentImage.getImage());
+
+			// Store 연관관계 제거
+			currentImage.getImage().getStoreImages().remove(currentImage);
+			store.getStoreImages().remove(currentImage);
+		}
+
+		// 추가대상
+		Set<UUID> currentImageIds = currentImages.stream()
+			.map(si -> si.getImage().getId())
+			.collect(Collectors.toSet());
+
+		Set<UUID> imagesToAddSet = new HashSet<>(requestedImageIds);
+		imagesToAddSet.removeAll(currentImageIds);
+
+		List<StoreImage> toAddStoreImages = new ArrayList<>();
+
+		for (UUID imageId : imagesToAddSet) {
+			Image image = existingImageMap.getOrDefault(
+				imageId,
+				newImageMap.values().stream()
+					.filter(img -> img.getId().equals(imageId))
+					.findFirst()
+					.orElseThrow(() -> new IllegalStateException("요청된 이미지가 존재하지 않습니다."))
+			);
+
+			StoreImage newStoreImage = StoreImage.builder()
+				.store(store)
+				.image(image)
+				.status(StoreImageStatusEnum.STORE)
+				.build();
+
+			store.getStoreImages().add(newStoreImage);
+			image.getStoreImages().add(newStoreImage);
+			toAddStoreImages.add(newStoreImage);
+		}
+
+		storeImageRepository.saveAll(toAddStoreImages);
+
+		// Update
+		store.updateStoreInfo(requestDto, dong);
+		storeRepository.save(store);
+
+		ResUpdateStoreInfoDto resUpdateStoreInfoDto = ResUpdateStoreInfoDto.builder()
+			.storeId(store.getId())
+			.storeName(store.getName())
+			.addressDetails(store.getAddressDetails())
+			.phoneNumber(store.getPhoneNumber())
+			//.regionDong(store.getRegionDong().getCode()) //dong 연결되면 해제
+			.build();
+
+		return resUpdateStoreInfoDto;
+	}
+
+	@Transactional
+	public ResUpdateStoreDetailsDto updateStoreDetails(UUID storeId, @Valid ReqUpdateStoreDetailsDto requestDto, User user) {
+
+		// Store 검증
+		Store store = storeRepository.findById(storeId).orElseThrow(()-> new IllegalArgumentException("존재하지 않는 가게입니다."));
+		StoreDetails storeDetails = storeDetailsRepository.findByStoreId(storeId).orElseThrow(()-> new IllegalArgumentException("존재하지 않는 가게입니다."));
+
+		// Role 검증
+		List<Manager> managers = store.getManagers();
+
+		checkUserRole(user,store,managers);
+
+		// 검증 완료
+
+		// Update
+		store.updateStoreDetails(requestDto.getDeliveryFee(), requestDto.getMinOrderPrice());
+		storeRepository.save(store);
+
+		storeDetails.updateStoreDetails(requestDto.getDescription(), requestDto.getHoliday(), requestDto.getOperationHours());
+		storeDetailsRepository.save(storeDetails);
+
+		// 반환
+		ResUpdateStoreDetailsDto resUpdateStoreDetailsDto = ResUpdateStoreDetailsDto.builder()
+			.storeId(store.getId())
+			.storeName(store.getName())
+			.deliveryFee(store.getDeliveryFee())
+			.minOrderPrice(store.getMinOrderPrice())
+			.description(storeDetails.getDescription())
+			.operationHours(storeDetails.getOperationHours())
+			.holiday(storeDetails.getHoliday())
+			.build();
+
+		return resUpdateStoreDetailsDto;
+	}
+
+	@Transactional(readOnly = true)
+	public Page<ResGetListStoreDto> getStores(int page, int size, String sort, String keyword, String categoryId, User user) {
+
+		// 허용 사이즈
+		List<Integer> sizeList = List.of(10,30,50);
+		if (!sizeList.contains(size)) {
+			size = 10;
+		}
+
+		//음수일경우 0 강제
+		page = Math.max(page-1, 0);
+
+		// 전체 조회시 cateogryId 없음
+		UUID categoryUUID = null;
+
+		if(categoryId != null && !categoryId.isBlank()){
+			try {
+				categoryUUID = UUID.fromString(categoryId);
+			}
+			catch (IllegalArgumentException e){
+				throw new IllegalArgumentException("올바른 카테고리가 아닙니다.");
+			}
+		}
+
+		Pageable pageable = PageRequest.of(page, size);
+
+		return storeRepository.getStores(pageable, sort, keyword, categoryUUID);
+
+	}
+
+	@Transactional
+	public ResUpdateStoreStatusDto updateStoreStatus(UUID storeId, @Valid ReqUpdateStoreStatusDto requestDto, User user) {
+
+		// Store 검증
+		Store store = storeRepository.findById(storeId).orElseThrow(()-> new IllegalArgumentException("존재하지 않는 가게입니다."));
+
+		// Role 검증
+		List<Manager> managers = store.getManagers();
+		checkUserRole(user,store,managers);
+
+		// 현재 Status와 비교
+		StoreStatusEnum currentStatus = store.getStatus();
+		// 동일하면 Exception
+		if (currentStatus == requestDto.getStoreStatus()){
+			throw new IllegalArgumentException("현재와 동일한 상태로는 변경할 수 없습니다.");
+		}
+
+		store.updateStoreStatus(requestDto.getStoreStatus());
+		storeRepository.save(store);
+
+		ResUpdateStoreStatusDto resDto = ResUpdateStoreStatusDto.builder().storeId(store.getId()).storeStatus(store.getStatus()).build();
+		return resDto;
+
+	}
+
+	@Transactional
+	public ResDeleteStoreDto deleteStore(UUID storeId, @Valid ReqDeleteStoreDto requestDto, User user) {
+
+		Store store = storeRepository.findById(storeId).orElseThrow(()-> new IllegalArgumentException("존재하지 않는 가게입니다."));
+		StoreDetails storeDetails = storeDetailsRepository.findByStoreId(storeId).orElseThrow(()-> new IllegalArgumentException("존재하지 않는 가게입니다."));
+
+		checkUserIsOwner(user, store);
+
+		// 사업자번호 동일한지 검증
+		boolean isRightBN = requestDto.getBusinessNumber().equals(storeDetails.getBusinessNumber());
+
+		if (!isRightBN){
+			throw new IllegalArgumentException("잘못된 사업자등록번호입니다. 정확한 사업자번호를 입력하세요.");
+		}
+
+		if (!store.isDeleted() && !storeDetails.isDeleted()){
+			store.softDelete(user.getId());
+			storeDetails.softDelete(user.getId());
+		}else{
+			throw new IllegalArgumentException("이미 삭제된 가게입니다.");
+		}
+
+		storeRepository.save(store);
+		storeDetailsRepository.save(storeDetails);
+
+		ResDeleteStoreDto resDeleteStoreDto = ResDeleteStoreDto.builder().storeName(store.getName()).storeId(store.getId()).businessNumber(storeDetails.getBusinessNumber()).build();
+
+		return resDeleteStoreDto;
+	}
 
 	/**
 	 * Image 테이블 저장
@@ -203,5 +485,54 @@ public class StoreService {
 
 	}
 
+	/**
+	 * StoreCategory 저장
+	 * @param newCategories
+	 * @param store
+	 */
+	public void saveStoreCategories(List<Category> newCategories, Store store) {
+		List<StoreCategory> storeCategories = new ArrayList<>();
+		for(Category c : newCategories){
+			//기존 카테고리와 동일한지 확인
+			boolean isEqual = store.getStoreCategories().stream().anyMatch(currentCategory->currentCategory.getId().equals(c.getId()));
+
+			if(!isEqual){
+				StoreCategory newStoreCategory = StoreCategory.builder().store(store).category(c).build();
+				store.getStoreCategories().add(newStoreCategory);
+				c.getStoreCategories().add(newStoreCategory);
+				storeCategories.add(newStoreCategory);
+			}
+		}
+		storeCategoryRepository.saveAll(storeCategories);
+	}
+
+	/**
+	 * Owner || Manager 검증
+	 * @param user
+	 * @param store
+	 * @param managers
+	 */
+	public void checkUserRole(User user, Store store, List<Manager> managers) {
+
+		boolean IsManger = managers != null && managers.stream().anyMatch(manager ->  manager.getUser().getId().equals(user.getId()));
+		boolean IsOwner = store.getOwner().getUser().getId().equals(user.getId());
+
+		// 가게 Owner || Manager가 아니면 수정 불가
+		if (!(IsManger || IsOwner)) {
+			throw new AccessDeniedException("수정 권한이 없습니다.");
+		}
+	}
+
+	/**
+	 * 가게 Owner 검증
+	 * @param user
+	 * @param store
+	 */
+	public void checkUserIsOwner(User user, Store store) {
+		boolean IsOwner = store.getOwner().getUser().getId().equals(user.getId());
+		if (!IsOwner) {
+			throw new AccessDeniedException("소유주가 아니면 가게 정보를 수정할 수 없습니다");
+		}
+	}
 }
 
