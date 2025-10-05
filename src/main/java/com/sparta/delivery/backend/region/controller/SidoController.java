@@ -35,7 +35,7 @@ public class SidoController {
 	private final SidoService sidoService;
 
 	@PostMapping("/sidos")
-	@PreAuthorize("hasRole('MANAGER')")
+	@PreAuthorize("isAuthenticated() && hasRole('MANAGER')")
 	public ResponseEntity<List<ResCreateSidoDto>> createSidos(
 		@RequestBody List<@Valid ReqCreateSidoDto> requestDtoList
 	) {
@@ -45,7 +45,7 @@ public class SidoController {
 	}
 
 	@GetMapping("/sidos")
-	@PreAuthorize("hasAnyRole('MANAGER', 'OWNER', 'CUSTOMER')")
+	@PreAuthorize("isAuthenticated() && hasAnyRole('MANAGER', 'OWNER', 'CUSTOMER')")
 	public ResponseEntity<List<ResReadSidoDto>> getAllSido() {
 		List<ResReadSidoDto> responseDtoList = sidoService.getAllSido();
 
@@ -53,7 +53,7 @@ public class SidoController {
 	}
 
 	@PutMapping("/sidos/{sidoId}")
-	@PreAuthorize("hasRole('MANAGER')")
+	@PreAuthorize("isAuthenticated() && hasRole('MANAGER')")
 	public ResponseEntity<ResUpdateSidoDto> updateSido(
 		@PathVariable UUID sidoId, @Valid @RequestBody ReqUpdateSidoDto requestDto
 	) {
@@ -63,7 +63,7 @@ public class SidoController {
 	}
 
 	@DeleteMapping("/sidos/{sidoId}")
-	@PreAuthorize("hasRole('MANAGER')")
+	@PreAuthorize("isAuthenticated() && hasRole('MANAGER')")
 	public ResponseEntity<Void> deleteSido(
 		@PathVariable UUID sidoId, @AuthenticationPrincipal UserDetailsImpl loginUser
 	) {

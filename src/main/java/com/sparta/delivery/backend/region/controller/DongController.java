@@ -34,7 +34,7 @@ public class DongController {
 	private final DongService dongService;
 
 	@PostMapping("/sigungus/{sigunguId}/dongs")
-	@PreAuthorize("hasRole('MANAGER')")
+	@PreAuthorize("isAuthenticated() && hasRole('MANAGER')")
 	public ResponseEntity<List<ResCreateDongDto>> createDongs(
 		@PathVariable UUID sigunguId, @RequestBody List<@Valid ReqCreateDongDto> requestDtoList
 	) {
@@ -44,7 +44,7 @@ public class DongController {
 	}
 
 	@GetMapping("/sigungus/{sigunguId}/dongs")
-	@PreAuthorize("hasAnyRole('MANAGER', 'OWNER', 'CUSTOMER')")
+	@PreAuthorize("isAuthenticated() && hasAnyRole('MANAGER', 'OWNER', 'CUSTOMER')")
 	public ResponseEntity<List<ResReadDongDto>> getAllDong(@PathVariable UUID sigunguId) {
 		List<ResReadDongDto> responseDtoList = dongService.getAllDong(sigunguId);
 
@@ -52,7 +52,7 @@ public class DongController {
 	}
 
 	@PutMapping("/sigungus/{sigunguId}/dongs/{dongId}")
-	@PreAuthorize("hasRole('MANAGER')")
+	@PreAuthorize("isAuthenticated() && hasRole('MANAGER')")
 	public ResponseEntity<ResUpdateDongDto> updateDong(
 		@PathVariable UUID sigunguId, @PathVariable UUID dongId, @Valid @RequestBody ReqCreateDongDto requestDto
 	) {
@@ -62,7 +62,7 @@ public class DongController {
 	}
 
 	@DeleteMapping("/sigungus/{sigunguId}/dongs/{dongId}")
-	@PreAuthorize("hasRole('MANAGER')")
+	@PreAuthorize("isAuthenticated() && hasRole('MANAGER')")
 	public ResponseEntity<Void> deleteDong(
 		@PathVariable UUID sigunguId, @PathVariable UUID dongId, @AuthenticationPrincipal UserDetailsImpl loginUser
 	) {
