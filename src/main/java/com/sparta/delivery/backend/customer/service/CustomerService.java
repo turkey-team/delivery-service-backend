@@ -9,6 +9,7 @@ import com.sparta.delivery.backend.customer.dto.ResGetCustomerDto;
 import com.sparta.delivery.backend.customer.entity.Customer;
 import com.sparta.delivery.backend.customer.repository.CustomerRepository;
 import com.sparta.delivery.backend.global.excpetion.DuplicateUsernameException;
+import com.sparta.delivery.backend.global.verification.EmailVerificationTokenValidator;
 import com.sparta.delivery.backend.security.UserDetailsImpl;
 import com.sparta.delivery.backend.user.entity.User;
 import com.sparta.delivery.backend.user.entity.UserRoleEnum;
@@ -23,8 +24,8 @@ public class CustomerService {
 	private final CustomerRepository customerRepository;
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
+	private final EmailVerificationTokenValidator emailVerificationTokenValidator;
 
-	//TODO: 이메일 인증 필요
 	@Transactional
 	public void createCustomer(ReqCreateCustomerDto requestDto) {
 		//같은 메일로 다른 사용자 요청 가능하도록 할지 정책 결정필요
@@ -32,6 +33,8 @@ public class CustomerService {
 			.ifPresent(user -> {
 				throw new DuplicateUsernameException("이미 존재하는 사용자명입니다.");
 			});
+
+		emailVerificationTokenValidator.validateAndConsumeToken(requestDto.getEmail(), requestDto.getEmailVerificationToken());
 
 		User user = User.builder()
 			.username(requestDto.getUsername())
