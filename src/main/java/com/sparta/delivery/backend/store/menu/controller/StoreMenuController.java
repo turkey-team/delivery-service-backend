@@ -33,7 +33,7 @@ public class StoreMenuController {
 	private final StoreMenuService storeMenuService;
 
 	@PostMapping
-	public ResponseEntity<ResStoreMenuDto> createStoreMenu(
+	public ResponseEntity<Void> createStoreMenu(
 		@PathVariable UUID storeId,
 		@RequestBody ReqCreateStoreMenuDto reqCreateStoreMenuDto
 	) {
@@ -62,35 +62,35 @@ public class StoreMenuController {
 
 	// 메뉴 정보 수정
 	@PutMapping("/{menuId}")
-	public ResponseEntity<ResStoreMenuDto> updateStoreMenu(
+	public ResponseEntity<Void> updateStoreMenu(
 		@PathVariable UUID storeId,
 		@PathVariable UUID menuId,
 		@RequestBody ReqUpdateStoreMenuDto reqUpdateStoreMenuDto
 	) {
-		ResStoreMenuDto updated = storeMenuService.updateStoreMenu(storeId, menuId, reqUpdateStoreMenuDto);
-		return ResponseEntity.ok(updated);
+		storeMenuService.updateStoreMenu(storeId, menuId, reqUpdateStoreMenuDto);
+		return ResponseEntity.ok().build();
 	}
 
 	// 메뉴 순서 변경
 	@PatchMapping("/{menuId}/sort")
-	public ResponseEntity<ResStoreMenuDto> updateSortOrder(
+	public ResponseEntity<Void> updateSortOrder(
 		@PathVariable UUID storeId,
 		@PathVariable UUID menuId,
 		@RequestBody ReqUpdateSortOrderDto reqUpdateSortOrderDto
 	) {
-		ResStoreMenuDto updated = storeMenuService.updateSortOrder(storeId, menuId, reqUpdateSortOrderDto);
-		return ResponseEntity.ok(updated);
+		storeMenuService.updateSortOrder(storeId, menuId, reqUpdateSortOrderDto);
+		return ResponseEntity.ok().build();
 	}
 
 	// 숨기기
 	@PatchMapping("/{menuId}/visibility")
-	public ResponseEntity<ResStoreMenuDto> updateVisibility(
+	public ResponseEntity<Void> updateVisibility(
 		@PathVariable UUID storeId,
 		@PathVariable UUID menuId,
 		@RequestBody ReqUpdateVisibilityDto reqUpdateVisibilityDto
 	) {
-		ResStoreMenuDto updated = storeMenuService.updateVisibility(storeId, menuId, reqUpdateVisibilityDto);
-		return ResponseEntity.ok(updated);
+		storeMenuService.updateVisibility(storeId, menuId, reqUpdateVisibilityDto);
+		return ResponseEntity.ok().build();
 	}
 
 	@DeleteMapping("/{menuId}")
