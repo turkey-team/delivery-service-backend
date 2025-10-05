@@ -40,7 +40,7 @@ public class SidoService {
 			throw new RegionDuplicateRequestException("요청에 중복된 시/도 이름이 포함되어 있습니다.");
 		}
 
-		if (sidoRepository.existsByNameInAndDeletedAtIsNull(names)) {
+		if (sidoRepository.existsByNameInCustom(names)) {
 			log.warn("시/도 지역 이름 중복");
 			throw new RegionAlreadyExistsException("이미 존재하는 시/도 이름이 포함되어 있습니다.");
 		}
@@ -55,7 +55,7 @@ public class SidoService {
 			throw new RegionDuplicateRequestException("요청에 중복된 시/도 코드가 포함되어 있습니다.");
 		}
 
-		if (sidoRepository.existsByCodeInAndDeletedAtIsNull(codes)) {
+		if (sidoRepository.existsByCodeInCustom(codes)) {
 			log.warn("시/도 지역 코드 중복");
 			throw new RegionAlreadyExistsException("이미 존재하는 시/도 코드가 포함되어 있습니다.");
 		}
@@ -76,7 +76,7 @@ public class SidoService {
 	// 시·도 목록 조회
 	@Transactional(readOnly = true)
 	public List<ResReadSidoDto> getAllSido() {
-		return sidoRepository.findAllByDeletedAtIsNull().stream()
+		return sidoRepository.findAllCustom().stream()
 			.map(ResReadSidoDto::from)
 			.toList();
 	}
@@ -84,17 +84,17 @@ public class SidoService {
 	// 시·도 수정
 	@Transactional
 	public ResUpdateSidoDto updateSido(UUID sidoId, ReqUpdateSidoDto requestDto) {
-		Sido sido = sidoRepository.findByIdAndDeletedAtIsNull(sidoId).orElseThrow(() -> {
+		Sido sido = sidoRepository.findByIdCustom(sidoId).orElseThrow(() -> {
 			log.warn("시/도 지역 검색 실패");
 			return new RegionNotFoundException("존재하지 않는 시/도입니다.");
 		});
 
-		if (sidoRepository.existsByNameAndIdNotAndDeletedAtIsNull(requestDto.getName(), sidoId)) {
+		if (sidoRepository.existsByNameAndIdNotCustom(requestDto.getName(), sidoId)) {
 			log.warn("시/도 지역 이름 중복");
 			throw new RegionAlreadyExistsException("이미 존재하는 시/도 이름입니다.");
 		}
 
-		if (sidoRepository.existsByCodeAndIdNotAndDeletedAtIsNull(requestDto.getCode(), sidoId)) {
+		if (sidoRepository.existsByCodeAndIdNotCustom(requestDto.getCode(), sidoId)) {
 			log.warn("시/도 지역 코드 중복");
 			throw new RegionAlreadyExistsException("이미 존재하는 시/도 코드입니다.");
 		}
@@ -107,7 +107,7 @@ public class SidoService {
 	// 시·도 삭제
 	@Transactional
 	public void deleteSido(UUID sidoId, Long loginUserId) {
-		Sido sido = sidoRepository.findByIdAndDeletedAtIsNull(sidoId).orElseThrow(() -> {
+		Sido sido = sidoRepository.findByIdCustom(sidoId).orElseThrow(() -> {
 			log.warn("시/도 지역 검색 실패");
 			return new RegionNotFoundException("존재하지 않는 시/도입니다.");
 		});

@@ -33,7 +33,7 @@ public class DongService {
 	// 동 생성
 	@Transactional
 	public List<ResCreateDongDto> createDongs(UUID sigunguId, List<ReqCreateDongDto> requestDtoList) {
-		Sigungu sigungu = sigunguRepository.findByIdAndDeletedAtIsNull(sigunguId).orElseThrow(() -> {
+		Sigungu sigungu = sigunguRepository.findByIdCustom(sigunguId).orElseThrow(() -> {
 			log.warn("시/군/구 지역 검색 실패");
 			return new RegionNotFoundException("존재하지 않는 시/군/구입니다.");
 		});
@@ -48,7 +48,7 @@ public class DongService {
 			throw new RegionDuplicateRequestException("요청에 중복된 시/도 이름이 포함되어 있습니다.");
 		}
 
-		if (dongRepository.existsByNameInAndSigunguAndDeletedAtIsNull(names, sigungu)) {
+		if (dongRepository.existsByNameInAndSigunguCustom(names, sigungu)) {
 			log.warn("동 지역 이름 중복");
 			throw new RegionAlreadyExistsException("이미 존재하는 동 이름이 포함되어 있습니다.");
 		}
@@ -62,7 +62,7 @@ public class DongService {
 			throw new RegionDuplicateRequestException("요청에 중복된 시/도 코드가 포함되어 있습니다.");
 		}
 
-		if (dongRepository.existsByCodeInAndDeletedAtIsNull(codes)) {
+		if (dongRepository.existsByCodeInCustom(codes)) {
 			log.warn("동 지역 코드 중복");
 			throw new RegionAlreadyExistsException("이미 존재하는 동 코드가 포함되어 있습니다.");
 		}
@@ -83,12 +83,12 @@ public class DongService {
 
 	// 동 목록 조회
 	public List<ResReadDongDto> getAllDong(UUID sigunguId) {
-		Sigungu sigungu = sigunguRepository.findByIdAndDeletedAtIsNull(sigunguId).orElseThrow(() -> {
+		Sigungu sigungu = sigunguRepository.findByIdCustom(sigunguId).orElseThrow(() -> {
 			log.warn("시/군/구 지역 검색 실패");
 			return new EntityNotFoundException("존재하지 않는 시/군/구입니다.");
 		});
 
-		return dongRepository.findAllBySigunguAndDeletedAtIsNull(sigungu).stream()
+		return dongRepository.findAllBySigunguCustom(sigungu).stream()
 			.map(ResReadDongDto::from)
 			.toList();
 	}
@@ -96,23 +96,22 @@ public class DongService {
 	// 동 수정
 	@Transactional
 	public ResUpdateDongDto updateDong(UUID sigunguId, UUID dongId, ReqCreateDongDto requestDto) {
-		Sigungu sigungu = sigunguRepository.findByIdAndDeletedAtIsNull(sigunguId).orElseThrow(() -> {
+		Sigungu sigungu = sigunguRepository.findByIdCustom(sigunguId).orElseThrow(() -> {
 			log.warn("시/군/구 지역 검색 실패");
 			return new RegionNotFoundException("존재하지 않는 시/군/구입니다.");
 		});
 
-		Dong dong = dongRepository.findByIdAndSigunguAndDeletedAtIsNull(dongId, sigungu).orElseThrow(() -> {
+		Dong dong = dongRepository.findByIdAndSigunguCustom(dongId, sigungu).orElseThrow(() -> {
 			log.warn("동 지역 검색 실패");
 			return new RegionNotFoundException("존재하지 않는 동입니다.");
 		});
 
-		if (dongRepository.existsByNameAndSigunguAndIdNotAndDeletedAtIsNull(requestDto.getName(), sigungu,
-			dong.getId())) {
+		if (dongRepository.existsByNameAndSigunguAndIdNotCustom(requestDto.getName(), sigungu, dong.getId())) {
 			log.warn("동 지역 이름 중복");
 			throw new RegionAlreadyExistsException("이미 존재하는 동 이름입니다.");
 		}
 
-		if (dongRepository.existsByCodeAndIdNotAndDeletedAtIsNull(requestDto.getCode(), dong.getId())) {
+		if (dongRepository.existsByCodeAndIdNotCustom(requestDto.getCode(), dong.getId())) {
 			log.warn("동 지역 코드 중복");
 			throw new RegionAlreadyExistsException("이미 존재하는 동 코드입니다.");
 		}
@@ -125,12 +124,12 @@ public class DongService {
 	// 동 삭제
 	@Transactional
 	public void deleteDong(UUID sigunguId, UUID dongId, Long loginUserId) {
-		Sigungu sigungu = sigunguRepository.findByIdAndDeletedAtIsNull(sigunguId).orElseThrow(() -> {
+		Sigungu sigungu = sigunguRepository.findByIdCustom(sigunguId).orElseThrow(() -> {
 			log.warn("시/군/구 지역 검색 실패");
 			return new RegionNotFoundException("존재하지 않는 시/군/구입니다.");
 		});
 
-		Dong dong = dongRepository.findByIdAndSigunguAndDeletedAtIsNull(dongId, sigungu).orElseThrow(() -> {
+		Dong dong = dongRepository.findByIdAndSigunguCustom(dongId, sigungu).orElseThrow(() -> {
 			log.warn("동 지역 검색 실패");
 			return new RegionNotFoundException("존재하지 않는 동입니다.");
 		});
