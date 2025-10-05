@@ -1,6 +1,5 @@
 package com.sparta.delivery.backend.security.config;
 
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -27,7 +26,8 @@ public class WebSecurityConfig {
 	private final UserDetailsServiceImpl userDetailsService;
 	private final AuthenticationConfiguration authenticationConfiguration;
 
-	public WebSecurityConfig(JwtUtil jwtUtil, UserDetailsServiceImpl userDetailsService, AuthenticationConfiguration authenticationConfiguration) {
+	public WebSecurityConfig(JwtUtil jwtUtil, UserDetailsServiceImpl userDetailsService,
+		AuthenticationConfiguration authenticationConfiguration) {
 		this.jwtUtil = jwtUtil;
 		this.userDetailsService = userDetailsService;
 		this.authenticationConfiguration = authenticationConfiguration;
@@ -61,21 +61,25 @@ public class WebSecurityConfig {
 		);
 
 		http.authorizeHttpRequests((authorizeHttpRequests) ->
-			authorizeHttpRequests
-				.requestMatchers("/error").permitAll()
-				.requestMatchers("/h2/**").permitAll()
-				.requestMatchers("/v1/customers").permitAll()
-				//TODO: 추후 개발 완성전 manager등록 API 필터 거치도록 변경
-				.requestMatchers("/v1/managers").permitAll()
-				.requestMatchers("/v1/owners").permitAll()
-				.requestMatchers("/v1/auth/login").permitAll()
-				.requestMatchers("/v1/auth/logout").authenticated()
-				.anyRequest().authenticated() // 그 외 모든 요청 인증처리
-		)
+				authorizeHttpRequests
+					.requestMatchers("/error").permitAll()
+					.requestMatchers("/h2/**").permitAll()
+					.requestMatchers("/v1/customers").permitAll()
+					//TODO: 추후 개발 완성전 manager등록 API 필터 거치도록 변경
+					.requestMatchers("/v1/managers").permitAll()
+					.requestMatchers("/v1/owners").permitAll()
+					.requestMatchers("/v1/auth/login").permitAll()
+					.requestMatchers("/v1/auth/logout").authenticated()
+					// Swagger UI
+					.requestMatchers("/swagger-ui/**").permitAll()
+					.requestMatchers("/swagger-resources/**").permitAll()
+					.requestMatchers("/v3/api-docs/**").permitAll()
+					.anyRequest().authenticated() // 그 외 모든 요청 인증처리
+			)
 
-		.headers(headers -> headers
-			.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable)
-		);
+			.headers(headers -> headers
+				.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable)
+			);
 
 		http.addFilterBefore(jwtAuthorizationFilter(), JwtAuthenticationFilter.class);
 		http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
