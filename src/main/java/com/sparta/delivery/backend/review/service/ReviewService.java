@@ -20,8 +20,8 @@ import com.sparta.delivery.backend.order.repository.OrderRepository;
 import com.sparta.delivery.backend.owner.entity.Owner;
 import com.sparta.delivery.backend.reply.service.ReplyService;
 import com.sparta.delivery.backend.review.dto.ReqCreateReviewDto;
-import com.sparta.delivery.backend.review.dto.ReqDeleteReviewDto;
 import com.sparta.delivery.backend.review.dto.ReqUpdateReviewDto;
+import com.sparta.delivery.backend.review.dto.ResDeleteReviewDto;
 import com.sparta.delivery.backend.review.dto.ResResultReviewDto;
 import com.sparta.delivery.backend.review.dto.ResViewReviewDto;
 import com.sparta.delivery.backend.review.entity.Review;
@@ -167,7 +167,7 @@ public class ReviewService {
 		cacheManager = "reviewCacheManager"
 	)*/
 	@Transactional
-	public ReqDeleteReviewDto deleteReview(UUID reviewId, Long userId) {
+	public ResDeleteReviewDto deleteReview(UUID reviewId, Long userId) {
 		Review review = reviewRepository.findById(reviewId)
 			.orElseThrow(() -> new NoSuchElementException("해당 리뷰를 찾을 수 없습니다."));
 
@@ -185,7 +185,7 @@ public class ReviewService {
 		store.deleteReview(review.getRate());
 		evictReviewCache(store.getId());
 
-		return ReqDeleteReviewDto.of(review);
+		return ResDeleteReviewDto.of(review);
 	}
 
 }
