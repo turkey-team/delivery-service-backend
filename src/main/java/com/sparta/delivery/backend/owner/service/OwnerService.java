@@ -24,7 +24,7 @@ public class OwnerService {
 	private final PasswordEncoder passwordEncoder;
 	private final EmailVerificationTokenValidator emailVerificationTokenValidator;
 
-	//TODO: 1. 사업자 등록번호 검증, 2. 이메일 인증
+	//TODO: 1. 사업자 등록번호 검증
 	@Transactional
 	public void createOwner(ReqCreateOwnerDto requestDto) {
 		//같은 메일로 다른 사용자 요청 가능하도록 할지 정책 결정필요
@@ -37,7 +37,7 @@ public class OwnerService {
 		User user = User.builder()
 			.username(requestDto.getUsername())
 			.password(passwordEncoder.encode(requestDto.getPassword()))
-			.role(UserRoleEnum.CUSTOMER)
+			.role(UserRoleEnum.OWNER)
 			.build();
 		Owner owner = Owner.builder()
 			.user(user)
