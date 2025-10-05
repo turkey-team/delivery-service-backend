@@ -19,6 +19,7 @@ import com.sparta.delivery.backend.category.dto.ResGetListCategoryDto;
 import com.sparta.delivery.backend.category.dto.ResUpdateCategoryDto;
 import com.sparta.delivery.backend.category.entity.Category;
 import com.sparta.delivery.backend.category.repository.CategoryRepository;
+import com.sparta.delivery.backend.store.repository.StoreCategoryRepository;
 import com.sparta.delivery.backend.user.entity.User;
 import com.sparta.delivery.backend.user.entity.UserRoleEnum;
 
@@ -29,6 +30,7 @@ import lombok.RequiredArgsConstructor;
 public class CategoryService {
 
 	private final CategoryRepository categoryRepository;
+	private final StoreCategoryRepository storeCategoryRepository;
 
 	@Transactional
 	public ResCreateCategoryDto createCategory(String name, User user) {
@@ -114,6 +116,12 @@ public class CategoryService {
 		checkUserRole(user);
 
 		Category category = categoryRepository.findById(categoryId).orElseThrow(()->new IllegalArgumentException("해당 카테고리가 존재하지 않습니다"));
+
+		boolean isUsed = storeCategoryRepository.existsByCategoryIdAndDeletedAtIsNull(categoryId);
+
+		if (isUsed) {
+			throw new IllegalArgumentException("현재 사용중인 카테고리는 삭제할 수 없습니다.");
+		}
 
 		category.softDelete(user.getId());
 		categoryRepository.save(category);
