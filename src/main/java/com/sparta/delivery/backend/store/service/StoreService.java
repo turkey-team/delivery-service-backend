@@ -22,7 +22,6 @@ import com.sparta.delivery.backend.category.entity.Category;
 import com.sparta.delivery.backend.category.repository.CategoryRepository;
 import com.sparta.delivery.backend.image.entity.Image;
 import com.sparta.delivery.backend.image.repository.ImageRepository;
-import com.sparta.delivery.backend.manager.entity.Manager;
 import com.sparta.delivery.backend.owner.entity.Owner;
 import com.sparta.delivery.backend.owner.repository.OwnerRepository;
 import com.sparta.delivery.backend.region.entity.Dong;
@@ -72,13 +71,16 @@ public class StoreService {
 	public ResCreateStoreDto createStore(ReqCreateStoreDto requestDto , User user) {
 
 		// 1. Owner 검증
-
-		if (user.getRole() != UserRoleEnum.OWNER){
+		if (user.getRole() != UserRoleEnum.OWNER && user.getRole() != UserRoleEnum.MANAGER){
 			throw new AccessDeniedException("가게 생성 권한이 없습니다");
 		}
 
 		//Owner 조회
 		Owner owner = ownerRepository.findByUser_PublicId(user.getPublicId());
+
+		if (owner == null && user.getRole() == UserRoleEnum.MANAGER){
+			owner = ownerRepository.findById(requestDto.getOwnerId()).orElse(null);
+		}
 
 		// Region Dong 조회
 		Dong dong = dongRepository.findByCode(requestDto.getRegionCode());
@@ -176,7 +178,7 @@ public class StoreService {
 		Store store = storeRepository.findById(storeId).orElseThrow(()-> new IllegalArgumentException("존재하지 않는 가게입니다."));
 		StoreDetails storeDetails = storeDetailsRepository.findByStoreId(storeId).orElseThrow(()-> new IllegalArgumentException("존재하지 않는 가게입니다."));
 
-		checkUserIsOwner(user, store);
+		checkUserRole(user,store);
 
 		Dong dong = dongRepository.findByCode(requestDto.getRegionDong());
 
@@ -336,9 +338,7 @@ public class StoreService {
 		StoreDetails storeDetails = storeDetailsRepository.findByStoreId(storeId).orElseThrow(()-> new IllegalArgumentException("존재하지 않는 가게입니다."));
 
 		// Role 검증
-		List<Manager> managers = store.getManagers();
-
-		checkUserRole(user,store,managers);
+		checkUserRole(user,store);
 
 		// 검증 완료
 
@@ -393,6 +393,13 @@ public class StoreService {
 
 	}
 
+	/**
+	 *
+	 * @param storeId 수정할 가게
+	 * @param requestDto 수정할 상태(OPEN, CLOSED, READY)
+	 * @param user 로그인한 유저
+	 * @return
+	 */
 	@Transactional
 	public ResUpdateStoreStatusDto updateStoreStatus(UUID storeId, @Valid ReqUpdateStoreStatusDto requestDto, User user) {
 
@@ -400,8 +407,7 @@ public class StoreService {
 		Store store = storeRepository.findById(storeId).orElseThrow(()-> new IllegalArgumentException("존재하지 않는 가게입니다."));
 
 		// Role 검증
-		List<Manager> managers = store.getManagers();
-		checkUserRole(user,store,managers);
+		checkUserRole(user,store);
 
 		// 현재 Status와 비교
 		StoreStatusEnum currentStatus = store.getStatus();
@@ -418,13 +424,21 @@ public class StoreService {
 
 	}
 
+	/**
+	 *
+	 * @param storeId 삭제할 가게ID
+	 * @param requestDto 사업자번호
+	 * @param user 로그인유저
+	 * @return
+	 */
 	@Transactional
 	public ResDeleteStoreDto deleteStore(UUID storeId, @Valid ReqDeleteStoreDto requestDto, User user) {
 
 		Store store = storeRepository.findById(storeId).orElseThrow(()-> new IllegalArgumentException("존재하지 않는 가게입니다."));
 		StoreDetails storeDetails = storeDetailsRepository.findByStoreId(storeId).orElseThrow(()-> new IllegalArgumentException("존재하지 않는 가게입니다."));
 
-		checkUserIsOwner(user, store);
+		// Role 검증
+		checkUserRole(user,store);
 
 		// 사업자번호 동일한지 검증
 		boolean isRightBN = requestDto.getBusinessNumber().equals(storeDetails.getBusinessNumber());
@@ -450,7 +464,7 @@ public class StoreService {
 
 	/**
 	 * Image 테이블 저장
-	 * @param urls
+	 * @param urls 이미지URL
 	 * @return
 	 */
 	public List<Image> saveImages(List<String> urls) {
@@ -470,9 +484,9 @@ public class StoreService {
 
 	/**
 	 * StoreImage 테이블 저장
-	 * @param images
-	 * @param store
-	 * @param status STORE, BUSINESS
+	 * @param images 저장할 이미지
+	 * @param store 가게
+	 * @param status 이미지 타입 : STORE, BUSINESS
 	 */
 	public void saveStoreImages(List<Image> images, Store store, StoreImageStatusEnum status) {
 
@@ -487,8 +501,8 @@ public class StoreService {
 
 	/**
 	 * StoreCategory 저장
-	 * @param newCategories
-	 * @param store
+	 * @param newCategories 신규 추가 카테고리
+	 * @param store 가게
 	 */
 	public void saveStoreCategories(List<Category> newCategories, Store store) {
 		List<StoreCategory> storeCategories = new ArrayList<>();
@@ -508,13 +522,12 @@ public class StoreService {
 
 	/**
 	 * Owner || Manager 검증
-	 * @param user
-	 * @param store
-	 * @param managers
+	 * @param user 로그인한 유저
+	 * @param store 가게정보
 	 */
-	public void checkUserRole(User user, Store store, List<Manager> managers) {
+	public void checkUserRole(User user, Store store) {
 
-		boolean IsManger = managers != null && managers.stream().anyMatch(manager ->  manager.getUser().getId().equals(user.getId()));
+		boolean IsManger = (user.getRole() == UserRoleEnum.MANAGER)?true:false;
 		boolean IsOwner = store.getOwner().getUser().getId().equals(user.getId());
 
 		// 가게 Owner || Manager가 아니면 수정 불가
@@ -523,16 +536,5 @@ public class StoreService {
 		}
 	}
 
-	/**
-	 * 가게 Owner 검증
-	 * @param user
-	 * @param store
-	 */
-	public void checkUserIsOwner(User user, Store store) {
-		boolean IsOwner = store.getOwner().getUser().getId().equals(user.getId());
-		if (!IsOwner) {
-			throw new AccessDeniedException("소유주가 아니면 가게 정보를 수정할 수 없습니다");
-		}
-	}
 }
 

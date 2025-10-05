@@ -48,6 +48,8 @@ public class ReqCreateStoreDto {
 		// business : 사업자등록증
 	}
 
+	private UUID ownerId;
+
 	//details
 	private String description;
 	@NotBlank(message = "영업시간을 설정해주세요.")

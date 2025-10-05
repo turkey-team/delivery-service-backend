@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,7 +20,7 @@ import com.sparta.delivery.backend.category.dto.ResUpdateCategoryDto;
 import com.sparta.delivery.backend.category.entity.Category;
 import com.sparta.delivery.backend.category.repository.CategoryRepository;
 import com.sparta.delivery.backend.user.entity.User;
-
+import com.sparta.delivery.backend.user.entity.UserRoleEnum;
 
 import lombok.RequiredArgsConstructor;
 
@@ -32,10 +33,8 @@ public class CategoryService {
 	@Transactional
 	public ResCreateCategoryDto createCategory(String name, User user) {
 
-		//MASTER권한확인
-		// if (!(user.getRole()== UserRoleEnum.MASTER)){
-		// 	throw new IllegalArgumentException("권한이없습니다");
-		// }
+		//권한확인
+		checkUserRole(user);
 
 		boolean flag = checkExistCategory(name);
 
@@ -53,6 +52,9 @@ public class CategoryService {
 
 	@Transactional
 	public ResUpdateCategoryDto updateCategory(UUID id, String name, User user) {
+
+		//권한확인
+		checkUserRole(user);
 
 		Category category = categoryRepository.findById(id).orElseThrow(()->new IllegalArgumentException("해당 카테고리가 존재하지 않습니다."));
 
@@ -108,6 +110,9 @@ public class CategoryService {
 	@Transactional
 	public ResDeleteCategoryDto deleteCategory(UUID categoryId, User user) {
 
+		//권한확인
+		checkUserRole(user);
+
 		Category category = categoryRepository.findById(categoryId).orElseThrow(()->new IllegalArgumentException("해당 카테고리가 존재하지 않습니다"));
 
 		category.softDelete(user.getId());
@@ -141,6 +146,17 @@ public class CategoryService {
 
 	public boolean checkExistCategory(String categoryName){
 		return categoryRepository.existsByName(categoryName);
+	}
+
+	public void checkUserRole(User user) {
+
+		boolean IsManger = (user.getRole() == UserRoleEnum.MANAGER)?true:false;
+		//boolean IsMaster = (user.getRole() == UserRoleEnum.MASTER)?true:false;
+
+		// Master, Manager가 아니면 권한없음
+		if (!(IsManger /*|| IsMaster*/)) {
+			throw new AccessDeniedException("권한이 없습니다.");
+		}
 	}
 
 }

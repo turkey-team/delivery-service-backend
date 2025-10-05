@@ -1,6 +1,5 @@
 package com.sparta.delivery.backend.category.controller;
 
-import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -35,7 +34,7 @@ public class CategoryController {
 	private final CategoryService categoryService;
 
 	/**
-	 *
+	 * 카테고리 생성
 	 * @param reqCreateCategoryDto 카테고리 이름
 	 * @param userDetails 로그인 유저
 	 * @return 생성한 카테고리
@@ -45,11 +44,25 @@ public class CategoryController {
 	 	return categoryService.createCategory(reqCreateCategoryDto.getName(), userDetails.getUser());
 	}
 
+	/**
+	 * 카테고리 단건조회
+	 * @param categoryId
+	 * @return
+	 */
 	@GetMapping("/categories/{categoryId}")
 	public ResGetCategoryDto getCategory(@PathVariable UUID categoryId){
 		return categoryService.getCategory(categoryId);
 	}
 
+	/**
+	 * 카테고리 페이징, 키워드 검색
+	 * @param userDetails
+	 * @param keyword
+	 * @param size
+	 * @param sort
+	 * @param page
+	 * @return
+	 */
 	@GetMapping("/categories")
 	public Page<ResGetListCategoryDto> getCategories(@AuthenticationPrincipal UserDetailsImpl userDetails,
 														@RequestParam(required = false, defaultValue = "") String keyword,
@@ -61,7 +74,7 @@ public class CategoryController {
 	}
 
 	/**
-	 *
+	 * 카테고리 수정
 	 * @param categoryId
 	 * @param reqUpdateCategoryDto
 	 * @param userDetails
@@ -72,9 +85,16 @@ public class CategoryController {
 		return categoryService.updateCategory(categoryId, reqUpdateCategoryDto.getName(), userDetails.getUser());
 	}
 
+	/**
+	 * 카테고리 삭제
+	 * @param categoryId
+	 * @param userDetails
+	 * @return
+	 */
 	@DeleteMapping("/categories/{categoryId}")
 	public ResDeleteCategoryDto deleteCategory(@PathVariable UUID categoryId, @AuthenticationPrincipal UserDetailsImpl userDetails){
 		return categoryService.deleteCategory(categoryId, userDetails.getUser());
 	}
+
 
 }

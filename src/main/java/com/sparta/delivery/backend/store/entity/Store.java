@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.sparta.delivery.backend.common.BaseEntity;
 import com.sparta.delivery.backend.image.entity.Image;
-import com.sparta.delivery.backend.manager.entity.Manager;
 import com.sparta.delivery.backend.owner.entity.Owner;
 import com.sparta.delivery.backend.region.entity.Dong;
 import com.sparta.delivery.backend.store.dto.ReqUpdateStoreInfoDto;
@@ -68,9 +67,6 @@ public class Store extends BaseEntity {
 
 	@Column(name = "phone_number")
 	private String phoneNumber;
-
-	@OneToMany(mappedBy = "store", fetch = FetchType.LAZY)
-	private List<Manager> managers = new ArrayList<>();
 
 	public void addReview(int rate) {
 		this.reviewRate = (this.reviewRate * this.reviewCnt + rate) / (this.reviewCnt + 1);
