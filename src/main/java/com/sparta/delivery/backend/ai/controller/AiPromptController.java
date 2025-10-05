@@ -24,9 +24,9 @@ import lombok.RequiredArgsConstructor;
 public class AiPromptController {
 
 	private final AiPromptService aiPromptService;
-	
+
 	@PostMapping
-	@PreAuthorize("hasRole('OWNER')")
+	@PreAuthorize("isAuthenticated() && hasRole('OWNER')")
 	public ResponseEntity<ResCreateAiPromptDto> createAiPrompt(@Valid @RequestBody ReqCreateAiPromptDto requestDto) {
 		ResCreateAiPromptDto responseDto = aiPromptService.createAiPrompt(requestDto);
 
@@ -34,7 +34,7 @@ public class AiPromptController {
 	}
 
 	@GetMapping
-	@PreAuthorize("hasRole('MANAGER')")
+	@PreAuthorize("isAuthenticated() && hasRole('MANAGER')")
 	public ResponseEntity<Page<ResReadAiPromptDto>> getAllAiPrompt(Pageable pageable) {
 		Page<ResReadAiPromptDto> responseDtoList = aiPromptService.getAllAiPrompts(pageable);
 
