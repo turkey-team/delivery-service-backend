@@ -1,8 +1,8 @@
 package com.sparta.delivery.backend.review.service;
 
-//@SpringBootTest
-//@ActiveProfiles("test")
-//@EnableAsync
+/*@SpringBootTest
+@ActiveProfiles("test")
+@EnableAsync*/
 public class ReviewRedisCacheTest {
 
 	/*@Autowired
@@ -69,7 +69,7 @@ public class ReviewRedisCacheTest {
 		Review review = Review.builder()
 			.customer(customer)
 			.store(store)
-			.context("내용")
+			.context("짬뽕")
 			.rate(5)
 			.imageUrl(null)
 			.build();
@@ -77,7 +77,7 @@ public class ReviewRedisCacheTest {
 		Review review2 = Review.builder()
 			.customer(customer)
 			.store(store)
-			.context("내용2")
+			.context("짜장면")
 			.rate(4)
 			.imageUrl(null)
 			.build();
@@ -121,6 +121,44 @@ public class ReviewRedisCacheTest {
 		} else {
 			System.out.println("[" + stage + "] 캐시 존재 → key=" + key + ", value=" + wrapper.get());
 		}
+	}
+
+	@Test
+	void cacheableTest_sortByRateDescAndCreatedAtAsc() {
+		Cache cache = cacheManager.getCache("reviewList");
+		assertNotNull(cache);
+
+		String key = "review:store:" + storeId;
+
+		ReviewRepositorySearchConditionDto condition = new ReviewRepositorySearchConditionDto();
+		condition.setContext("");
+
+		// rate 내림차순, createdAt 오름차순 정렬
+		Pageable pageableWithSort = PageRequest.of(
+			0,
+			10,
+			Sort.by(
+				Sort.Order.asc("rate"),      // rate 내림차순
+				Sort.Order.asc("createdAt")   // createdAt 오름차순
+			)
+		);
+
+		Page<ResViewReviewDto> result = reviewService.getReviews(storeId, condition, pageableWithSort);
+
+		for (ResViewReviewDto reviewDto : result) {
+			System.out.println("reviewDto = " + reviewDto);
+		}
+
+		// 정렬 확인 (rate 내림차순 먼저)
+		assertEquals(4, result.getContent().get(0).getRate());
+		assertEquals(5, result.getContent().get(1).getRate());
+
+		// 캐시 확인
+		Cache.ValueWrapper cachedWrapper = cache.get(key);
+		assertNotNull(cachedWrapper, "캐시에 데이터가 저장되어야 함");
+
+		System.out.println("캐시 key: " + key);
+		System.out.println("캐시 값: " + cachedWrapper.get());
 	}
 
 	// 리뷰 등록 수정 삭제 + Cache Evict 적용 테스트
@@ -177,7 +215,7 @@ public class ReviewRedisCacheTest {
 		assertNull(cache.get(key), "리뷰 수정 후 캐시는 무효화되어야 함");
 
 		// 리뷰 삭제 → 캐시 무효화 확인
-		ReqDeleteReviewDto reqDeleteReviewDto = reviewService.deleteReview(review.getId(), userId);
+		ResDeleteReviewDto reqDeleteReviewDto = reviewService.deleteReview(review.getId(), userId);
 		System.out.println("삭제된 리뷰 = " + reqDeleteReviewDto);
 		printCacheStatus(cache, key, "리뷰 삭제 후 캐시");
 		assertNull(cache.get(key), "리뷰 삭제 후 캐시는 무효화되어야 함");
