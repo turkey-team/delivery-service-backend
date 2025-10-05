@@ -17,7 +17,6 @@ public class ReqCreateStoreMenuDto {
 	설명
 	준비 시간
 	재고 상태
-	메뉴 순서
 	숨김 상태
 	 */
 	private String name;
@@ -26,6 +25,5 @@ public class ReqCreateStoreMenuDto {
 	private String description;
 	private String prepTime;
 	private StockStatus stockStatus;
-	private int sortOrder;
-	private Boolean isHidden; // 체크박스로 정보가 넘어오기때문에 true false 를 instant 로 변환처리
+	private Boolean isHidden; // 숨기기 체크박스
 }

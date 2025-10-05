@@ -17,8 +17,6 @@ public class ReqUpdateStoreMenuDto {
 	설명
 	준비 시간
 	재고 상태
-	메뉴 순서
-	숨김 상태
 	 */
 	private String name;
 	private String imageUrl;

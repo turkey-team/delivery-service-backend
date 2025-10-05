@@ -1,6 +1,5 @@
 package com.sparta.delivery.backend.store.menu.service;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -8,7 +7,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,8 +19,6 @@ import com.sparta.delivery.backend.store.menu.dto.ReqUpdateSortOrderDto;
 import com.sparta.delivery.backend.store.menu.dto.ReqUpdateStoreMenuDto;
 import com.sparta.delivery.backend.store.menu.dto.ReqUpdateVisibilityDto;
 import com.sparta.delivery.backend.store.menu.dto.ResStoreMenuDto;
-import com.sparta.delivery.backend.store.menu.dto.ResUpdateSortOrderDto;
-import com.sparta.delivery.backend.store.menu.dto.ResUpdateVisibilityDto;
 import com.sparta.delivery.backend.store.menu.entity.StoreMenu;
 import com.sparta.delivery.backend.store.menu.repository.StoreMenuRepository;
 import com.sparta.delivery.backend.store.repository.StoreRepository;
@@ -40,7 +36,7 @@ public class StoreMenuService {
 	private final ImageRepository imageRepository;
 	private final UserRepository userRepository;
 
-	// 생성
+	/** 생성 **/
 	@Transactional
 	public void createStoreMenu(
 		UUID storeId,
@@ -66,7 +62,7 @@ public class StoreMenuService {
 		storeMenuRepository.save(storeMenu);
 	}
 
-	// 조회
+	/** 조회 **/
 	// 단일 메뉴 조회 (세부)
 	@Transactional(readOnly = true)
 	public ResStoreMenuDto getStoreMenuByStoreMenuId(
@@ -93,9 +89,9 @@ public class StoreMenuService {
 		return storeMenuList.map(ResStoreMenuDto::new);
 	}
 
-	// 수정
+	/** 수정 **/
 	@Transactional
-	public ResponseEntity<Void> updateStoreMenu(
+	public ResStoreMenuDto updateStoreMenu(
 		UUID storeId,
 		UUID menuId,
 		ReqUpdateStoreMenuDto reqUpdateStoreMenuDto
@@ -108,11 +104,11 @@ public class StoreMenuService {
 
 		storeMenu.updateStoreMenu(reqUpdateStoreMenuDto, image);
 
-		return ResponseEntity.noContent().build();
+		return new ResStoreMenuDto(storeMenu);
 	}
 
 	@Transactional
-	public ResUpdateSortOrderDto updateSortOrder(
+	public ResStoreMenuDto updateSortOrder(
 		UUID storeId,
 		UUID menuId,
 		ReqUpdateSortOrderDto reqUpdateSortOrderDto
@@ -149,11 +145,11 @@ public class StoreMenuService {
 		// 대상 메뉴 순서 변경
 		targetMenu.setSortOrder(targetSortOrder);
 
-		return new ResUpdateSortOrderDto(targetMenu);
+		return new ResStoreMenuDto(targetMenu);
 	}
 
 	@Transactional
-	public ResUpdateVisibilityDto updateVisibility(
+	public ResStoreMenuDto updateVisibility(
 		UUID storeId,
 		UUID menuId,
 		ReqUpdateVisibilityDto reqUpdateVisibilityDto
@@ -163,10 +159,10 @@ public class StoreMenuService {
 
 		storeMenu.setHiddenAt(reqUpdateVisibilityDto.isHidden());
 
-		return new ResUpdateVisibilityDto(storeMenu);
+		return new ResStoreMenuDto(storeMenu);
 	}
 
-	// 삭제
+	/** 삭제 **/
 	@Transactional
 	public void deleteStoreMenu(UUID storeId, UUID menuId) {
 		StoreMenu storeMenu = findStoreMenu(storeId, menuId);
@@ -183,6 +179,8 @@ public class StoreMenuService {
 		// 남은 메뉴들 순서 재정렬
 		reorderSortOrder(storeId);
 	}
+
+
 
 	/** 삭제 시 재정렬 **/
 	// 메뉴 삭제 시 모든 메뉴 순서 1부터 오름차순 재배치

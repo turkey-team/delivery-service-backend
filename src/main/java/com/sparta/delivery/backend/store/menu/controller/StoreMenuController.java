@@ -21,8 +21,6 @@ import com.sparta.delivery.backend.store.menu.dto.ReqUpdateSortOrderDto;
 import com.sparta.delivery.backend.store.menu.dto.ReqUpdateStoreMenuDto;
 import com.sparta.delivery.backend.store.menu.dto.ReqUpdateVisibilityDto;
 import com.sparta.delivery.backend.store.menu.dto.ResStoreMenuDto;
-import com.sparta.delivery.backend.store.menu.dto.ResUpdateSortOrderDto;
-import com.sparta.delivery.backend.store.menu.dto.ResUpdateVisibilityDto;
 import com.sparta.delivery.backend.store.menu.service.StoreMenuService;
 
 import lombok.RequiredArgsConstructor;
@@ -35,7 +33,7 @@ public class StoreMenuController {
 	private final StoreMenuService storeMenuService;
 
 	@PostMapping
-	public ResponseEntity<Void> createStoreMenu(
+	public ResponseEntity<ResStoreMenuDto> createStoreMenu(
 		@PathVariable UUID storeId,
 		@RequestBody ReqCreateStoreMenuDto reqCreateStoreMenuDto
 	) {
@@ -64,34 +62,34 @@ public class StoreMenuController {
 
 	// 메뉴 정보 수정
 	@PutMapping("/{menuId}")
-	public ResponseEntity<Void> updateStoreMenu(
+	public ResponseEntity<ResStoreMenuDto> updateStoreMenu(
 		@PathVariable UUID storeId,
 		@PathVariable UUID menuId,
 		@RequestBody ReqUpdateStoreMenuDto reqUpdateStoreMenuDto
 	) {
-		storeMenuService.updateStoreMenu(storeId, menuId, reqUpdateStoreMenuDto);
-		return ResponseEntity.noContent().build();
+		ResStoreMenuDto updated = storeMenuService.updateStoreMenu(storeId, menuId, reqUpdateStoreMenuDto);
+		return ResponseEntity.ok(updated);
 	}
 
 	// 메뉴 순서 변경
 	@PatchMapping("/{menuId}/sort")
-	public ResponseEntity<ResUpdateSortOrderDto> updateSortOrder(
+	public ResponseEntity<ResStoreMenuDto> updateSortOrder(
 		@PathVariable UUID storeId,
 		@PathVariable UUID menuId,
 		@RequestBody ReqUpdateSortOrderDto reqUpdateSortOrderDto
 	) {
-		ResUpdateSortOrderDto updated = storeMenuService.updateSortOrder(storeId, menuId, reqUpdateSortOrderDto);
+		ResStoreMenuDto updated = storeMenuService.updateSortOrder(storeId, menuId, reqUpdateSortOrderDto);
 		return ResponseEntity.ok(updated);
 	}
 
 	// 숨기기
 	@PatchMapping("/{menuId}/visibility")
-	public ResponseEntity<ResUpdateVisibilityDto> updateVisibility(
+	public ResponseEntity<ResStoreMenuDto> updateVisibility(
 		@PathVariable UUID storeId,
 		@PathVariable UUID menuId,
 		@RequestBody ReqUpdateVisibilityDto reqUpdateVisibilityDto
 	) {
-		ResUpdateVisibilityDto updated = storeMenuService.updateVisibility(storeId, menuId, reqUpdateVisibilityDto);
+		ResStoreMenuDto updated = storeMenuService.updateVisibility(storeId, menuId, reqUpdateVisibilityDto);
 		return ResponseEntity.ok(updated);
 	}
 
