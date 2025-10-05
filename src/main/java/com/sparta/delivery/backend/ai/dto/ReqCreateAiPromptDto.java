@@ -2,11 +2,13 @@ package com.sparta.delivery.backend.ai.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 public class ReqCreateAiPromptDto {
 
 	@NotBlank(message = "요청 메세지가 비어있습니다.")
