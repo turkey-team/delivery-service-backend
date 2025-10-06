@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sparta.delivery.backend.common.BaseEntity;
+import com.sparta.delivery.backend.image.entity.Image;
 import com.sparta.delivery.backend.owner.entity.Owner;
 import com.sparta.delivery.backend.region.entity.Dong;
+import com.sparta.delivery.backend.store.dto.ReqUpdateStoreInfoDto;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -18,6 +20,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -84,4 +87,47 @@ public class Store extends BaseEntity {
 		}
 	}
 
+	@Builder
+	public Store(Owner owner, String name
+		, String addressDetails
+		, double reviewRate
+		, Integer minOrderPrice
+		, int deliveryFee
+		, Dong regionDong
+		, StoreStatusEnum status
+		, String phoneNumber)
+	{
+		this.owner = owner;
+		this.name = name;
+		this.addressDetails = addressDetails;
+		this.reviewRate = reviewRate;
+		this.minOrderPrice = minOrderPrice;
+		this.deliveryFee = deliveryFee;
+		this.regionDong = regionDong;
+		this.status = status;
+		this.phoneNumber = phoneNumber;
+	}
+
+	public StoreImage addImage(Store store, Image image, StoreImageStatusEnum status)
+	{
+		return StoreImage.builder().store(store).image(image).status(status).build();
+	}
+
+	public void updateStoreInfo(ReqUpdateStoreInfoDto requestDto, Dong dong){
+		this.name = requestDto.getStoreName();
+		this.addressDetails = requestDto.getAddressDetails();
+		this.phoneNumber = requestDto.getPhoneNumber();
+		this.addressDetails = requestDto.getAddressDetails();
+		this.regionDong = dong;
+	}
+
+	public void updateStoreDetails(int deliveryFee, Integer minOrderPrice) {
+		this.deliveryFee = deliveryFee;
+		this.minOrderPrice = minOrderPrice;
+	}
+
+	public void updateStoreStatus(StoreStatusEnum status)
+	{
+		this.status = status;
+	}
 }

@@ -7,4 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.sparta.delivery.backend.store.entity.StoreCategory;
 
 public interface StoreCategoryRepository extends JpaRepository<StoreCategory, UUID> {
+	boolean existsByCategoryIdAndDeletedAtIsNull(UUID categoryId);
 }
