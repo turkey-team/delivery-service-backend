@@ -45,7 +45,7 @@ public class ReplyController {
 	@ApiResponses({
 		@ApiResponse(responseCode = "200", description = "답글 조회 성공", content = @Content(
 			array = @ArraySchema(schema = @Schema(implementation = ResViewReplyDto.class)))),
-		@ApiResponse(responseCode = "401", description = "권한 없음"),
+		@ApiResponse(responseCode = "403", description = "권한 없음"),
 		@ApiResponse(responseCode = "404", description = "리뷰를 찾을 수 없음")
 	})
 	@PreAuthorize("hasAnyRole('OWNER', 'MANAGER')")
@@ -63,7 +63,7 @@ public class ReplyController {
 		@ApiResponse(responseCode = "200", description = "답글 작성 성공", content = @Content(
 			schema = @Schema(implementation = ResViewReplyDto.class))),
 		@ApiResponse(responseCode = "400", description = "잘못된 요청"),
-		@ApiResponse(responseCode = "401", description = "권한 없음"),
+		@ApiResponse(responseCode = "403", description = "권한 없음"),
 		@ApiResponse(responseCode = "404", description = "리뷰를 찾을 수 없음")
 	})
 	@PreAuthorize("hasAnyRole('OWNER', 'MANAGER')")
@@ -85,7 +85,7 @@ public class ReplyController {
 		@ApiResponse(responseCode = "200", description = "답글 수정 성공", content = @Content(
 			schema = @Schema(implementation = ResViewReplyDto.class))),
 		@ApiResponse(responseCode = "400", description = "잘못된 요청"),
-		@ApiResponse(responseCode = "401", description = "권한 없음"),
+		@ApiResponse(responseCode = "403", description = "권한 없음"),
 		@ApiResponse(responseCode = "404", description = "답글을 찾을 수 없음")
 	})
 	@PreAuthorize("hasAnyRole('OWNER', 'MANAGER')")
@@ -106,7 +106,7 @@ public class ReplyController {
 	@ApiResponses({
 		@ApiResponse(responseCode = "200", description = "답글 삭제 성공", content = @Content(
 			schema = @Schema(implementation = ResDeleteReplyDto.class))),
-		@ApiResponse(responseCode = "401", description = "권한 없음"),
+		@ApiResponse(responseCode = "403", description = "권한 없음"),
 		@ApiResponse(responseCode = "404", description = "답글을 찾을 수 없음")
 	})
 	@PreAuthorize("hasAnyRole('OWNER', 'MANAGER')")
