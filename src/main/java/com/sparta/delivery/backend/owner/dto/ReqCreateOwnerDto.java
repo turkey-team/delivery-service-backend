@@ -33,6 +33,9 @@ public class ReqCreateOwnerDto {
 
 	@Size(min = 12, max = 12, message = "사업자등록번호는 12자여야 합니다.")
 	private String businessNumber;
+
+	@NotBlank(message = "이메일 인증 토큰은 필수입니다.")
+	private String emailVerificationToken;
 }
 
 

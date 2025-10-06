@@ -28,6 +28,15 @@ public class GlobalExceptionHandler {
 		);
 	}
 
+	@ExceptionHandler({NotFoundException.class})
+	public ResponseEntity<ApiException> handleException(NotFoundException ex) {
+		ApiException apiException = new ApiException(ex.getMessage(), HttpStatus.NOT_FOUND.value());
+		return new ResponseEntity<>(
+			apiException,
+			HttpStatus.NOT_FOUND
+		);
+	}
+
 	@ExceptionHandler({HttpMessageNotReadableException.class})
 	public ResponseEntity<ApiException> handleException(HttpMessageNotReadableException ex) {
 		ApiException apiException = new ApiException("잘못된 JSON 형식입니다.", HttpStatus.BAD_REQUEST.value());
