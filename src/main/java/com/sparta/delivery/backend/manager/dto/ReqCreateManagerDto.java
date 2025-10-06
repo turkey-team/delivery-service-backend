@@ -29,4 +29,7 @@ public class ReqCreateManagerDto {
 
 	@Size(max = 20, message = "전화번호는 최대 20자까지 가능합니다.")
 	private String phoneNumber;
+
+	@NotBlank(message = "이메일 인증 토큰은 필수입니다.")
+	private String emailVerificationToken;
 }

@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sparta.delivery.backend.global.excpetion.DuplicateUsernameException;
+import com.sparta.delivery.backend.global.verification.EmailVerificationTokenValidator;
 import com.sparta.delivery.backend.manager.dto.ReqCreateManagerDto;
 import com.sparta.delivery.backend.manager.entity.Manager;
 import com.sparta.delivery.backend.manager.repository.ManagerRepository;
