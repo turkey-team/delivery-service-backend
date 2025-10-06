@@ -197,7 +197,16 @@ public class ReviewRedisCacheTest {
 		);
 
 		List<Reply> replies = replyRepository.findByReviewId(resResultReviewDto.getReviewId());
-		System.out.println("autoReply = " + replies.get(0).getContext());
+		Reply autoReply = replies.get(0);
+		System.out.println("autoReply = " + autoReply.getContext());
+
+		Review linkedReview = autoReply.getReview();
+		Owner linkedOwner = autoReply.getOwner();
+		System.out.println("linkedReview ID = " + linkedReview.getId());
+		System.out.println("linkedOwner ID = " + linkedOwner.getId());
+
+		assertEquals(resResultReviewDto.getReviewId(), autoReply.getReview().getId());
+		assertNotNull(autoReply.getOwner().getId());
 
 		// 캐시 다시 조회 → 캐시 재생성
 		reviewService.getReviews(storeId, condition, pageable);

@@ -42,14 +42,20 @@ public class ReplyService {
 	private static final int MAX_RETRY = 3;
 
 	@Async
-	public void generateReplyAsync(Review review, Owner owner) {
+	public void generateReplyAsync(UUID reviewId, UUID ownerId) {
 		log.info("generateReplyAsync 시작 - thread: {}", Thread.currentThread().getName());
-		createReplyTransactionalWithRetry(review, owner);
+		createReplyTransactionalWithRetry(reviewId, ownerId);
 	}
 
 	@Transactional
-	public void createReplyTransactionalWithRetry(Review review, Owner owner) {
+	public void createReplyTransactionalWithRetry(UUID reviewId, UUID ownerId) {
 		int attempt = 0;
+
+		Review review = reviewRepository.findById(reviewId)
+			.orElseThrow(() -> new NoSuchElementException("리뷰 없음"));
+
+		Owner owner = ownerRepository.findById(ownerId)
+			.orElseThrow(() -> new NoSuchElementException("점주 없음"));
 
 		while (attempt < MAX_RETRY) {
 			try {

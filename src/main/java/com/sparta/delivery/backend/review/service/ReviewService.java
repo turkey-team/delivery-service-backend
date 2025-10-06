@@ -30,6 +30,8 @@ import com.sparta.delivery.backend.review.repository.ReviewRepositorySearchCondi
 import com.sparta.delivery.backend.store.entity.Store;
 import com.sparta.delivery.backend.store.repository.StoreRepository;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -44,6 +46,9 @@ public class ReviewService {
 	private final OrderRepository orderRepository;
 	private final CacheManager cacheManager;
 	private final ReplyService replyService;
+
+	@PersistenceContext
+	private EntityManager em;
 
 	private static final String REVIEW_CACHE_NAME = "reviewList";
 
@@ -119,12 +124,16 @@ public class ReviewService {
 			.build();
 
 		reviewRepository.save(review);
+
+		em.flush();
+		em.clear();
+
 		store.addReview(review.getRate());
 		evictReviewCache(storeId);
 
 		Owner owner = store.getOwner();
 		log.info("registerReview 완료 - 비동기 호출 직전 thread: {}", Thread.currentThread().getName());
-		replyService.generateReplyAsync(review, owner);
+		replyService.generateReplyAsync(review.getId(), owner.getId());
 
 		return ResResultReviewDto.of(review);
 	}
