@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class AiPromptReadResponseDto {
+public class ResReadAiPromptDto {
 
 	private UUID id;
 
@@ -24,8 +24,8 @@ public class AiPromptReadResponseDto {
 
 	private Long createdBy;
 
-	public static AiPromptReadResponseDto from(AiPrompt aiPrompt) {
-		return new AiPromptReadResponseDto(
+	public static ResReadAiPromptDto from(AiPrompt aiPrompt) {
+		return new ResReadAiPromptDto(
 			aiPrompt.getId(),
 			aiPrompt.getReqMessage(),
 			aiPrompt.getResMessage(),

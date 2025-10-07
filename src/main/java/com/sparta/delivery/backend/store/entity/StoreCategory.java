@@ -1,11 +1,14 @@
 package com.sparta.delivery.backend.store.entity;
 
+import java.time.Instant;
 import java.util.UUID;
 
 import org.hibernate.annotations.UuidGenerator;
 
 import com.sparta.delivery.backend.category.entity.Category;
+import com.sparta.delivery.backend.common.BaseEntity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
@@ -21,10 +24,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "p_store_category")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class StoreCategory {
-	@Id
-	@UuidGenerator
-	private UUID id;
+public class StoreCategory extends BaseEntity {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="store_id")
@@ -39,4 +39,5 @@ public class StoreCategory {
 		this.store = store;
 		this.category = category;
 	}
+
 }

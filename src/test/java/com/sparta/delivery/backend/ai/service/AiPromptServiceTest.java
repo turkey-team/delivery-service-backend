@@ -1,0 +1,102 @@
+package com.sparta.delivery.backend.ai.service;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.BDDMockito.*;
+
+import java.util.List;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
+import com.sparta.delivery.backend.ai.dto.ReqCreateAiPromptDto;
+import com.sparta.delivery.backend.ai.dto.ResCreateAiPromptDto;
+import com.sparta.delivery.backend.ai.dto.ResReadAiPromptDto;
+import com.sparta.delivery.backend.ai.entity.AiPrompt;
+import com.sparta.delivery.backend.ai.repository.AiPromptRepository;
+
+@ExtendWith(MockitoExtension.class)
+public class AiPromptServiceTest {
+
+	@Mock
+	private AiPromptRepository aiPromptRepository;
+
+	@Mock
+	private GoogleAiService googleAiService;
+
+	@InjectMocks
+	private AiPromptService aiPromptService;
+
+	@Nested
+	@DisplayName("프롬프트 생성 테스트")
+	class createAiPrompt {
+
+		@Test
+		@DisplayName("성공")
+		void success() {
+			ReqCreateAiPromptDto requestDto = new ReqCreateAiPromptDto("요청");
+			AiPrompt aiPrompt = AiPrompt.builder()
+				.reqMessage("요청")
+				.resMessage("응답")
+				.build();
+
+			given(googleAiService.createAiPrompt("요청")).willReturn("응답");
+			given(aiPromptRepository.save(any(AiPrompt.class))).willReturn(aiPrompt);
+
+			ResCreateAiPromptDto responseDto = aiPromptService.createAiPrompt(requestDto);
+
+			assertThat(responseDto.getResMessage()).isEqualTo("응답");
+			then(googleAiService).should(times(1)).createAiPrompt("요청");
+			then(aiPromptRepository).should(times(1)).save(any(AiPrompt.class));
+		}
+
+		@Test
+		@DisplayName("실패")
+		void failure() {
+			ReqCreateAiPromptDto requestDto = new ReqCreateAiPromptDto("요청");
+
+			given(googleAiService.createAiPrompt("요청")).willThrow(new RuntimeException("오류"));
+
+			assertThatThrownBy(() -> aiPromptService.createAiPrompt(requestDto))
+				.isInstanceOf(RuntimeException.class)
+				.hasMessage("오류");
+			then(aiPromptRepository).should(never()).save(any(AiPrompt.class));
+		}
+
+	}
+
+	@Nested
+	@DisplayName("프롬프트 조회 테스트")
+	class getAllAiPrompts {
+
+		@Test
+		@DisplayName("성공")
+		void success() {
+			AiPrompt aiPrompt = AiPrompt.builder()
+				.reqMessage("요청")
+				.resMessage("응답")
+				.build();
+			Pageable pageable = PageRequest.of(0, 10);
+			Page<AiPrompt> page = new PageImpl<>(List.of(aiPrompt));
+
+			given(aiPromptRepository.findAll(pageable)).willReturn(page);
+
+			Page<ResReadAiPromptDto> responseDto = aiPromptService.getAllAiPrompts(pageable);
+
+			assertThat(responseDto).hasSize(1);
+			assertThat(responseDto.getContent().get(0).getReqMessage()).isEqualTo("요청");
+			assertThat(responseDto.getContent().get(0).getResMessage()).isEqualTo("응답");
+			then(aiPromptRepository).should(times(1)).findAll(pageable);
+		}
+
+	}
+
+}

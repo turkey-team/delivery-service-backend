@@ -70,10 +70,12 @@ public class WebSecurityConfig {
 					.requestMatchers("/v1/owners").permitAll()
 					.requestMatchers("/v1/auth/login").permitAll()
 					.requestMatchers("/v1/auth/logout").authenticated()
+
 					// Swagger UI
 					.requestMatchers("/swagger-ui/**").permitAll()
 					.requestMatchers("/swagger-resources/**").permitAll()
 					.requestMatchers("/v3/api-docs/**").permitAll()
+
 					.anyRequest().authenticated() // 그 외 모든 요청 인증처리
 			)
 

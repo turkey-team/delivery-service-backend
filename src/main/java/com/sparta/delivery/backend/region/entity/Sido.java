@@ -1,9 +1,13 @@
 package com.sparta.delivery.backend.region.entity;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.sparta.delivery.backend.common.BaseEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -22,6 +26,9 @@ public class Sido extends BaseEntity {
 	@Column(name = "code", length = 2, nullable = false)
 	private String code;
 
+	@OneToMany(mappedBy = "sido")
+	private List<Sigungu> sigunguList = new ArrayList<>();
+
 	@Builder
 	private Sido(String name, String code) {
 		this.name = name;
@@ -35,6 +42,12 @@ public class Sido extends BaseEntity {
 		if (code != null) {
 			this.code = code;
 		}
+	}
+
+	@Override
+	public void softDelete(Long loginUserId) {
+		super.softDelete(loginUserId);
+		sigunguList.forEach(sigungu -> sigungu.softDelete(loginUserId));
 	}
 
 }

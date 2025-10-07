@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class CategoryResponseDto {
+public class ResCreateCategoryDto {
 
 	private UUID id;
 	private String name;
@@ -21,7 +21,7 @@ public class CategoryResponseDto {
 	private Long updatedBy;
 	private Long deletedBy;
 
-	public CategoryResponseDto(Category category) {
+	public ResCreateCategoryDto(Category category) {
 		this.id = category.getId();
 		this.name = category.getName();
 		this.createdAt = category.getCreatedAt();

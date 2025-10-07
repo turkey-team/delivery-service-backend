@@ -9,12 +9,12 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class AiPromptCreateResponseDto {
+public class ResCreateAiPromptDto {
 
 	private String resMessage;
 
-	public static AiPromptCreateResponseDto from(AiPrompt aiPrompt) {
-		return new AiPromptCreateResponseDto(
+	public static ResCreateAiPromptDto from(AiPrompt aiPrompt) {
+		return new ResCreateAiPromptDto(
 			aiPrompt.getResMessage()
 		);
 	}
