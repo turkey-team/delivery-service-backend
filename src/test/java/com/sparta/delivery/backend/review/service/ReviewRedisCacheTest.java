@@ -82,8 +82,8 @@ public class ReviewRedisCacheTest {
 			.imageUrl(null)
 			.build();
 
-		reviewRepository.save(review);
-		reviewRepository.save(review2);
+		reviewRepository.saveAll(List.of(review, review2));
+		//reviewRepository.flush();
 
 		// 테스트 전 캐시 초기화
 		Cache cache = cacheManager.getCache("reviewList");
@@ -99,7 +99,7 @@ public class ReviewRedisCacheTest {
 		assertNotNull(cache);
 
 		String key =
-			"review:store:" + storeId;
+			"review:store:" + storeId + ":page:" + pageable.getPageNumber();
 
 		// 캐시 없는 상태에서 조회 호출
 		ReviewRepositorySearchConditionDto condition = new ReviewRepositorySearchConditionDto();
@@ -128,8 +128,6 @@ public class ReviewRedisCacheTest {
 		Cache cache = cacheManager.getCache("reviewList");
 		assertNotNull(cache);
 
-		String key = "review:store:" + storeId;
-
 		ReviewRepositorySearchConditionDto condition = new ReviewRepositorySearchConditionDto();
 		condition.setContext("");
 
@@ -142,6 +140,8 @@ public class ReviewRedisCacheTest {
 				Sort.Order.asc("createdAt")   // createdAt 오름차순
 			)
 		);
+
+		String key = "review:store:" + storeId + ":page:" + pageableWithSort.getPageNumber();
 
 		Page<ResViewReviewDto> result = reviewService.getReviews(storeId, condition, pageableWithSort);
 
@@ -166,7 +166,7 @@ public class ReviewRedisCacheTest {
 	void cacheEvictOnReviewCreateUpdateDelete() throws InterruptedException {
 		Cache cache = cacheManager.getCache("reviewList");
 		String key =
-			"review:store:" + storeId;
+			"review:store:" + storeId + ":page:" + pageable.getPageNumber();
 
 		Order order = new Order();
 		order.setCustomer(customerRepository.findAll().get(0));
@@ -176,7 +176,7 @@ public class ReviewRedisCacheTest {
 
 		// 캐시 없는 상태에서 조회 → 캐시 생성
 		ReviewRepositorySearchConditionDto condition = new ReviewRepositorySearchConditionDto();
-		condition.setContext("내용");
+		condition.setContext("");
 		reviewService.getReviews(storeId, condition, pageable);
 
 		printCacheStatus(cache, key, "조회 후 캐시");
@@ -187,6 +187,7 @@ public class ReviewRedisCacheTest {
 		newReview.setContext("너는 이걸 짬뽕이라고 만들어놓았냐? 맛도 싱겁고 국수도 다 안 익은채로 왔잖아!");
 		newReview.setRate(4);
 		newReview.setOrderId(orderId);
+
 		ResResultReviewDto resResultReviewDto = reviewService.registerReview(newReview, storeId, userId);
 		System.out.println("등록된 리뷰 = " + resResultReviewDto);
 		printCacheStatus(cache, key, "리뷰 등록 후 캐시");

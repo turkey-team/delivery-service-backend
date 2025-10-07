@@ -65,8 +65,9 @@ public class ReviewService {
 	// reviews list 조회
 	@Cacheable(
 		value = "reviewList",
-		key = "'review:store:' + #storeId",
-		cacheManager = "reviewCacheManager")
+		key = "'review:store:' + #storeId + ':page:' + #pageable.pageNumber",
+		cacheManager = "reviewCacheManager",
+		condition = "#pageable.pageNumber == 0")
 	@Transactional(readOnly = true)
 	public Page<ResViewReviewDto> getReviews(UUID storeId, ReviewRepositorySearchConditionDto condition,
 		Pageable pageable) {
@@ -82,9 +83,9 @@ public class ReviewService {
 	private void evictReviewCache(UUID storeId) {
 		Cache cache = cacheManager.getCache(REVIEW_CACHE_NAME);
 		if (cache != null) {
-			String key = "review:store:" + storeId;
+			String key = "review:store:" + storeId + ":page:0";
 			cache.evict(key);
-			System.out.println("Redis 캐시 삭제됨 -> key : " + key);
+			System.out.println("Redis 첫 페이지 캐시 삭제됨 -> key : " + key);
 		}
 	}
 
