@@ -10,7 +10,6 @@ import com.sparta.delivery.backend.region.entity.Dong;
 import com.sparta.delivery.backend.region.entity.Sigungu;
 
 public interface DongRepository extends JpaRepository<Dong, UUID> {
-	Dong findByCode(String code);
 
 	boolean existsByNameAndSigungu(String name, Sigungu sigungu);
 
