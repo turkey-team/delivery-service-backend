@@ -4,6 +4,7 @@ import com.sparta.delivery.backend.common.BaseEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -18,7 +19,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Dong extends BaseEntity {
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "p_region_sigungu", nullable = false)
 	private Sigungu sigungu;
 
@@ -33,6 +34,7 @@ public class Dong extends BaseEntity {
 		this.sigungu = sigungu;
 		this.name = name;
 		this.code = code;
+		sigungu.getDongList().add(this);
 	}
 
 	public void update(Sigungu sigungu, String name, String code) {

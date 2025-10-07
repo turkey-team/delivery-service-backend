@@ -12,9 +12,11 @@ import com.sparta.delivery.backend.region.dto.ResCreateSidoDto;
 import com.sparta.delivery.backend.region.dto.ResReadSidoDto;
 import com.sparta.delivery.backend.region.dto.ResUpdateSidoDto;
 import com.sparta.delivery.backend.region.entity.Sido;
+import com.sparta.delivery.backend.region.exception.RegionAlreadyExistsException;
+import com.sparta.delivery.backend.region.exception.RegionDuplicateRequestException;
+import com.sparta.delivery.backend.region.exception.RegionNotFoundException;
 import com.sparta.delivery.backend.region.repository.SidoRepository;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,30 +29,54 @@ public class SidoService {
 
 	// 시·도 생성
 	@Transactional
-	public ResCreateSidoDto createSido(ReqCreateSidoDto requestDto) {
-		if (sidoRepository.existsByName(requestDto.getName())) {
+	public List<ResCreateSidoDto> createSidos(List<ReqCreateSidoDto> requestDtoList) {
+		List<String> names = requestDtoList.stream()
+			.map(ReqCreateSidoDto::getName)
+			.distinct()
+			.toList();
+
+		if (names.size() != requestDtoList.size()) {
+			log.warn("시/도 지역 이름 중복 : Request");
+			throw new RegionDuplicateRequestException("요청에 중복된 시/도 이름이 포함되어 있습니다.");
+		}
+
+		if (sidoRepository.existsByNameInCustom(names)) {
 			log.warn("시/도 지역 이름 중복");
-			throw new IllegalArgumentException("이미 존재하는 시/도 이름입니다.");
+			throw new RegionAlreadyExistsException("이미 존재하는 시/도 이름이 포함되어 있습니다.");
 		}
 
-		if (sidoRepository.existsByCode(requestDto.getCode())) {
+		List<String> codes = requestDtoList.stream()
+			.map(ReqCreateSidoDto::getCode)
+			.distinct()
+			.toList();
+
+		if (codes.size() != requestDtoList.size()) {
+			log.warn("시/도 지역 코드 중복 : Request");
+			throw new RegionDuplicateRequestException("요청에 중복된 시/도 코드가 포함되어 있습니다.");
+		}
+
+		if (sidoRepository.existsByCodeInCustom(codes)) {
 			log.warn("시/도 지역 코드 중복");
-			throw new IllegalArgumentException("이미 존재하는 시/도 코드입니다.");
+			throw new RegionAlreadyExistsException("이미 존재하는 시/도 코드가 포함되어 있습니다.");
 		}
 
-		Sido sido = Sido.builder()
-			.name(requestDto.getName())
-			.code(requestDto.getCode())
-			.build();
+		List<Sido> sidoList = requestDtoList.stream()
+			.map(requestDto -> Sido.builder()
+				.name(requestDto.getName())
+				.code(requestDto.getCode())
+				.build()
+			)
+			.toList();
 
-		Sido savedSido = sidoRepository.save(sido);
-
-		return ResCreateSidoDto.from(savedSido);
+		return sidoRepository.saveAll(sidoList).stream()
+			.map(ResCreateSidoDto::from)
+			.toList();
 	}
 
 	// 시·도 목록 조회
+	@Transactional(readOnly = true)
 	public List<ResReadSidoDto> getAllSido() {
-		return sidoRepository.findAll().stream()
+		return sidoRepository.findAllCustom().stream()
 			.map(ResReadSidoDto::from)
 			.toList();
 	}
@@ -58,19 +84,19 @@ public class SidoService {
 	// 시·도 수정
 	@Transactional
 	public ResUpdateSidoDto updateSido(UUID sidoId, ReqUpdateSidoDto requestDto) {
-		Sido sido = sidoRepository.findById(sidoId).orElseThrow(() -> {
+		Sido sido = sidoRepository.findByIdCustom(sidoId).orElseThrow(() -> {
 			log.warn("시/도 지역 검색 실패");
-			return new EntityNotFoundException("존재하지 않는 시/도입니다.");
+			return new RegionNotFoundException("존재하지 않는 시/도입니다.");
 		});
 
-		if (sidoRepository.existsByNameAndIdNot(requestDto.getName(), sidoId)) {
+		if (sidoRepository.existsByNameAndIdNotCustom(requestDto.getName(), sidoId)) {
 			log.warn("시/도 지역 이름 중복");
-			throw new IllegalArgumentException("이미 존재하는 시/도 이름입니다.");
+			throw new RegionAlreadyExistsException("이미 존재하는 시/도 이름입니다.");
 		}
 
-		if (sidoRepository.existsByCodeAndIdNot(requestDto.getCode(), sidoId)) {
+		if (sidoRepository.existsByCodeAndIdNotCustom(requestDto.getCode(), sidoId)) {
 			log.warn("시/도 지역 코드 중복");
-			throw new IllegalArgumentException("이미 존재하는 시/도 코드입니다.");
+			throw new RegionAlreadyExistsException("이미 존재하는 시/도 코드입니다.");
 		}
 
 		sido.update(requestDto.getName(), requestDto.getCode());
@@ -80,14 +106,13 @@ public class SidoService {
 
 	// 시·도 삭제
 	@Transactional
-	public void deleteSido(UUID sidoId) {
-		Sido sido = sidoRepository.findById(sidoId).orElseThrow(() -> {
+	public void deleteSido(UUID sidoId, Long loginUserId) {
+		Sido sido = sidoRepository.findByIdCustom(sidoId).orElseThrow(() -> {
 			log.warn("시/도 지역 검색 실패");
-			return new EntityNotFoundException("존재하지 않는 시/도입니다.");
+			return new RegionNotFoundException("존재하지 않는 시/도입니다.");
 		});
 
-		// 임시로 null을 넘김
-		sido.softDelete(null);
+		sido.softDelete(loginUserId);
 	}
 
 }

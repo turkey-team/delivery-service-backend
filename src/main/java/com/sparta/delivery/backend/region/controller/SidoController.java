@@ -3,7 +3,10 @@ package com.sparta.delivery.backend.region.controller;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,7 +22,9 @@ import com.sparta.delivery.backend.region.dto.ResCreateSidoDto;
 import com.sparta.delivery.backend.region.dto.ResReadSidoDto;
 import com.sparta.delivery.backend.region.dto.ResUpdateSidoDto;
 import com.sparta.delivery.backend.region.service.SidoService;
+import com.sparta.delivery.backend.security.UserDetailsImpl;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -29,32 +34,40 @@ public class SidoController {
 
 	private final SidoService sidoService;
 
-	@PostMapping("/sido")
-	public ResponseEntity<ResCreateSidoDto> createSido(@RequestBody ReqCreateSidoDto requestDto) {
-		ResCreateSidoDto responseDto = sidoService.createSido(requestDto);
+	@PostMapping("/sidos")
+	@PreAuthorize("isAuthenticated() && hasRole('MANAGER')")
+	public ResponseEntity<List<ResCreateSidoDto>> createSidos(
+		@RequestBody List<@Valid ReqCreateSidoDto> requestDtoList
+	) {
+		List<ResCreateSidoDto> responseDtoList = sidoService.createSidos(requestDtoList);
 
-		return ResponseEntity.ok(responseDto);
+		return ResponseEntity.status(HttpStatus.CREATED).body(responseDtoList);
 	}
 
-	@GetMapping("/sido")
+	@GetMapping("/sidos")
+	@PreAuthorize("isAuthenticated() && hasAnyRole('MANAGER', 'OWNER', 'CUSTOMER')")
 	public ResponseEntity<List<ResReadSidoDto>> getAllSido() {
 		List<ResReadSidoDto> responseDtoList = sidoService.getAllSido();
 
 		return ResponseEntity.ok(responseDtoList);
 	}
 
-	@PutMapping("/sido/{sidoId}")
+	@PutMapping("/sidos/{sidoId}")
+	@PreAuthorize("isAuthenticated() && hasRole('MANAGER')")
 	public ResponseEntity<ResUpdateSidoDto> updateSido(
-		@PathVariable UUID sidoId, @RequestBody ReqUpdateSidoDto requestDto
+		@PathVariable UUID sidoId, @Valid @RequestBody ReqUpdateSidoDto requestDto
 	) {
 		ResUpdateSidoDto responseDto = sidoService.updateSido(sidoId, requestDto);
 
 		return ResponseEntity.ok(responseDto);
 	}
 
-	@DeleteMapping("/sido/{sidoId}")
-	public ResponseEntity<Void> deleteSido(@PathVariable UUID sidoId) {
-		sidoService.deleteSido(sidoId);
+	@DeleteMapping("/sidos/{sidoId}")
+	@PreAuthorize("isAuthenticated() && hasRole('MANAGER')")
+	public ResponseEntity<Void> deleteSido(
+		@PathVariable UUID sidoId, @AuthenticationPrincipal UserDetailsImpl loginUser
+	) {
+		sidoService.deleteSido(sidoId, loginUser.getId());
 
 		return ResponseEntity.noContent().build();
 	}
