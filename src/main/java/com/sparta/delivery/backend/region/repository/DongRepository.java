@@ -12,6 +12,7 @@ import com.sparta.delivery.backend.region.entity.Dong;
 import com.sparta.delivery.backend.region.entity.Sigungu;
 
 public interface DongRepository extends JpaRepository<Dong, UUID> {
+	Dong findByCode(String code);
 
 	@Query("""
 		SELECT CASE WHEN COUNT(d) > 0 THEN TRUE ELSE FALSE END
