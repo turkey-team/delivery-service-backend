@@ -83,7 +83,7 @@ public class StoreService {
 		}
 
 		// Region Dong 조회
-		Dong dong = dongRepository.findByCode(requestDto.getRegionCode());
+		Dong dong = dongRepository.findByCode(requestDto.getRegionCode()).orElseThrow(()->new IllegalArgumentException("존재하지 않는 주소지입니다."));
 
 		// 카테고리 조회
 
@@ -180,7 +180,7 @@ public class StoreService {
 
 		checkUserRole(user,store);
 
-		Dong dong = dongRepository.findByCode(requestDto.getRegionDong());
+		Dong dong = dongRepository.findByCode(requestDto.getRegionDong()).orElseThrow(()->new IllegalArgumentException("존재하지 않는 주소지입니다."));
 
 		// 현재 등록된 카테고리 조회
 		List<StoreCategory> currentCategories = store.getStoreCategories();
