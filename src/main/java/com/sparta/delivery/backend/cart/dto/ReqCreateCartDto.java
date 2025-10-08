@@ -2,7 +2,7 @@ package com.sparta.delivery.backend.cart.dto;
 
 import java.util.UUID;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,7 +11,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ReqCreateCartDto {
-	@NotBlank
+
+	@NotNull
 	private UUID menuId;
 
 }

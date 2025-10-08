@@ -3,7 +3,6 @@ package com.sparta.delivery.backend.cart.dto;
 import java.util.List;
 import java.util.UUID;
 
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,12 +19,20 @@ public class ResGetCartDto {
 
 	@Getter
 	@NoArgsConstructor
-	@AllArgsConstructor
 	public static class CartDto {
 		private UUID cartId;
 		private String menuName;
 		private int price;
-		private int quantity;
+		private Long quantity;
 		private String imgUrl;
+
+		public CartDto(UUID cartId, String menuName, int menuPrice, Long count, String imageUrl) {
+			this.cartId = cartId;
+			this.menuName = menuName;
+			this.price = menuPrice;
+			this.quantity = count;
+			this.imgUrl = imageUrl;
+		}
 	}
+
 }

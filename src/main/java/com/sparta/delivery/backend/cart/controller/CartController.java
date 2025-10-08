@@ -30,7 +30,7 @@ public class CartController {
 	private final CartService cartService;
 
 	@PostMapping("/carts")
-	public ResCreateCartDto createCart(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestBody @Valid ReqCreateCartDto requestDto){
+	public ResCreateCartDto createCart(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestBody ReqCreateCartDto requestDto){
 		return cartService.createCart(userDetails.getUser(), requestDto);
 	}
 
