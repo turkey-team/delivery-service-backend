@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sparta.delivery.backend.region.dto.ReqCreateDongDto;
+import com.sparta.delivery.backend.region.dto.ReqUpdateDongDto;
 import com.sparta.delivery.backend.region.dto.ResCreateDongDto;
 import com.sparta.delivery.backend.region.dto.ResReadDongDto;
 import com.sparta.delivery.backend.region.dto.ResUpdateDongDto;
@@ -54,7 +55,7 @@ public class DongController {
 	@PutMapping("/sigungus/{sigunguId}/dongs/{dongId}")
 	@PreAuthorize("isAuthenticated() && hasRole('MANAGER')")
 	public ResponseEntity<ResUpdateDongDto> updateDong(
-		@PathVariable UUID sigunguId, @PathVariable UUID dongId, @Valid @RequestBody ReqCreateDongDto requestDto
+		@PathVariable UUID sigunguId, @PathVariable UUID dongId, @Valid @RequestBody ReqUpdateDongDto requestDto
 	) {
 		ResUpdateDongDto responseDto = dongService.updateDong(sigunguId, dongId, requestDto);
 

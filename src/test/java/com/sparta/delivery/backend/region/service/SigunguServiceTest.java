@@ -182,13 +182,9 @@ public class SigunguServiceTest {
 		@Test
 		@DisplayName("실패 - DB에 존재하지 않는 시·도")
 		void failure_notFoundSido() {
-			List<ReqCreateSigunguDto> requestDtoList = List.of(
-				new ReqCreateSigunguDto("강남구", "680")
-			);
-
 			given(sidoRepository.findByIdCustom(any())).willReturn(Optional.empty());
 
-			assertThatThrownBy(() -> sigunguService.createSigungus(any(), requestDtoList))
+			assertThatThrownBy(() -> sigunguService.getAllSigungu(any()))
 				.isInstanceOf(RegionNotFoundException.class)
 				.hasMessage("존재하지 않는 시/도입니다.");
 			then(sigunguRepository).should(never()).findAllBySidoCustom(any());

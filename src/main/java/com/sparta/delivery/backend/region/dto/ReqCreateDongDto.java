@@ -2,11 +2,13 @@ package com.sparta.delivery.backend.region.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 public class ReqCreateDongDto {
 
 	@NotBlank(message = "동 이름은 필수입니다.")

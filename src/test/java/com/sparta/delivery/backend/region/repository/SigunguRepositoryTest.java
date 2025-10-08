@@ -201,7 +201,7 @@ public class SigunguRepositoryTest {
 
 		@Test
 		@DisplayName("해당 시/도에 Id가 일치하는 시/군/구가 존재하지 않으면, 빈 객체를 반환한다.")
-		void returnSigunguWhenIdNotExistsInSido() {
+		void returnEmptyWhenIdNotExistsInSido() {
 			createSigungus();
 
 			Optional<Sigungu> sigungu = sigunguRepository.findByIdAndSidoCustom(UUID.randomUUID(), seoul);
@@ -274,7 +274,7 @@ public class SigunguRepositoryTest {
 		}
 
 		@Test
-		@DisplayName("전체 시/도에 이름이 일치하고 Id가 자신인 시/군/구가 존재하면, false를 반환한다.")
+		@DisplayName("전체 시/도에 코드가 일치하고 Id가 자신인 시/군/구가 존재하면, false를 반환한다.")
 		void returnFalseWhenCodeExistsAndIdIsSame() {
 			createSigungus();
 
