@@ -26,7 +26,7 @@ public class AiPromptController {
 	private final AiPromptService aiPromptService;
 
 	@PostMapping
-	@PreAuthorize("isAuthenticated() && hasRole('OWNER')")
+	@PreAuthorize("isAuthenticated() && hasAnyRole('MANAGER', 'OWNER')")
 	public ResponseEntity<ResCreateAiPromptDto> createAiPrompt(@Valid @RequestBody ReqCreateAiPromptDto requestDto) {
 		ResCreateAiPromptDto responseDto = aiPromptService.createAiPrompt(requestDto);
 
