@@ -32,16 +32,28 @@ public class Address extends BaseEntity {
 	@JoinColumn(name = "p_user_id", nullable = false)
 	private User user;
 
+	@Column(name = "is_default", nullable = false)
+	private Boolean isDefault;
+
 	@Builder
 	private Address(Dong dong, String address, User user) {
 		this.dong = dong;
 		this.address = address;
 		this.user = user;
+		this.isDefault = true;
 	}
 
 	public void update(Dong dong, String address) {
 		this.dong = dong;
 		this.address = address;
+	}
+
+	public void setDefault() {
+		this.isDefault = true;
+	}
+
+	public void unsetDefault() {
+		this.isDefault = false;
 	}
 
 }
