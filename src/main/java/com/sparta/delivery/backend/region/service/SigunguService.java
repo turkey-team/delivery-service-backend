@@ -45,7 +45,7 @@ public class SigunguService {
 
 		if (names.size() != requestDtoList.size()) {
 			log.warn("시/군/구 지역 이름 중복 : Request");
-			throw new RegionDuplicateRequestException("요청에 중복된 시/도 이름이 포함되어 있습니다.");
+			throw new RegionDuplicateRequestException("요청에 중복된 시/군/구 이름이 포함되어 있습니다.");
 		}
 
 		if (sigunguRepository.existsByNameInAndSidoCustom(names, sido)) {
@@ -60,7 +60,7 @@ public class SigunguService {
 
 		if (codes.size() != requestDtoList.size()) {
 			log.warn("시/군/구 지역 코드 중복 : Request");
-			throw new RegionDuplicateRequestException("요청에 중복된 시/도 코드가 포함되어 있습니다.");
+			throw new RegionDuplicateRequestException("요청에 중복된 시/군/구 코드가 포함되어 있습니다.");
 		}
 
 		if (sigunguRepository.existsByCodeInCustom(codes)) {

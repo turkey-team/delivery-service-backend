@@ -94,7 +94,7 @@ public class SigunguServiceTest {
 
 			assertThatThrownBy(() -> sigunguService.createSigungus(sido.getId(), requestDtoList))
 				.isInstanceOf(RegionDuplicateRequestException.class)
-				.hasMessage("요청에 중복된 시/도 이름이 포함되어 있습니다.");
+				.hasMessage("요청에 중복된 시/군/구 이름이 포함되어 있습니다.");
 			then(sigunguRepository).should(never()).saveAll(anyList());
 		}
 
@@ -129,7 +129,7 @@ public class SigunguServiceTest {
 
 			assertThatThrownBy(() -> sigunguService.createSigungus(sido.getId(), requestDtoList))
 				.isInstanceOf(RegionDuplicateRequestException.class)
-				.hasMessage("요청에 중복된 시/도 코드가 포함되어 있습니다.");
+				.hasMessage("요청에 중복된 시/군/구 코드가 포함되어 있습니다.");
 			then(sigunguRepository).should(never()).saveAll(anyList());
 		}
 
