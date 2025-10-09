@@ -1,6 +1,7 @@
 package com.sparta.delivery.backend.store.menu.entity;
 
 import java.time.Instant;
+import java.util.UUID;
 
 import com.sparta.delivery.backend.common.BaseEntity;
 import com.sparta.delivery.backend.image.entity.Image;
@@ -28,17 +29,6 @@ import lombok.NoArgsConstructor;
 @Table(
 	name = "p_store_menu",
 	uniqueConstraints = @UniqueConstraint(columnNames = {"p_store_id", "sort_order"})
-	/**
-		스토어(p_store_id) 단위로 sort_order Unique 보장
-		-> Order의 수는 겹치면 안되며 1부터 시작해야 한다.
-		1. jakarta.validation으로 @Min Annotation 사용
-		2. DB 생성 시
-			ALTER TABLE p_store_menu
-			ADD CONSTRAINT chk_sort_order CHECK (sort_order >= 1);
-		비즈니스 로직:
-			Integer maxSort = repository.findMaxSortOrderByStore(storeId);
-			menu.setSortOrder(maxSort + 1);
-	*/
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class StoreMenu extends BaseEntity {
@@ -85,8 +75,7 @@ public class StoreMenu extends BaseEntity {
 		this.description = reqCreateStoreMenuDto.getDescription();
 		this.prepTime = reqCreateStoreMenuDto.getPrepTime();
 		this.stockStatus = reqCreateStoreMenuDto.getStockStatus();
-		this.setSortOrder(reqCreateStoreMenuDto.getSortOrder());	// 순서는 1 이상
-		this.setHiddenAt(reqCreateStoreMenuDto.getIsHidden());		// Boolean → Instant 변환
+		this.setHiddenAt(reqCreateStoreMenuDto.getIsHidden());
 	}
 
 	public void updateStoreMenu(ReqUpdateStoreMenuDto reqUpdateStoreMenuDto, Image image) {
@@ -98,8 +87,10 @@ public class StoreMenu extends BaseEntity {
 		this.stockStatus = reqUpdateStoreMenuDto.getStockStatus();
 	}
 
+
+	// 생성할 때는 순서 정하는게 없다. 이후에 수정해야함
 	public void setSortOrder(int sortOrder) {
-		if (sortOrder < 1) throw new IllegalArgumentException();
+		if (sortOrder < 1) throw new IllegalArgumentException("sortOrder는 1 이상이어야 합니다.");
 		this.sortOrder = sortOrder;
 	}
 
@@ -110,5 +101,10 @@ public class StoreMenu extends BaseEntity {
 
 	public String getImageUrl() {
 		return image != null ? image.getImageUrl() : null;
+	}
+
+	// sortOrder 가 음수로 변경 → 조회 시 제외됨
+	public void softDelete(UUID deletedByUserId) {
+		this.sortOrder = -Math.abs(this.sortOrder);
 	}
 }

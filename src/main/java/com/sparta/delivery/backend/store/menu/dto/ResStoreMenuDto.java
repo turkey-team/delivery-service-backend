@@ -8,7 +8,6 @@ import com.sparta.delivery.backend.store.menu.enums.StockStatus;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Getter
 @NoArgsConstructor
@@ -26,12 +25,12 @@ public class ResStoreMenuDto {
 	public ResStoreMenuDto(StoreMenu storeMenu) {
 		this.id = storeMenu.getId();
 		this.name = storeMenu.getName();
+		this.imageUrl = storeMenu.getImage() != null ? storeMenu.getImage().getImageUrl() : null;
 		this.price = storeMenu.getPrice();
 		this.description = storeMenu.getDescription();
 		this.prepTime = storeMenu.getPrepTime();
-		this.sortOrder = storeMenu.getSortOrder();
 		this.stockStatus = storeMenu.getStockStatus();
+		this.sortOrder = storeMenu.getSortOrder();
 		this.hiddenAt = storeMenu.getHiddenAt();
-		this.imageUrl = storeMenu.getImage() != null ? storeMenu.getImage().getImageUrl() : null;
 	}
 }
