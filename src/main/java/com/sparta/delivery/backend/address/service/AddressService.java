@@ -31,6 +31,9 @@ public class AddressService {
 			() -> new NotFoundException("주소지를 찾을 수 없습니다.")
 		);
 
+		// 기본 주소지가 이미 존재하면 기본 주소지 해제
+		unsetDefaultAddressIfExists(userDetails);
+
 		Address address = Address.builder()
 			.dong(dong)
 			.address(requestDto.getAddress())
@@ -39,11 +42,34 @@ public class AddressService {
 		addressRepository.save(address);
 	}
 
+	@Transactional
+	public ResAddressDto setDefaultAddress(UUID id, UserDetailsImpl userDetails) {
+		Address address = addressRepository.findByIdAndDeletedAtIsNull(id).orElseThrow(
+			() -> new NotFoundException("요청한 리소스를 찾을 수 없습니다.")
+		);
+
+		unsetDefaultAddressIfExists(userDetails);
+		address.setDefault();
+		return ResAddressDto.from(address);
+	}
+
+	private void unsetDefaultAddressIfExists(UserDetailsImpl userDetails) {
+		addressRepository.findByUserIdAndIsDefaultTrueAndDeletedAtIsNull(userDetails.getId())
+			.ifPresent(Address::unsetDefault);
+	}
+
 	@Transactional(readOnly = true)
-	public List<ResAddressDto> getMyAddresses(UserDetailsImpl user) {
+	public List<ResAddressDto> getMyAddresses(UserDetailsImpl userDetails) {
 		List<Address> findAddresses = addressRepository.findAllByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(
-			user.getId());
+			userDetails.getId());
 		return findAddresses.stream().map(ResAddressDto::from).toList();
+	}
+
+	@Transactional(readOnly = true)
+	public ResAddressDto getDefaultAddress(UserDetailsImpl userDetails) {
+		Address defaultAddress = addressRepository.findByUserIdAndIsDefaultTrueAndDeletedAtIsNull(userDetails.getId())
+			.orElseThrow(() -> new NotFoundException("요청한 리소스를 찾을 수 없습니다."));
+		return ResAddressDto.from(defaultAddress);
 	}
 
 	@Transactional

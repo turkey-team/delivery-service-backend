@@ -42,8 +42,13 @@ public class AddressController {
 	}
 
 	@GetMapping
-	public List<ResAddressDto> getMyAddresses(@AuthenticationPrincipal UserDetailsImpl user) {
-		return addressService.getMyAddresses(user);
+	public ResponseEntity<List<ResAddressDto>> getMyAddresses(@AuthenticationPrincipal UserDetailsImpl user) {
+		return ResponseEntity.ok(addressService.getMyAddresses(user));
+	}
+
+	@GetMapping("/default")
+	public ResponseEntity<ResAddressDto> getDefaultAddress(@AuthenticationPrincipal UserDetailsImpl user) {
+		return ResponseEntity.ok(addressService.getDefaultAddress(user));
 	}
 
 	@PreAuthorize("@addressPermissionEvaluator.isOwner(#id, authentication.principal)")
@@ -53,6 +58,15 @@ public class AddressController {
 		@Valid @RequestBody ReqUpdateAddressDto requestDto
 	) {
 		return addressService.updateAddress(id, requestDto);
+	}
+
+	@PreAuthorize("@addressPermissionEvaluator.isOwner(#id, authentication.principal)")
+	@PutMapping("/{id}/default")
+	public ResponseEntity<ResAddressDto> setDefaultAddress(
+		@PathVariable UUID id,
+		@AuthenticationPrincipal UserDetailsImpl user
+	) {
+		return ResponseEntity.ok(addressService.setDefaultAddress(id, user));
 	}
 
 	@PreAuthorize("@addressPermissionEvaluator.isOwner(#id, authentication.principal)")
