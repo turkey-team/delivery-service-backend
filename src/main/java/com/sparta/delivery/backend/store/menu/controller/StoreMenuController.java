@@ -21,8 +21,6 @@ import com.sparta.delivery.backend.store.menu.dto.ReqUpdateSortOrderDto;
 import com.sparta.delivery.backend.store.menu.dto.ReqUpdateStoreMenuDto;
 import com.sparta.delivery.backend.store.menu.dto.ReqUpdateVisibilityDto;
 import com.sparta.delivery.backend.store.menu.dto.ResStoreMenuDto;
-import com.sparta.delivery.backend.store.menu.dto.ResUpdateSortOrderDto;
-import com.sparta.delivery.backend.store.menu.dto.ResUpdateVisibilityDto;
 import com.sparta.delivery.backend.store.menu.service.StoreMenuService;
 
 import lombok.RequiredArgsConstructor;
@@ -70,29 +68,29 @@ public class StoreMenuController {
 		@RequestBody ReqUpdateStoreMenuDto reqUpdateStoreMenuDto
 	) {
 		storeMenuService.updateStoreMenu(storeId, menuId, reqUpdateStoreMenuDto);
-		return ResponseEntity.noContent().build();
+		return ResponseEntity.ok().build();
 	}
 
 	// 메뉴 순서 변경
 	@PatchMapping("/{menuId}/sort")
-	public ResponseEntity<ResUpdateSortOrderDto> updateSortOrder(
+	public ResponseEntity<Void> updateSortOrder(
 		@PathVariable UUID storeId,
 		@PathVariable UUID menuId,
 		@RequestBody ReqUpdateSortOrderDto reqUpdateSortOrderDto
 	) {
-		ResUpdateSortOrderDto updated = storeMenuService.updateSortOrder(storeId, menuId, reqUpdateSortOrderDto);
-		return ResponseEntity.ok(updated);
+		storeMenuService.updateSortOrder(storeId, menuId, reqUpdateSortOrderDto);
+		return ResponseEntity.ok().build();
 	}
 
 	// 숨기기
 	@PatchMapping("/{menuId}/visibility")
-	public ResponseEntity<ResUpdateVisibilityDto> updateVisibility(
+	public ResponseEntity<Void> updateVisibility(
 		@PathVariable UUID storeId,
 		@PathVariable UUID menuId,
 		@RequestBody ReqUpdateVisibilityDto reqUpdateVisibilityDto
 	) {
-		ResUpdateVisibilityDto updated = storeMenuService.updateVisibility(storeId, menuId, reqUpdateVisibilityDto);
-		return ResponseEntity.ok(updated);
+		storeMenuService.updateVisibility(storeId, menuId, reqUpdateVisibilityDto);
+		return ResponseEntity.ok().build();
 	}
 
 	@DeleteMapping("/{menuId}")
