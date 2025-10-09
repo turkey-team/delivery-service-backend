@@ -24,6 +24,8 @@ import com.sparta.delivery.backend.address.entity.Address;
 import com.sparta.delivery.backend.address.repository.AddressRepository;
 import com.sparta.delivery.backend.global.excpetion.NotFoundException;
 import com.sparta.delivery.backend.region.entity.Dong;
+import com.sparta.delivery.backend.region.entity.Sido;
+import com.sparta.delivery.backend.region.entity.Sigungu;
 import com.sparta.delivery.backend.region.repository.DongRepository;
 import com.sparta.delivery.backend.security.UserDetailsImpl;
 import com.sparta.delivery.backend.user.entity.User;
@@ -45,27 +47,18 @@ class AddressServiceTest {
 	private UserDetailsImpl userDetails;
 	private Dong dong;
 	private Address address;
+	private Address otherAddress;
 
 	@BeforeEach
 	void setUp() {
-		user = User.builder()
-			.username("test")
-			.password("password")
-			.role(UserRoleEnum.CUSTOMER)
-			.build();
-
+		user = createUser("testUser", "password123");
 		userDetails = new UserDetailsImpl(user);
 
-		dong = Dong.builder()
-			.code("123")
-			.name("망원1동")
-			.build();
-
-		address = Address.builder()
-			.dong(dong)
-			.address("서울특별시 마포구 망원1동 마포나루길 467")
-			.user(user)
-			.build();
+		Sido seoul = createSido("서울특별시", "11");
+		Sigungu seocho = createSigungu(seoul, "서초구", "650");
+		dong = createDong(seocho, "136", "서초동");
+		address = createAddress(userDetails.getUser(), dong, "서울특별시 서초구 서초동 강남대로 123");
+		otherAddress = createAddress(userDetails.getUser(), dong, "서울특별시 서초구 서초동 강남대로 456");
 	}
 
 	@Nested
@@ -73,11 +66,11 @@ class AddressServiceTest {
 	class RegisterAddressTest {
 
 		@Test
-		@DisplayName("성공")
+		@DisplayName("성공 - 등록 완료")
 		void registerAddress_Success() {
 			ReqRegisterAddressDto requestDto = new ReqRegisterAddressDto(
-				"123",
-				"서울특별시 마포구 망원1동 마포나루길 467");
+				"136",
+				"서울특별시 서초구 서초동 강남대로 123");
 
 			given(dongRepository.findByCode(requestDto.getRegionCode()))
 				.willReturn(Optional.of(dong));
@@ -87,6 +80,8 @@ class AddressServiceTest {
 
 			addressService.registerAddress(requestDto, userDetails);
 
+			then(addressRepository).should(times(1))
+				.findByUserIdAndIsDefaultTrueAndDeletedAtIsNull(userDetails.getId());
 			then(dongRepository).should(times(1)).findByCode(requestDto.getRegionCode());
 			then(addressRepository).should(times(1)).save(any(Address.class));
 		}
@@ -103,24 +98,20 @@ class AddressServiceTest {
 
 			assertThatThrownBy(() -> addressService.registerAddress(requestDto, userDetails))
 				.isInstanceOf(NotFoundException.class)
-				.hasMessage("주소지를 찾을 수 없습니다.");
+				.hasMessage("해당 주소지를 찾을 수 없습니다.");
 
 			then(addressRepository).should(never()).save(any(Address.class));
 		}
 	}
 
 	@Nested
-	@DisplayName("내 주소 목록 조회 테스트")
+	@DisplayName("주소 조회 테스트")
 	class GetMyAddressesTest {
 
 		@Test
-		@DisplayName("성공")
+		@DisplayName("성공 - 목록 조회 완료")
 		void getMyAddresses_Success() {
-			Address anotherAddress = Address.builder()
-				.dong(dong)
-				.address("강남대로 456")
-				.user(user)
-				.build();
+			Address anotherAddress = createAddress(user, dong, "강남대로 456");
 
 			List<Address> addresses = List.of(address, anotherAddress);
 
@@ -133,6 +124,21 @@ class AddressServiceTest {
 			then(addressRepository).should(times(1))
 				.findAllByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(user.getId());
 		}
+
+		@Test
+		@DisplayName("성공 - 기본 주소지 조회")
+		void getDefaultAddress_Success() {
+			given(addressRepository.findByUserIdAndIsDefaultTrueAndDeletedAtIsNull(user.getId()))
+				.willReturn(Optional.of(address));
+
+			ResAddressDto result = addressService.getDefaultAddress(userDetails);
+
+			assertThat(result).isNotNull();
+			assertThat(result.isDefault()).isTrue();
+			assertThat(result.getAddress()).isEqualTo(address.getAddress());
+			then(addressRepository).should(times(1))
+				.findByUserIdAndIsDefaultTrueAndDeletedAtIsNull(user.getId());
+		}
 	}
 
 	@Nested
@@ -140,7 +146,7 @@ class AddressServiceTest {
 	class UpdateAddressTest {
 
 		@Test
-		@DisplayName("성공")
+		@DisplayName("성공 - 수정 완료")
 		void updateAddress_Success() {
 			UUID addressId = address.getId();
 			ReqUpdateAddressDto requestDto = new ReqUpdateAddressDto(
@@ -157,8 +163,31 @@ class AddressServiceTest {
 			ResAddressDto result = addressService.updateAddress(addressId, requestDto);
 
 			assertThat(result).isNotNull();
+			assertThat(result.getAddress()).isEqualTo("새로운 주소 789");
 			then(addressRepository).should(times(1)).findByIdAndDeletedAtIsNull(addressId);
 			then(dongRepository).should(times(1)).findByCode(requestDto.getRegionCode());
+		}
+
+		@Test
+		@DisplayName("성공 - 기본 주소지 수정")
+		void updateAddress_Success_ChangeDefault() {
+			UUID addressId = otherAddress.getId();
+
+			given(addressRepository.findByIdAndDeletedAtIsNull(addressId))
+				.willReturn(Optional.of(otherAddress));
+
+			given(addressRepository.findByUserIdAndIsDefaultTrueAndDeletedAtIsNull(user.getId()))
+				.willReturn(Optional.of(address));
+
+			ResAddressDto result = addressService.setDefaultAddress(addressId, userDetails);
+
+			assertThat(result).isNotNull();
+			assertThat(result.isDefault()).isTrue();
+			assertThat(result.getAddress()).isEqualTo(otherAddress.getAddress());
+			assertThat(address.getIsDefault()).isFalse();
+			then(addressRepository).should(times(1)).findByIdAndDeletedAtIsNull(addressId);
+			then(addressRepository).should(times(1))
+				.findByUserIdAndIsDefaultTrueAndDeletedAtIsNull(userDetails.getId());
 		}
 
 		@Test
@@ -181,7 +210,7 @@ class AddressServiceTest {
 		}
 
 		@Test
-		@DisplayName("주소 수정: 실패 - 존재하지 않는 지역 코드")
+		@DisplayName("실패 - 존재하지 않는 지역 코드")
 		void updateAddress_Fail_RegionDongNotFound() {
 			UUID addressId = address.getId();
 			ReqUpdateAddressDto requestDto = new ReqUpdateAddressDto(
@@ -206,7 +235,7 @@ class AddressServiceTest {
 	class DeleteAddressTest {
 
 		@Test
-		@DisplayName("주소 삭제: 성공")
+		@DisplayName("성공 - 삭제 완료")
 		void deleteAddress_Success() {
 			UUID addressId = address.getId();
 
@@ -219,7 +248,7 @@ class AddressServiceTest {
 		}
 
 		@Test
-		@DisplayName("주소 삭제: 실패 - 존재하지 않는 주소 ID")
+		@DisplayName("실패 - 존재하지 않는 주소 ID")
 		void deleteAddress_Fail_AddressNotFound() {
 			UUID addressId = UUID.randomUUID();
 
@@ -232,7 +261,7 @@ class AddressServiceTest {
 		}
 
 		@Test
-		@DisplayName("주소 삭제: 실패 - 이미 삭제된 주소")
+		@DisplayName("실패 - 이미 삭제된 주소")
 		void deleteAddress_Fail_AlreadyDeleted() {
 			UUID addressId = address.getId();
 
@@ -243,5 +272,44 @@ class AddressServiceTest {
 				.isInstanceOf(NotFoundException.class)
 				.hasMessage("요청한 리소스를 찾을 수 없습니다.");
 		}
+	}
+
+	private User createUser(String username, String password) {
+		return User.builder()
+			.username(username)
+			.password(password)
+			.role(UserRoleEnum.CUSTOMER)
+			.build();
+	}
+
+	private Address createAddress(User user, Dong dong, String address) {
+		return Address.builder()
+			.user(user)
+			.dong(dong)
+			.address(address)
+			.build();
+	}
+
+	private Sido createSido(String name, String code) {
+		return Sido.builder()
+			.name(name)
+			.code(code)
+			.build();
+	}
+
+	private Sigungu createSigungu(Sido sido, String name, String code) {
+		return Sigungu.builder()
+			.sido(sido)
+			.name(name)
+			.code(code)
+			.build();
+	}
+
+	private Dong createDong(Sigungu sigungu, String code, String name) {
+		return Dong.builder()
+			.sigungu(sigungu)
+			.code(code)
+			.name(name)
+			.build();
 	}
 }

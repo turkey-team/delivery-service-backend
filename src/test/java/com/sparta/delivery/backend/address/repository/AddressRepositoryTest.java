@@ -41,18 +41,10 @@ class AddressRepositoryTest {
 	@BeforeEach
 	void setUp() {
 		// 테스트 사용자 생성
-		testUser = User.builder()
-			.username("testUser")
-			.password("password123")
-			.role(UserRoleEnum.CUSTOMER)
-			.build();
+		testUser = createUser("testUser", "password");
 		entityManager.persist(testUser);
 
-		otherUser = User.builder()
-			.username("otherUser")
-			.password("password456")
-			.role(UserRoleEnum.CUSTOMER)
-			.build();
+		otherUser = createUser("otherUser", "password");
 		entityManager.persist(otherUser);
 
 		Sido seoul = createSido("서울특별시", "11");
@@ -64,10 +56,10 @@ class AddressRepositoryTest {
 		Sigungu seocho = createSigungu(seoul, "서초구", "650");
 		entityManager.persist(seocho);
 
-		testDong = createDong(gangnam,"102","역삼동");
+		testDong = createDong(gangnam, "102", "역삼동");
 		entityManager.persist(testDong);
 
-		otherDong = createDong(seocho,"103","서초동");
+		otherDong = createDong(seocho, "103", "서초동");
 		entityManager.persist(otherDong);
 
 		entityManager.flush();
@@ -79,7 +71,7 @@ class AddressRepositoryTest {
 	class FindAllByUserIdTest {
 
 		@Test
-		@DisplayName("삭제되지 않은 주소들을 생성일 역순으로 조회한다")
+		@DisplayName("생성일 역순으로 조회한다")
 		void success_findAllActiveAddressesOrderByCreatedAtDesc() {
 			// given
 			Address address1 = createAddress(testUser, testDong, "강남구 테헤란로 1");
@@ -117,7 +109,7 @@ class AddressRepositoryTest {
 		}
 
 		@Test
-		@DisplayName("삭제된 주소는 조회 결과에서 제외된다")
+		@DisplayName("삭제된 주소들을 조회 결과에서 제외한다")
 		void success_excludeDeletedAddresses() {
 			// given
 			Address activeAddress = createAddress(testUser, testDong, "활성 주소");
@@ -277,6 +269,126 @@ class AddressRepositoryTest {
 			// then
 			assertThat(foundAddress).isEmpty();
 		}
+	}
+
+	@Nested
+	@DisplayName("findByUserIdAndIsDefaultTrueAndDeletedAtIsNull 메서드는")
+	class FindByUserIdAndIsDefaultTrueAndDeletedAtIsNullTest {
+
+		@Test
+		@DisplayName("삭제되지 않고 기본 주소지로 설정된 주소를 조회한다")
+		void findDefaultAddress_Success() {
+			// given
+			Address address = createAddress(testUser, testDong, "서울특별시 서초구 서초동 강남대로 123");
+			address.setDefault();
+			addressRepository.save(address);
+
+			// when
+			Optional<Address> result = addressRepository.findByUserIdAndIsDefaultTrueAndDeletedAtIsNull(
+				testUser.getId());
+
+			// then
+			assertThat(result).isPresent();
+			assertThat(result.get().getAddress()).isEqualTo("서울특별시 서초구 서초동 강남대로 123");
+			assertThat(result.get().getIsDefault()).isTrue();
+			assertThat(result.get().getDeletedAt()).isNull();
+		}
+
+		@Test
+		@DisplayName("여러 주소 중 기본 주소지만 조회한다.")
+		void findDefaultAddress_Success_OnlyDefaultAddress() {
+			// given
+			Address address1 = createAddress(testUser, testDong, "서울특별시 서초구 서초동 강남대로 123");
+			address1.unsetDefault();
+			addressRepository.save(address1);
+
+			Address address2 = createAddress(testUser, testDong, "서울특별시 서초구 서초동 강남대로 456");
+			address2.setDefault();
+			addressRepository.save(address2);
+
+			Address address3 = createAddress(testUser, testDong, "서울특별시 서초구 서초동 강남대로 789");
+			address3.unsetDefault();
+			addressRepository.save(address3);
+
+			// when
+			Optional<Address> result = addressRepository.findByUserIdAndIsDefaultTrueAndDeletedAtIsNull(
+				testUser.getId());
+
+			// then
+			assertThat(result).isPresent();
+			assertThat(result.get().getAddress()).isEqualTo("서울특별시 서초구 서초동 강남대로 456");
+			assertThat(result.get().getIsDefault()).isTrue();
+		}
+
+		@Test
+		@DisplayName("삭제된 기본 주소지는 조회되지 않는다")
+		void findDefaultAddress_Success_ExcludeDeletedAddress() {
+			// given
+			Address address = createAddress(testUser, testDong, "서울특별시 서초구 서초동 강남대로 123");
+			address.setDefault();
+			addressRepository.save(address);
+
+			// 소프트 삭제
+			address.softDelete(testUser.getId());
+			addressRepository.save(address);
+
+			// when
+			Optional<Address> result = addressRepository.findByUserIdAndIsDefaultTrueAndDeletedAtIsNull(
+				testUser.getId());
+
+			// then
+			assertThat(result).isEmpty();
+		}
+
+		@Test
+		@DisplayName("다른 사용자의 기본 주소지는 조회되지 않는다")
+		void findDefaultAddress_Success_OnlyOwnAddress() {
+			// given
+			Address address = createAddress(otherUser, otherDong, "서울특별시 서초구 서초동 강남대로 123");
+			address.setDefault();
+			addressRepository.save(address);
+
+			// when
+			Optional<Address> result = addressRepository.findByUserIdAndIsDefaultTrueAndDeletedAtIsNull(
+				testUser.getId());
+
+			// then
+			assertThat(result).isEmpty();
+		}
+
+		@Test
+		@DisplayName("삭제된 기본 주소와 삭제되지 않은 기본 주소가 함께 있을 때 삭제되지 않은 기본 주소만 조회한다")
+		void findDefaultAddress_Success_ActiveDefaultOnly() {
+			// given
+			Address deletedAddress = createAddress(testUser, testDong, "서울특별시 서초구 서초동 강남대로 123");
+			deletedAddress.setDefault();
+			addressRepository.save(deletedAddress);
+
+			deletedAddress.softDelete(testUser.getId());
+			addressRepository.save(deletedAddress);
+
+			// 활성 기본 주소지
+			Address activeAddress = createAddress(testUser, testDong, "서울특별시 서초구 서초동 강남대로 456");
+			activeAddress.setDefault();
+			addressRepository.save(activeAddress);
+
+			// when
+			Optional<Address> result = addressRepository.findByUserIdAndIsDefaultTrueAndDeletedAtIsNull(
+				testUser.getId());
+
+			// then
+			assertThat(result).isPresent();
+			assertThat(result.get().getAddress()).isEqualTo("서울특별시 서초구 서초동 강남대로 456");
+			assertThat(result.get().getDeletedAt()).isNull();
+		}
+	}
+
+	private User createUser(String username, String password) {
+		return User.builder()
+			.username(username)
+			.password(password)
+			.role(UserRoleEnum.CUSTOMER)
+			.build();
 	}
 
 	private Address createAddress(User user, Dong dong, String address) {
