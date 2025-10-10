@@ -61,13 +61,17 @@ jobs:
             docker rm turkey-backend || true
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/turkey-backend:latest
             docker run -d --name turkey-backend \
+              --network turkey-network \
               -p 80:8080 \
               -e JWT_ACCESS_TOKEN_SECRET="${{ secrets.JWT_ACCESS_TOKEN_SECRET }}" \
               -e JWT_REFRESH_TOKEN_SECRET="${{ secrets.JWT_REFRESH_TOKEN_SECRET }}" \
               -e MAIL_USERNAME="${{ secrets.MAIL_USERNAME }}" \
               -e MAIL_PASSWORD="${{ secrets.MAIL_PASSWORD }}" \
               -e AWS_ACCESS_KEY="${{ secrets.AWS_ACCESS_KEY_ID }}" \
-              -e AWS_SECRET_KEY="${{ secrets.AWS_SECRET_SECRET_KEY }}" \
+              -e AWS_SECRET_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
               -e AWS_S3_BUCKET="${{ secrets.AWS_S3_BUCKET }}" \
+              -e DB_URL="${{ secrets.DB_URL }}" \
+              -e DB_USERNAME="${{ secrets.DB_USERNAME }}" \
+              -e DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
               -e SPRING_PROFILES_ACTIVE=prod \
               ${{ secrets.DOCKERHUB_USERNAME }}/turkey-backend:latest
