@@ -1,0 +1,44 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:15
+    ports:
+      - "5432:5432"
+    restart: on-failure
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 비밀번호
+      POSTGRES_DB: deliverydb
+    volumes:
+      - db_data:/var/libs/postgresql/data
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      retries: 10
+
+  backend-server:
+    image: <AWS아이디>.dkr.ecr.ap-northeast-2.amazonaws.com/backend:1.0
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/deliverydb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 비밀번호
+      SPRING_PROFILES_ACTIVE: prod
+
+      DB_HOST: db
+      REDIS_HOST: redis
+
+volumes:
+  db_data:

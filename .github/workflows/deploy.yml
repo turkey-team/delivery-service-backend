@@ -1,0 +1,74 @@
+name: Deploy Turkey Team Backend Server to EC2
+
+on:
+  push:
+    branches: [ "dev", "main" ]
+  pull_request:
+    branches: [ "dev", "main" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. 코드 가져오기
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      # 2. JDK 설치
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      # 배포용 통합 application.yml 만들기 + gitignore 추가
+      - name: application.yml 파일 만들기
+        run: echo "${{secrets.APPLICATION_YML}}" > src/main/resources/(통합용)application.yml
+
+      # 3. AWS 인증
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ap-northeast-2
+          aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}} #IAM 설정 시 나옴
+          aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}} #IAM 설정 시 나옴
+
+      # 4. ECR 로그인
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # 5. Docker 이미지 build & push
+      - name: Build & Push Backend Service
+        run: |
+          docker build -t backend .
+          docker tag backend ${{steps.login-ecr.outputs.registry}}/backend:latest
+          docker push ${{steps.login-ecr.outputs.registry}}/backend:latest
+
+      # 6. EC2로 Compose 파일 전송
+      - name: Copy docker-compose.yml to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{secrets.EC2_HOST}}
+          username: ${{secrets.EC2_USERNAME}}
+          key: ${{secrets.EC2_PRIVATE_KEY}}
+          source: "docker-compose.yml"
+          target: "/home/ubuntu/backend/"
+          strip_components: 0
+          overwrite: true
+
+      # 7. EC2에서 Compose 실행
+      - name: SSH into EC2 and Deploy
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{secrets.EC2_HOST}}
+          username: ${{secrets.EC2_USERNAME}}
+          key: ${{secrets.EC2_PRIVATE_KEY}}
+          script_stop: true
+          command_timeout: '30m'
+          script: |
+            cd /home/ubuntu/backend
+            docker-compose down
+            docker-compose pull
+            docker-compose up -d --build
