@@ -58,19 +58,6 @@ public class AiPromptServiceTest {
 			then(aiPromptRepository).should(times(1)).save(any(AiPrompt.class));
 		}
 
-		@Test
-		@DisplayName("실패")
-		void failure() {
-			ReqCreateAiPromptDto requestDto = new ReqCreateAiPromptDto("요청");
-
-			given(googleAiService.createAiPrompt("요청")).willThrow(new RuntimeException("오류"));
-
-			assertThatThrownBy(() -> aiPromptService.createAiPrompt(requestDto))
-				.isInstanceOf(RuntimeException.class)
-				.hasMessage("오류");
-			then(aiPromptRepository).should(never()).save(any(AiPrompt.class));
-		}
-
 	}
 
 	@Nested

@@ -2,6 +2,7 @@ package com.sparta.delivery.backend.ai.controller;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,11 +27,11 @@ public class AiPromptController {
 	private final AiPromptService aiPromptService;
 
 	@PostMapping
-	@PreAuthorize("isAuthenticated() && hasRole('OWNER')")
+	@PreAuthorize("isAuthenticated() && hasAnyRole('MANAGER', 'OWNER')")
 	public ResponseEntity<ResCreateAiPromptDto> createAiPrompt(@Valid @RequestBody ReqCreateAiPromptDto requestDto) {
 		ResCreateAiPromptDto responseDto = aiPromptService.createAiPrompt(requestDto);
 
-		return ResponseEntity.ok(responseDto);
+		return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
 	}
 
 	@GetMapping
