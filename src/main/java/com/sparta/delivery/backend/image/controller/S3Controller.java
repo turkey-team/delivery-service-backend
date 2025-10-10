@@ -14,6 +14,7 @@ import com.sparta.delivery.backend.image.dto.ResPresignedUrlDto;
 import com.sparta.delivery.backend.image.service.S3Service;
 import com.sparta.delivery.backend.security.UserDetailsImpl;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -29,7 +30,7 @@ public class S3Controller {
 	 */
 	@PostMapping("/presigned-upload")
 	public ResponseEntity<List<ResPresignedUrlDto>> generatePresignedUrls(
-		@RequestBody List<ReqGeneratePresignedUrlDto> requests,
+		@Valid @RequestBody List<ReqGeneratePresignedUrlDto> requests,
 		@AuthenticationPrincipal UserDetailsImpl user
 	) {
 		return ResponseEntity.ok(s3Service.generatePresignedUrls(requests));
