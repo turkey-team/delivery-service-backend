@@ -72,7 +72,7 @@ public class CartService {
 
 	@Transactional
 	public ResDeleteCartItemDto deleteCartItem(User user, UUID cartId) {
-		Cart cart = cartRepository.findById(cartId).orElseThrow(()->new IllegalArgumentException("존재하지 않는 메뉴이거나 이미 삭제되었습니다."));
+		Cart cart = cartRepository.findByIdWithCustomerAndUser(cartId).orElseThrow(()->new IllegalArgumentException("존재하지 않는 메뉴이거나 이미 삭제되었습니다."));
 
 		// 로그인한 유저와 카트의 유저 아이디가 다를 경우
 		if (!cart.getCustomer().getUser().getId().equals(user.getId())) {

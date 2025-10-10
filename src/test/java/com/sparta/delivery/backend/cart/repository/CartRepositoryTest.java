@@ -1,13 +1,19 @@
 package com.sparta.delivery.backend.cart.repository;
 
 import static org.assertj.core.api.AssertionsForClassTypes.*;
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.Optional;
+import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
+import com.sparta.delivery.backend.cart.dto.ResGetCartDto;
 import com.sparta.delivery.backend.cart.entity.Cart;
 import com.sparta.delivery.backend.category.repository.CategoryRepository;
 import com.sparta.delivery.backend.customer.entity.Customer;
@@ -26,6 +32,9 @@ import com.sparta.delivery.backend.user.repository.UserRepository;
 
 @DataJpaTest
 public class CartRepositoryTest {
+	@Autowired
+	private TestEntityManager em;
+
 	@Autowired
 	private CartRepository cartRepository;
 
@@ -53,6 +62,8 @@ public class CartRepositoryTest {
 	private Owner owner;
 	private Store store;
 	private StoreMenu menu;
+	private Cart cart;
+	private UUID cartId;
 
 	@BeforeEach
 	void setUp() {
@@ -105,6 +116,38 @@ public class CartRepositoryTest {
 			.reqCreateStoreMenuDto(requestDto)
 			.store(store)
 			.build());
+
+		this.cart = cartRepository.save(Cart.builder()
+				.customer(customer)
+				.menu(menu)
+			.build());
+		this.cartId = cart.getId();
+	}
+
+	@Test
+	@DisplayName("JOIN FETCH 쿼리가 Cart, Customer, User를 N+1 없이 한번에 조회한다")
+	void findByIdWithCustomerAndUser_PreventsNPlusOne() {
+		// Given
+		em.flush();
+		em.clear();
+
+		// When
+		Optional<Cart> foundCartOptional = cartRepository.findByIdWithCustomerAndUser(cartId);
+
+		// Then
+		assertThat(foundCartOptional).isPresent();
+		Cart foundCart = foundCartOptional.get();
+
+
+		assertAll(
+			() -> assertThat(foundCart.getId()).isEqualTo(cartId),
+
+			() -> assertThat(foundCart.getCustomer().getNickname()).isEqualTo("닉네임"),
+
+			() -> assertThat(foundCart.getCustomer().getUser().getUsername()).isEqualTo("testuser"),
+			() -> assertThat(foundCart.getCustomer().getUser().getRole()).isEqualTo(UserRoleEnum.CUSTOMER)
+		);
+
 	}
 
 	@Test

@@ -3,7 +3,11 @@ package com.sparta.delivery.backend.store.repository;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
+import java.util.function.Function;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -14,27 +18,19 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sparta.delivery.backend.category.entity.Category;
-import com.sparta.delivery.backend.category.repository.CategoryRepository;
-import com.sparta.delivery.backend.image.entity.Image;
-import com.sparta.delivery.backend.image.repository.ImageRepository;
 import com.sparta.delivery.backend.manager.entity.Manager;
-import com.sparta.delivery.backend.manager.repository.ManagerRepository;
 import com.sparta.delivery.backend.owner.entity.Owner;
-import com.sparta.delivery.backend.region.entity.Dong;
-import com.sparta.delivery.backend.region.entity.Sido;
-import com.sparta.delivery.backend.region.entity.Sigungu;
 import com.sparta.delivery.backend.store.dto.ResGetListStoreDto;
 import com.sparta.delivery.backend.store.entity.Store;
 import com.sparta.delivery.backend.store.entity.StoreCategory;
 import com.sparta.delivery.backend.store.entity.StoreStatusEnum;
 import com.sparta.delivery.backend.user.entity.User;
 import com.sparta.delivery.backend.user.entity.UserRoleEnum;
-import com.sparta.delivery.backend.user.repository.UserRepository;
 
 import jakarta.persistence.EntityManager;
 
@@ -50,7 +46,7 @@ public class StoreRepositoryTest {
 	@Autowired
 	private EntityManager em;
 
-	private User testUser;
+	private User managerUser;
 	private Manager manager;
 
 	private User ownerUser;
@@ -64,22 +60,27 @@ public class StoreRepositoryTest {
 
 
 	@BeforeEach
-	void setUp() throws InterruptedException {
+	void setUp(){
 		// Given
+		LocalDateTime baseDateTime = LocalDateTime.now().minusDays(1);
+		ZoneId zoneId = ZoneId.systemDefault();
+
+		Function<Integer, Instant> toInstant = (hours) ->
+			baseDateTime.minusHours(hours).atZone(zoneId).toInstant();
 
 		// 0. manager
-		testUser = User.builder()
-			.username("testUser")
+		managerUser = User.builder()
+			.username("managerUser")
 			.password("password123")
 			.role(UserRoleEnum.MANAGER)
 			.build();
-		em.persist(testUser);
+		em.persist(managerUser);
 
 		manager = Manager.builder()
-			.user(testUser)
+			.user(managerUser)
 			.name("매니저")
 			.phoneNumber("01012345678")
-			.email("test@test.net")
+			.email("managerUser@test.net")
 			.build();
 
 		em.persist(manager);
@@ -114,19 +115,18 @@ public class StoreRepositoryTest {
 		// 2. 가게
 		storeA = Store.builder().name("도미노피자").reviewRate(4.8).deliveryFee(3000).minOrderPrice(15000).status(StoreStatusEnum.CLOSED).owner(owner).build();
 		em.persist(storeA);
-
-		Thread.sleep(100);
+		ReflectionTestUtils.setField(storeA, "createdAt", toInstant.apply(3));
 
 		storeB = Store.builder().name("굽네치킨").reviewRate(4.5).deliveryFee(2000).minOrderPrice(10000).status(StoreStatusEnum.CLOSED).owner(owner).build();
 		em.persist(storeB);
-
-		Thread.sleep(100);
+		ReflectionTestUtils.setField(storeB, "createdAt", toInstant.apply(2));
 
 		storeC = Store.builder().name("다른피자").reviewRate(4.9).deliveryFee(4000).minOrderPrice(20000).status(StoreStatusEnum.OPEN).owner(owner).build();
 		em.persist(storeC);
+		ReflectionTestUtils.setField(storeC, "createdAt", toInstant.apply(1));
 
-		Thread.sleep(100);
-
+		em.flush();
+		em.clear();
 
 		// 3. 가게-카테고리 연관관계 설정
 		em.persist(StoreCategory.builder().store(storeA).category(pizzaCategory).build());

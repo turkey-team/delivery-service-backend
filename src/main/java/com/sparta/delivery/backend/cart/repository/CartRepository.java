@@ -1,6 +1,7 @@
 package com.sparta.delivery.backend.cart.repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,4 +19,7 @@ public interface CartRepository extends JpaRepository<Cart, UUID>, CartRepositor
 	boolean existsByDeletedAtIsNullAndMenuStoreId(UUID storeId);
 
 	List<Cart> findAllByCustomerIdAndDeletedAtIsNull(UUID id);
+
+	@Query("SELECT DISTINCT c FROM Cart c JOIN FETCH c.customer cu JOIN FETCH cu.user WHERE c.id = :cartId")
+	Optional<Cart> findByIdWithCustomerAndUser(@Param("cartId") UUID cartId);
 }
