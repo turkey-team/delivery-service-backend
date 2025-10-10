@@ -1,6 +1,9 @@
 package com.sparta.delivery.backend.reply.entity;
 
+import java.util.UUID;
+
 import com.sparta.delivery.backend.common.BaseEntity;
+import com.sparta.delivery.backend.manager.entity.Manager;
 import com.sparta.delivery.backend.owner.entity.Owner;
 import com.sparta.delivery.backend.review.entity.Review;
 
@@ -25,21 +28,44 @@ public class Reply extends BaseEntity {
 	private Review review;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "p_owner_id", nullable = false)
+	@JoinColumn(name = "p_owner_id")
 	private Owner owner;
 
-	@Column(name = "context", nullable = false)
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "p_manager_id")
+	private Manager manager;
+
+	@Column(name = "context", nullable = false, length = 500)
 	private String context;
 
 	@Builder
-	private Reply(Review review, Owner owner, String context) {
+	private Reply(Review review, Owner owner, Manager manager, String context) {
 		this.review = review;
 		this.owner = owner;
+		this.manager = manager;
 		this.context = context;
 	}
 
 	public void update(String context) {
 		this.context = context;
+	}
+
+	public UUID getWriterId() {
+		if (owner != null) {
+			return owner.getId();
+		}
+		if (manager != null) {
+			return manager.getId();
+		}
+		return null;
+	}
+
+	public String getWriterName() {
+		if (owner != null)
+			return owner.getNickname();
+		if (manager != null)
+			return manager.getName();
+		return "알 수 없음";
 	}
 
 }

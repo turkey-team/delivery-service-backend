@@ -45,7 +45,10 @@ public class ReviewRedisCacheIntegrationTest {
 		System.out.println("Redis cached value: " + cached);
 
 		Long ttl = redisTemplate.getExpire(key, TimeUnit.SECONDS);
-		System.out.println("TTL: " + ttl + "초");*/
+		System.out.println("TTL: " + ttl + "초");
+
+		Boolean hasKey = redisTemplate.hasKey(key);
+		System.out.println("Redis에 key 존재 여부: " + hasKey);*/
 	}
 
 	@AfterEach

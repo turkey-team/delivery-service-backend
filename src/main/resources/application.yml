@@ -10,3 +10,4 @@ spring:
       - redis
       - mail
       - s3
+      - openai
