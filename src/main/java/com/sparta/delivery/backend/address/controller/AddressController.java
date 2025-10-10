@@ -32,6 +32,11 @@ public class AddressController {
 
 	private final AddressService addressService;
 
+	/**
+	 * 주소 등록 API
+	 * POST /v1/addresses
+	 */
+	@PreAuthorize("hasRole('CUSTOMER')")
 	@PostMapping
 	public ResponseEntity<Void> registerAddress(
 		@Valid @RequestBody ReqRegisterAddressDto requestDto,
@@ -41,12 +46,31 @@ public class AddressController {
 		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
 
+	/**
+	 * 주소 조회(목록) API
+	 * GET /v1/addresses
+	 */
+	@PreAuthorize("hasRole('CUSTOMER')")
 	@GetMapping
-	public List<ResAddressDto> getMyAddresses(@AuthenticationPrincipal UserDetailsImpl user) {
-		return addressService.getMyAddresses(user);
+	public ResponseEntity<List<ResAddressDto>> getMyAddresses(@AuthenticationPrincipal UserDetailsImpl user) {
+		return ResponseEntity.ok(addressService.getMyAddresses(user));
 	}
 
-	@PreAuthorize("@addressPermissionEvaluator.isOwner(#id, authentication.principal)")
+	/**
+	 * 기본 배송지 조회 API
+	 * GET /v1/addresses/default
+	 */
+	@PreAuthorize("hasRole('CUSTOMER')")
+	@GetMapping("/default")
+	public ResponseEntity<ResAddressDto> getDefaultAddress(@AuthenticationPrincipal UserDetailsImpl user) {
+		return ResponseEntity.ok(addressService.getDefaultAddress(user));
+	}
+
+	/**
+	 * 주소 수정 API
+	 * PUT /v1/addresses/{id}
+	 */
+	@PreAuthorize("hasRole('CUSTOMER') and @addressPermissionEvaluator.isOwner(#id, authentication.principal)")
 	@PutMapping("/{id}")
 	public ResAddressDto updateAddress(
 		@PathVariable UUID id,
@@ -55,7 +79,24 @@ public class AddressController {
 		return addressService.updateAddress(id, requestDto);
 	}
 
-	@PreAuthorize("@addressPermissionEvaluator.isOwner(#id, authentication.principal)")
+	/**
+	 * 기본 배송지 설정 API
+	 * PUT /v1/addresses/{id}/default
+	 */
+	@PreAuthorize("hasRole('CUSTOMER') and @addressPermissionEvaluator.isOwner(#id, authentication.principal)")
+	@PutMapping("/{id}/default")
+	public ResponseEntity<ResAddressDto> setDefaultAddress(
+		@PathVariable UUID id,
+		@AuthenticationPrincipal UserDetailsImpl user
+	) {
+		return ResponseEntity.ok(addressService.setDefaultAddress(id, user));
+	}
+
+	/**
+	 * 주소 삭제 API
+	 * DELETE /v1/addresses/{id}
+	 */
+	@PreAuthorize("hasRole('CUSTOMER') and @addressPermissionEvaluator.isOwner(#id, authentication.principal)")
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> deleteAddress(@PathVariable UUID id, @AuthenticationPrincipal UserDetailsImpl user) {
 		addressService.deleteAddress(id, user);

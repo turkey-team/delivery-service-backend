@@ -4,19 +4,21 @@ import java.util.UUID;
 
 import com.sparta.delivery.backend.address.entity.Address;
 
+import lombok.Builder;
 import lombok.Getter;
 
+@Builder
 @Getter
 public class ResAddressDto {
 	private UUID addressId;
 	private String address;
-
-	public ResAddressDto(UUID addressId, String address) {
-		this.addressId = addressId;
-		this.address = address;
-	}
+	private boolean isDefault;
 
 	public static ResAddressDto from(Address address) {
-		return new ResAddressDto(address.getId(), address.getAddress());
+		return ResAddressDto.builder()
+			.addressId(address.getId())
+			.address(address.getAddress())
+			.isDefault(address.getIsDefault())
+			.build();
 	}
 }
