@@ -3,17 +3,19 @@ package com.sparta.delivery.backend.ai.controller;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.sparta.delivery.backend.ai.dto.AiPromptCreateRequestDto;
-import com.sparta.delivery.backend.ai.dto.AiPromptCreateResponseDto;
-import com.sparta.delivery.backend.ai.dto.AiPromptReadResponseDto;
+import com.sparta.delivery.backend.ai.dto.ReqCreateAiPromptDto;
+import com.sparta.delivery.backend.ai.dto.ResCreateAiPromptDto;
+import com.sparta.delivery.backend.ai.dto.ResReadAiPromptDto;
 import com.sparta.delivery.backend.ai.service.AiPromptService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -24,15 +26,17 @@ public class AiPromptController {
 	private final AiPromptService aiPromptService;
 
 	@PostMapping
-	public ResponseEntity<AiPromptCreateResponseDto> createAiPrompt(@RequestBody AiPromptCreateRequestDto requestDto) {
-		AiPromptCreateResponseDto responseDto = aiPromptService.createAiPrompt(requestDto);
+	@PreAuthorize("isAuthenticated() && hasRole('OWNER')")
+	public ResponseEntity<ResCreateAiPromptDto> createAiPrompt(@Valid @RequestBody ReqCreateAiPromptDto requestDto) {
+		ResCreateAiPromptDto responseDto = aiPromptService.createAiPrompt(requestDto);
 
 		return ResponseEntity.ok(responseDto);
 	}
 
 	@GetMapping
-	public ResponseEntity<Page<AiPromptReadResponseDto>> getAllAiPrompt(Pageable pageable) {
-		Page<AiPromptReadResponseDto> responseDtoList = aiPromptService.getAllAiPrompts(pageable);
+	@PreAuthorize("isAuthenticated() && hasRole('MANAGER')")
+	public ResponseEntity<Page<ResReadAiPromptDto>> getAllAiPrompt(Pageable pageable) {
+		Page<ResReadAiPromptDto> responseDtoList = aiPromptService.getAllAiPrompts(pageable);
 
 		return ResponseEntity.ok(responseDtoList);
 	}

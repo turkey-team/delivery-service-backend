@@ -1,6 +1,7 @@
 package com.sparta.delivery.backend.manager.entity;
 
 import com.sparta.delivery.backend.common.BaseEntity;
+import com.sparta.delivery.backend.store.entity.Store;
 import com.sparta.delivery.backend.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -35,4 +36,5 @@ public class Manager extends BaseEntity {
         this.phoneNumber = phoneNumber;
         this.email = email;
     }
+
 }

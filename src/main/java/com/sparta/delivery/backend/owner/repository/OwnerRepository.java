@@ -10,5 +10,7 @@ import com.sparta.delivery.backend.owner.entity.Owner;
 
 @Repository
 public interface OwnerRepository extends JpaRepository<Owner, UUID> {
+
+	Owner findByUser_PublicId(UUID publicId);
 	Optional<Owner> findByUserId(Long id);
 }

@@ -13,10 +13,12 @@ import com.sparta.delivery.backend.region.dto.ResReadSigunguDto;
 import com.sparta.delivery.backend.region.dto.ResUpdateSigunguDto;
 import com.sparta.delivery.backend.region.entity.Sido;
 import com.sparta.delivery.backend.region.entity.Sigungu;
+import com.sparta.delivery.backend.region.exception.RegionAlreadyExistsException;
+import com.sparta.delivery.backend.region.exception.RegionDuplicateRequestException;
+import com.sparta.delivery.backend.region.exception.RegionNotFoundException;
 import com.sparta.delivery.backend.region.repository.SidoRepository;
 import com.sparta.delivery.backend.region.repository.SigunguRepository;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,42 +32,65 @@ public class SigunguService {
 
 	// 시·군·구 생성
 	@Transactional
-	public ResCreateSigunguDto createSigungu(UUID sidoId, ReqCreateSigunguDto requestDto) {
-		Sido sido = sidoRepository.findById(sidoId).orElseThrow(() -> {
+	public List<ResCreateSigunguDto> createSigungus(UUID sidoId, List<ReqCreateSigunguDto> requestDtoList) {
+		Sido sido = sidoRepository.findByIdCustom(sidoId).orElseThrow(() -> {
 			log.warn("시/도 지역 검색 실패");
-			return new EntityNotFoundException("존재하지 않는 시/도입니다.");
+			return new RegionNotFoundException("존재하지 않는 시/도입니다.");
 		});
 
-		if (sigunguRepository.existsByNameAndSido(requestDto.getName(), sido)) {
+		List<String> names = requestDtoList.stream()
+			.map(ReqCreateSigunguDto::getName)
+			.distinct()
+			.toList();
+
+		if (names.size() != requestDtoList.size()) {
+			log.warn("시/군/구 지역 이름 중복 : Request");
+			throw new RegionDuplicateRequestException("요청에 중복된 시/도 이름이 포함되어 있습니다.");
+		}
+
+		if (sigunguRepository.existsByNameInAndSidoCustom(names, sido)) {
 			log.warn("시/군/구 지역 이름 중복");
-			throw new IllegalArgumentException("이미 존재하는 시/군/구 이름입니다.");
+			throw new RegionAlreadyExistsException("이미 존재하는 시/군/구 이름이 포함되어 있습니다.");
 		}
 
-		if (sigunguRepository.existsByCode(requestDto.getCode())) {
+		List<String> codes = requestDtoList.stream()
+			.map(ReqCreateSigunguDto::getCode)
+			.distinct()
+			.toList();
+
+		if (codes.size() != requestDtoList.size()) {
+			log.warn("시/군/구 지역 코드 중복 : Request");
+			throw new RegionDuplicateRequestException("요청에 중복된 시/도 코드가 포함되어 있습니다.");
+		}
+
+		if (sigunguRepository.existsByCodeInCustom(codes)) {
 			log.warn("시/군/구 지역 코드 중복");
-			throw new IllegalArgumentException("이미 존재하는 시/군/구 코드입니다.");
+			throw new RegionAlreadyExistsException("이미 존재하는 시/군/구 코드가 포함되어 있습니다.");
 		}
 
-		Sigungu sigungu = Sigungu.builder()
-			.sido(sido)
-			.name(requestDto.getName())
-			.code(requestDto.getCode())
-			.build();
+		List<Sigungu> sigunguList = requestDtoList.stream()
+			.map(requestDto -> Sigungu.builder()
+				.sido(sido)
+				.name(requestDto.getName())
+				.code(requestDto.getCode())
+				.build()
+			)
+			.toList();
 
-		Sigungu savedSigungu = sigunguRepository.save(sigungu);
-
-		return ResCreateSigunguDto.from(savedSigungu);
+		return sigunguRepository.saveAll(sigunguList).stream()
+			.map(ResCreateSigunguDto::from)
+			.toList();
 	}
 
 	// 시·군·구 목록 조회
 	@Transactional(readOnly = true)
 	public List<ResReadSigunguDto> getAllSigungu(UUID sidoId) {
-		Sido sido = sidoRepository.findById(sidoId).orElseThrow(() -> {
+		Sido sido = sidoRepository.findByIdCustom(sidoId).orElseThrow(() -> {
 			log.warn("시/도 지역 검색 실패");
-			return new EntityNotFoundException("존재하지 않는 시/도입니다.");
+			return new RegionNotFoundException("존재하지 않는 시/도입니다.");
 		});
 
-		return sigunguRepository.findAllBySido(sido).stream()
+		return sigunguRepository.findAllBySidoCustom(sido).stream()
 			.map(ResReadSigunguDto::from)
 			.toList();
 	}
@@ -73,24 +98,25 @@ public class SigunguService {
 	// 시·군·구 수정
 	@Transactional
 	public ResUpdateSigunguDto updateSigungu(UUID sidoId, UUID sigunguId, ReqUpdateSigunguDto requestDto) {
-		Sido sido = sidoRepository.findById(sidoId).orElseThrow(() -> {
+		Sido sido = sidoRepository.findByIdCustom(sidoId).orElseThrow(() -> {
 			log.warn("시/도 지역 검색 실패");
-			return new EntityNotFoundException("존재하지 않는 시/도입니다.");
+			return new RegionNotFoundException("존재하지 않는 시/도입니다.");
 		});
 
-		Sigungu sigungu = sigunguRepository.findByIdAndSido(sigunguId, sido).orElseThrow(() -> {
+		Sigungu sigungu = sigunguRepository.findByIdAndSidoCustom(sigunguId, sido).orElseThrow(() -> {
 			log.warn("시/군/구 지역 검색 실패");
-			return new EntityNotFoundException("존재하지 않는 시/군/구입니다.");
+			return new RegionNotFoundException("존재하지 않는 시/군/구입니다.");
 		});
 
-		if (sigunguRepository.existsByNameAndSidoAndIdNot(requestDto.getName(), sido, sigungu.getId())) {
+		if (sigunguRepository.existsByNameAndSidoAndIdNotCustom(requestDto.getName(), sido,
+			sigungu.getId())) {
 			log.warn("시/군/구 지역 이름 중복");
-			throw new IllegalArgumentException("이미 존재하는 시/군/구 이름입니다.");
+			throw new RegionAlreadyExistsException("이미 존재하는 시/군/구 이름입니다.");
 		}
 
-		if (sigunguRepository.existsByCodeAndIdNot(requestDto.getCode(), sigungu.getId())) {
+		if (sigunguRepository.existsByCodeAndIdNotCustom(requestDto.getCode(), sigungu.getId())) {
 			log.warn("시/군/구 지역 코드 중복");
-			throw new IllegalArgumentException("이미 존재하는 시/군/구 코드입니다.");
+			throw new RegionAlreadyExistsException("이미 존재하는 시/군/구 코드입니다.");
 		}
 
 		sigungu.update(sido, requestDto.getName(), requestDto.getCode());
@@ -100,19 +126,18 @@ public class SigunguService {
 
 	// 시·군·구 삭제
 	@Transactional
-	public void deleteSigungu(UUID sidoId, UUID sigunguId) {
-		Sido sido = sidoRepository.findById(sidoId).orElseThrow(() -> {
+	public void deleteSigungu(UUID sidoId, UUID sigunguId, Long loginUserId) {
+		Sido sido = sidoRepository.findByIdCustom(sidoId).orElseThrow(() -> {
 			log.warn("시/도 지역 검색 실패");
-			return new EntityNotFoundException("존재하지 않는 시/도입니다.");
+			return new RegionNotFoundException("존재하지 않는 시/도입니다.");
 		});
 
-		Sigungu sigungu = sigunguRepository.findByIdAndSido(sigunguId, sido).orElseThrow(() -> {
+		Sigungu sigungu = sigunguRepository.findByIdAndSidoCustom(sigunguId, sido).orElseThrow(() -> {
 			log.warn("시/군/구 지역 검색 실패");
-			return new EntityNotFoundException("존재하지 않는 시/군/구입니다.");
+			return new RegionNotFoundException("존재하지 않는 시/군/구입니다.");
 		});
 
-		// 임시로 null을 넘김
-		sigungu.softDelete(null);
+		sigungu.softDelete(loginUserId);
 	}
 
 }
