@@ -34,47 +34,60 @@ dependencyManagement {
 }
 
 dependencies {
-
+    // Swagger
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13'
+    // SpringDoc-openapi-starter-webmvc-ui 의존성 라이브러리 보안 취약점 해결 (CVE-2025-48924)
+    implementation 'org.apache.commons:commons-lang3:3.18.0'
+
+    // Spring AI OpenAI Model Starter
     implementation 'org.springframework.ai:spring-ai-starter-model-openai'
 
-    //Querydsl 추가
-    implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
-
+    // Querydsl
+    implementation 'com.querydsl:querydsl-jpa:5.1.0:jakarta'
     annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
     annotationProcessor "jakarta.annotation:jakarta.annotation-api"
     annotationProcessor "jakarta.persistence:jakarta.persistence-api"
 
-    //email sender
+    // Email sender
     implementation("org.springframework.boot:spring-boot-starter-mail:3.5.0")
 
-
+    // Spring Data JPA
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    // Spring Web
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    //validation
+
+    // Validation
     implementation 'org.springframework.boot:spring-boot-starter-validation'
-    // redis
+
+    // Redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
     // JWT
     compileOnly group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.11.5'
     runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.11.5'
     runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.11.5'
+
     // Security
     implementation 'org.springframework.boot:spring-boot-starter-security'
-    //postgresSQL
+
+    // PostgresSQL
     runtimeOnly 'org.postgresql:postgresql'
-    //H2
+
+    // H2
     runtimeOnly 'com.h2database:h2'
-    //lombok
+
+    // Lombok
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-
     // Google Gen AI Java SDK
     implementation 'com.google.genai:google-genai:1.16.0'
 
+    // AWS S3
+    implementation platform('software.amazon.awssdk:bom:2.20.26')
+    implementation 'software.amazon.awssdk:s3'
 }
 
 tasks.named('test') {
