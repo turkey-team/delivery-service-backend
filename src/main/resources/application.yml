@@ -9,3 +9,4 @@ spring:
       - aistudio
       - redis
       - mail
+      - s3

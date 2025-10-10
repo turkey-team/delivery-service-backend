@@ -1,0 +1,9 @@
+cloud:
+  aws:
+    credentials:
+      access-key: ${AWS_ACCESS_KEY}
+      secret-key: ${AWS_SECRET_KEY}
+    region: ap-northeast-2  # 서울 리전
+    s3:
+      bucket: ${AWS_S3_BUCKET}
+      presigned-url-expiration-minutes: 5m
