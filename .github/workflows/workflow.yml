@@ -66,8 +66,8 @@ jobs:
               -e JWT_REFRESH_TOKEN_SECRET="${{ secrets.JWT_REFRESH_TOKEN_SECRET }}" \
               -e MAIL_USERNAME="${{ secrets.MAIL_USERNAME }}" \
               -e MAIL_PASSWORD="${{ secrets.MAIL_PASSWORD }}" \
-              -e AWS_ACCESS_KEY="${{ AWS_ACCESS_KEY_ID }}" \
-              -e AWS_SECRET_KEY="${{ AWS_SECRET_SECRET_KEY }}" \
-              -e AWS_S3_BUCKET="${{ AWS_S3_BUCKET }}" \
+              -e AWS_ACCESS_KEY="${{ secrets.AWS_ACCESS_KEY_ID }}" \
+              -e AWS_SECRET_KEY="${{ secrets.AWS_SECRET_SECRET_KEY }}" \
+              -e AWS_S3_BUCKET="${{ secrets.AWS_S3_BUCKET }}" \
               -e SPRING_PROFILES_ACTIVE=prod \
               ${{ secrets.DOCKERHUB_USERNAME }}/turkey-backend:latest
