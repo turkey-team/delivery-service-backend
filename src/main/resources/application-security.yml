@@ -46,8 +46,8 @@ spring:
 
 jwt:
   access:
-    secret: "QDf/pEIa8OtEcpGD1ypymS6z2cGOi+VQF+lVg+vDN7Q="
+    secret: ${JWT_ACCESS_TOKEN_SECRET}
     expiration: 1h  # 한시간
   refresh:
-    secret: "IKot+z0udp1tT6Iyg7wWXJ0HYOUyNP3vSp7Z94R/okY="
+    secret: ${JWT_REFRESH_TOKEN_SECRET}
     expiration: 7d # 일주일
