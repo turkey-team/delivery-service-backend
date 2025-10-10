@@ -9,4 +9,6 @@ import com.sparta.delivery.backend.reply.entity.Reply;
 
 public interface ReplyRepository extends JpaRepository<Reply, UUID> {
 	List<Reply> findByReviewId(UUID reviewId);
+
+	boolean existsByReviewId(UUID reviewId);
 }

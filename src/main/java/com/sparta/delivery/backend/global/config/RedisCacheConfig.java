@@ -9,9 +9,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 @Configuration
 @EnableCaching
@@ -19,6 +23,15 @@ public class RedisCacheConfig {
 
 	@Bean
 	public CacheManager reviewCacheManager(RedisConnectionFactory redisConnectionFactory) {
+		System.out.println(">>> RedisCacheManager(reviewCacheManager) 생성됨 <<<");
+
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.registerModule(new JavaTimeModule()); // Instant, LocalDateTime 등 지원
+		objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+		GenericJackson2JsonRedisSerializer serializer =
+			new GenericJackson2JsonRedisSerializer(objectMapper);
+
 		RedisCacheConfiguration redisCacheConfiguration = RedisCacheConfiguration
 			.defaultCacheConfig()
 			.serializeKeysWith(
@@ -27,7 +40,7 @@ public class RedisCacheConfig {
 			)
 			.serializeValuesWith(
 				RedisSerializationContext.SerializationPair.fromSerializer(
-					new Jackson2JsonRedisSerializer<Object>(Object.class)
+					serializer
 				)
 			)
 			.entryTtl(Duration.ofMinutes(5L));
