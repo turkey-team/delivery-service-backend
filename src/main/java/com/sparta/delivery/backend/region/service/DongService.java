@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sparta.delivery.backend.region.dto.ReqCreateDongDto;
+import com.sparta.delivery.backend.region.dto.ReqUpdateDongDto;
 import com.sparta.delivery.backend.region.dto.ResCreateDongDto;
 import com.sparta.delivery.backend.region.dto.ResReadDongDto;
 import com.sparta.delivery.backend.region.dto.ResUpdateDongDto;
@@ -18,7 +19,6 @@ import com.sparta.delivery.backend.region.exception.RegionNotFoundException;
 import com.sparta.delivery.backend.region.repository.DongRepository;
 import com.sparta.delivery.backend.region.repository.SigunguRepository;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -45,7 +45,7 @@ public class DongService {
 
 		if (names.size() != requestDtoList.size()) {
 			log.warn("동 지역 이름 중복 : Request");
-			throw new RegionDuplicateRequestException("요청에 중복된 시/도 이름이 포함되어 있습니다.");
+			throw new RegionDuplicateRequestException("요청에 중복된 동 이름이 포함되어 있습니다.");
 		}
 
 		if (dongRepository.existsByNameInAndSigunguCustom(names, sigungu)) {
@@ -55,11 +55,12 @@ public class DongService {
 
 		List<String> codes = requestDtoList.stream()
 			.map(ReqCreateDongDto::getCode)
+			.distinct()
 			.toList();
 
 		if (codes.size() != requestDtoList.size()) {
 			log.warn("동 지역 코드 중복 : Request");
-			throw new RegionDuplicateRequestException("요청에 중복된 시/도 코드가 포함되어 있습니다.");
+			throw new RegionDuplicateRequestException("요청에 중복된 동 코드가 포함되어 있습니다.");
 		}
 
 		if (dongRepository.existsByCodeInCustom(codes)) {
@@ -85,7 +86,7 @@ public class DongService {
 	public List<ResReadDongDto> getAllDong(UUID sigunguId) {
 		Sigungu sigungu = sigunguRepository.findByIdCustom(sigunguId).orElseThrow(() -> {
 			log.warn("시/군/구 지역 검색 실패");
-			return new EntityNotFoundException("존재하지 않는 시/군/구입니다.");
+			return new RegionNotFoundException("존재하지 않는 시/군/구입니다.");
 		});
 
 		return dongRepository.findAllBySigunguCustom(sigungu).stream()
@@ -95,7 +96,7 @@ public class DongService {
 
 	// 동 수정
 	@Transactional
-	public ResUpdateDongDto updateDong(UUID sigunguId, UUID dongId, ReqCreateDongDto requestDto) {
+	public ResUpdateDongDto updateDong(UUID sigunguId, UUID dongId, ReqUpdateDongDto requestDto) {
 		Sigungu sigungu = sigunguRepository.findByIdCustom(sigunguId).orElseThrow(() -> {
 			log.warn("시/군/구 지역 검색 실패");
 			return new RegionNotFoundException("존재하지 않는 시/군/구입니다.");
