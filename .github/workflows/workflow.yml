@@ -60,4 +60,4 @@ jobs:
             docker stop turkey-backend || true
             docker rm turkey-backend || true
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/turkey-backend:latest
-            docker run -d --name turkey-backend -p 8080:8080 ${{steps.login-ecr.outputs.registry}}/turkey-backend:latest
+            docker run -d --name turkey-backend -p 80:8080 ${{ secrets.DOCKERHUB_USERNAME }}/turkey-backend:latest
