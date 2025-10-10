@@ -16,3 +16,13 @@ spring:
     redis:
       host: localhost
       port: 6379
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+  data:
+    redis:
+      host: redis-container
+      port: 6379
