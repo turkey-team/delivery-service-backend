@@ -65,6 +65,8 @@ public class WebSecurityConfig {
 					.requestMatchers("/error").permitAll()
 					.requestMatchers("/h2/**").permitAll()
 					.requestMatchers("/v1/customers").permitAll()
+					.requestMatchers("/v1/email/send-verification").permitAll()
+					.requestMatchers("/v1/email/verify").permitAll()
 					//TODO: 추후 개발 완성전 manager등록 API 필터 거치도록 변경
 					.requestMatchers("/v1/managers").permitAll()
 					.requestMatchers("/v1/owners").permitAll()
