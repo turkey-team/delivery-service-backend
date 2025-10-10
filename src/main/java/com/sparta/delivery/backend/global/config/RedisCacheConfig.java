@@ -23,7 +23,6 @@ public class RedisCacheConfig {
 
 	@Bean
 	public CacheManager reviewCacheManager(RedisConnectionFactory redisConnectionFactory) {
-		System.out.println(">>> RedisCacheManager(reviewCacheManager) 생성됨 <<<");
 
 		ObjectMapper objectMapper = new ObjectMapper();
 		objectMapper.registerModule(new JavaTimeModule()); // Instant, LocalDateTime 등 지원

@@ -172,7 +172,7 @@ public class ReplyService {
 		}
 
 		if (owner != null) {
-			if (!reply.getOwner().getId().equals(owner.getId())) {
+			if (!reply.getWriterId().equals(owner.getId())) {
 				throw new UnauthorizedException("해당 가게의 점주만 리뷰 답글을 수정할 수 있습니다.");
 			}
 		}
