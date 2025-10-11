@@ -73,5 +73,6 @@ jobs:
               -e DB_URL="${{ secrets.DB_URL }}" \
               -e DB_USERNAME="${{ secrets.DB_USERNAME }}" \
               -e DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
+              -e OPEN_API_KEY="${{ secrets.OPEN_API_KEY }}" \
               -e SPRING_PROFILES_ACTIVE=prod \
               ${{ secrets.DOCKERHUB_USERNAME }}/turkey-backend:latest
