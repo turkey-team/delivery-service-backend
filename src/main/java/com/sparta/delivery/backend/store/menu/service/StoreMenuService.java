@@ -83,7 +83,7 @@ public class StoreMenuService {
 		Pageable pageable = PageRequest.of(page, size, Sort.by("sortOrder").ascending());
 
 		Page<StoreMenu> storeMenuList =
-			storeMenuRepository.findAllByStoreIdAndDeletedAtIsNull(storeId, pageable, null);
+			storeMenuRepository.findAllByStoreIdAndDeletedAtIsNull(storeId, pageable);
 
 		return storeMenuList.map(ResGetListStoreMenuDto::new);
 	}
