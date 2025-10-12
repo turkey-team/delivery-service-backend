@@ -5,10 +5,12 @@ import java.util.List;
 
 import com.sparta.delivery.backend.common.BaseEntity;
 import com.sparta.delivery.backend.customer.entity.Customer;
+import com.sparta.delivery.backend.order.dto.ReqUpdateOrderStatusDto;
 import com.sparta.delivery.backend.order.enums.OrderStatus;
 import com.sparta.delivery.backend.payment.entity.PayMethod;
 import com.sparta.delivery.backend.region.entity.Dong;
 import com.sparta.delivery.backend.store.entity.Store;
+import com.sparta.delivery.backend.user.entity.User;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -95,5 +97,20 @@ public class Order extends BaseEntity {
 		this.cancelledAt = cancelledAt;
 		this.cancelledBy = cancelledBy;
 		this.cancelledReason = cancelledReason;
+	}
+
+	public void updateOrderStatus(User user, ReqUpdateOrderStatusDto reqUpdateOrderStatusDto) {
+		if (this.orderStatus != OrderStatus.ORDERED) {
+			throw new IllegalStateException("이미 처리된 주문입니다.");
+		}
+
+		this.orderStatus = reqUpdateOrderStatusDto.getOrderStatus();
+
+		// 주문 거절하였을 때
+		if (this.orderStatus == OrderStatus.CANCELLED) {
+			this.cancelledAt = Instant.now();
+			this.cancelledBy = user.getId();
+			this.cancelledReason = reqUpdateOrderStatusDto.getCancelledReason();
+		}
 	}
 }
