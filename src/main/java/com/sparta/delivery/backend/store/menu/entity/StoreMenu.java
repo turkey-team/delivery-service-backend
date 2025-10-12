@@ -1,10 +1,12 @@
 package com.sparta.delivery.backend.store.menu.entity;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 import com.sparta.delivery.backend.common.BaseEntity;
 import com.sparta.delivery.backend.image.entity.Image;
+import com.sparta.delivery.backend.order.entity.OrderMenu;
 import com.sparta.delivery.backend.store.entity.Store;
 import com.sparta.delivery.backend.store.menu.dto.ReqCreateStoreMenuDto;
 import com.sparta.delivery.backend.store.menu.dto.ReqUpdateStoreMenuDto;
@@ -17,6 +19,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
@@ -65,6 +68,9 @@ public class StoreMenu extends BaseEntity {
 	// hiddenAt 로그 여부로 숨기기/보이기 설정하려면 Instant 가 적합
 	@Column(name = "hidden_at")
 	private Instant hiddenAt;
+
+	@OneToMany(mappedBy = "order")
+	private List<OrderMenu> orderMenus;
 
 	@Builder
 	private StoreMenu(ReqCreateStoreMenuDto reqCreateStoreMenuDto, Store store, Image image) {
