@@ -77,7 +77,7 @@ public class OrderController {
 		return ResponseEntity.ok(order);
 	}
 
-	// Owner 가 {주문 수락 -> 배달 소요 시간 응답 or 주문 취소 (5분 이내) -> 취소 사유 전달}
+	// Owner 가 주문 수락 or 주문 취소 -> 취소 사유 전달
 	@PatchMapping("/{orderId}/status")
 	public ResponseEntity<Void> updateOrderStatusDto(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
