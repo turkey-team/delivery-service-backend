@@ -24,6 +24,7 @@ import com.sparta.delivery.backend.order.dto.ReqUpdateOrderStatusDto;
 import com.sparta.delivery.backend.order.dto.ResGetListOrderDto;
 import com.sparta.delivery.backend.order.dto.ResGetOrderDto;
 import com.sparta.delivery.backend.order.entity.Order;
+import com.sparta.delivery.backend.order.entity.OrderMenu;
 import com.sparta.delivery.backend.order.enums.OrderStatus;
 import com.sparta.delivery.backend.order.repository.OrderMenuRepository;
 import com.sparta.delivery.backend.order.repository.OrderRepository;
@@ -65,10 +66,6 @@ public class OrderService {
 		List<Cart> carts = cartRepository.findAllByCustomerIdAndStoreIdAndDeletedAtIsNull(customer.getId(), storeId);
 		if (carts.isEmpty()) throw new IllegalStateException("장바구니가 비어 있습니다.");
 
-		// 장바구니에 담긴 메뉴별 수량 계산
-		Map<UUID, Long> menuCount = carts.stream()
-			.collect(Collectors.groupingBy(cart -> cart.getMenu().getId(), Collectors.counting()));
-
 		// 대표 주소 조회
 		UserDetailsImpl userDetailsImpl = new UserDetailsImpl(user);
 		ResAddressDto defaultAddress = addressService.getDefaultAddress(userDetailsImpl);
@@ -94,8 +91,8 @@ public class OrderService {
 
 		// 주문 상세 생성 & 장바구니 비우기
 		carts.forEach(cart -> {
-			orderItemRepository.save(new OrderItem(savedOrder, cart.getMenu(), cart.getMenu().getPrice()));
-			cart.softDelete();
+			orderMenuRepository.save(new OrderMenu(savedOrder, cart.getMenu()));
+			cart.softDelete(); // softDelete 필요..?
 		});
 		cartRepository.saveAll(carts);
 	}
@@ -104,7 +101,7 @@ public class OrderService {
 	public Page<ResGetListOrderDto> getOrdersByUserId(User user, int page, int size) {
 		userRepository.findById(user.getId())
 			.orElseThrow(() -> new IllegalStateException("고객 정보가 존재하지 않습니다."));
-		return orderRepository.findAllByCustomerId(customer.getId(), PageRequest.of(page, size))
+		return orderRepository.findOrdersByUserId(user.getId(), PageRequest.of(page, size))
 			.map(ResGetListOrderDto::from);
 	}
 
