@@ -237,7 +237,7 @@ public class ReviewRedisCacheTest {
 		// 배송 완료가 아닌 주문 생성
 		Order incompleteOrder = new Order();
 		incompleteOrder.setCustomer(customerRepository.findAll().get(0));
-		incompleteOrder.setOrderStatus(OrderStatus.ORDERING); // 미완료 상태
+		incompleteOrder.setOrderStatus(OrderStatus.ORDERED); // 미완료 상태
 		orderRepository.save(incompleteOrder);
 
 		ReqCreateReviewDto reviewDto = new ReqCreateReviewDto();
