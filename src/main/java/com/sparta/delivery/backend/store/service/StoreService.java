@@ -324,7 +324,7 @@ public class StoreService {
 			.storeName(store.getName())
 			.addressDetails(store.getAddressDetails())
 			.phoneNumber(store.getPhoneNumber())
-			//.regionDong(store.getRegionDong().getCode()) //dong 연결되면 해제
+			.regionDong(store.getRegionDong().getCode()) //dong 연결되면 해제
 			.build();
 
 		return resUpdateStoreInfoDto;
