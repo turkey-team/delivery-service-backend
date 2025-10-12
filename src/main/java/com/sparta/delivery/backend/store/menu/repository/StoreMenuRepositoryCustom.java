@@ -14,4 +14,7 @@ public interface StoreMenuRepositoryCustom {
 
 	// 정렬 순서가 특정 값 이상인 메뉴 조회 (메뉴 reorder 시 활용)
 	List<StoreMenu> findAllByStoreIdAndSortOrderGreaterThanEqualAndDeletedAtIsNull(UUID storeId, int sortOrder);
+
+	// 현재 store의 최대 sortOrder 조회
+	Integer findMaxSortOrderByStore(UUID storeId);
 }

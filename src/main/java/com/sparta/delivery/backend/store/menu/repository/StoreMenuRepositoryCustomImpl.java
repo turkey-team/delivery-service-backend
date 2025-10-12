@@ -61,4 +61,15 @@ public class StoreMenuRepositoryCustomImpl implements StoreMenuRepositoryCustom 
 			.orderBy(sm.sortOrder.asc())
 			.fetch();
 	}
+
+	@Override
+	public Integer findMaxSortOrderByStore(UUID storeId) {
+		QStoreMenu sm = QStoreMenu.storeMenu;
+
+		return queryFactory
+			.select(sm.sortOrder.max())
+			.from(sm)
+			.where(sm.store.id.eq(storeId), sm.deletedAt.isNull())
+			.fetchOne();
+	}
 }
