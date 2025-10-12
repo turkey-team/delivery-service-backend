@@ -74,7 +74,7 @@ public class Store extends BaseEntity {
 	}
 
 	public void updateReview(int oldRate, int newRate) {
-		this.reviewRate = (this.reviewRate * this.reviewCnt - oldRate + newRate);
+		this.reviewRate = (this.reviewRate * this.reviewCnt - oldRate + newRate) / this.reviewCnt;
 	}
 
 	public void deleteReview(int rate) {
@@ -95,8 +95,7 @@ public class Store extends BaseEntity {
 		, int deliveryFee
 		, Dong regionDong
 		, StoreStatusEnum status
-		, String phoneNumber)
-	{
+		, String phoneNumber) {
 		this.owner = owner;
 		this.name = name;
 		this.addressDetails = addressDetails;
@@ -108,12 +107,11 @@ public class Store extends BaseEntity {
 		this.phoneNumber = phoneNumber;
 	}
 
-	public StoreImage addImage(Store store, Image image, StoreImageStatusEnum status)
-	{
+	public StoreImage addImage(Store store, Image image, StoreImageStatusEnum status) {
 		return StoreImage.builder().store(store).image(image).status(status).build();
 	}
 
-	public void updateStoreInfo(ReqUpdateStoreInfoDto requestDto, Dong dong){
+	public void updateStoreInfo(ReqUpdateStoreInfoDto requestDto, Dong dong) {
 		this.name = requestDto.getStoreName();
 		this.addressDetails = requestDto.getAddressDetails();
 		this.phoneNumber = requestDto.getPhoneNumber();
@@ -126,8 +124,7 @@ public class Store extends BaseEntity {
 		this.minOrderPrice = minOrderPrice;
 	}
 
-	public void updateStoreStatus(StoreStatusEnum status)
-	{
+	public void updateStoreStatus(StoreStatusEnum status) {
 		this.status = status;
 	}
 }

@@ -126,10 +126,10 @@ public class ReviewService {
 
 		reviewRepository.save(review);
 
+		store.addReview(review.getRate());
 		em.flush();
 		em.clear();
-
-		store.addReview(review.getRate());
+		
 		evictReviewCache(storeId);
 
 		Owner owner = store.getOwner();
