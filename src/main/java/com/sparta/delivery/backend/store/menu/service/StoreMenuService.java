@@ -18,7 +18,8 @@ import com.sparta.delivery.backend.store.menu.dto.ReqCreateStoreMenuDto;
 import com.sparta.delivery.backend.store.menu.dto.ReqUpdateSortOrderDto;
 import com.sparta.delivery.backend.store.menu.dto.ReqUpdateStoreMenuDto;
 import com.sparta.delivery.backend.store.menu.dto.ReqUpdateVisibilityDto;
-import com.sparta.delivery.backend.store.menu.dto.ResStoreMenuDto;
+import com.sparta.delivery.backend.store.menu.dto.ResGetListStoreMenuDto;
+import com.sparta.delivery.backend.store.menu.dto.ResGetStoreMenuDto;
 import com.sparta.delivery.backend.store.menu.entity.StoreMenu;
 import com.sparta.delivery.backend.store.menu.repository.StoreMenuRepository;
 import com.sparta.delivery.backend.store.repository.StoreRepository;
@@ -63,18 +64,18 @@ public class StoreMenuService {
 	/** 조회 **/
 	// 단일 메뉴 조회 (세부)
 	@Transactional(readOnly = true)
-	public ResStoreMenuDto getStoreMenuByStoreMenuId(
+	public ResGetStoreMenuDto getStoreMenuByStoreMenuId(
 		UUID storeId,
 		UUID menuId
 	) {
 		validateStore(storeId);
 		StoreMenu storeMenu = findStoreMenu(storeId, menuId);
-		return new ResStoreMenuDto(storeMenu);
+		return new ResGetStoreMenuDto(storeMenu);
 	}
 
 	// 전체 메뉴 조회 (페이징)
 	@Transactional(readOnly = true)
-	public Page<ResStoreMenuDto> getStoreMenusByStoreId(
+	public Page<ResGetListStoreMenuDto> getStoreMenusByStoreId(
 		UUID storeId,
 		int page,
 		int size
@@ -84,7 +85,7 @@ public class StoreMenuService {
 		Page<StoreMenu> storeMenuList =
 			storeMenuRepository.findAllByStoreIdAndDeletedAtIsNull(storeId, pageable, null);
 
-		return storeMenuList.map(ResStoreMenuDto::new);
+		return storeMenuList.map(ResGetListStoreMenuDto::new);
 	}
 
 	/** 수정 **/
