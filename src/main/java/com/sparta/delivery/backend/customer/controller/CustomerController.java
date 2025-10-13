@@ -114,7 +114,10 @@ public class CustomerController {
 	}
 
 	@Operation(summary = "비밀번호 재설정 요청", description = "이메일로 비밀번호 재설정 링크를 발송합니다")
-	@ApiResponse(responseCode = "200", description = "요청이 처리되었습니다")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "요청이 처리되었습니다"),
+		@ApiResponse(responseCode = "400", description = "잘못된 요청 데이터", content = @Content())
+	})
 	@PostMapping("/password-reset/request")
 	public ResponseEntity<ResPasswordResetRequestDto> requestPasswordReset(
 		@Valid @RequestBody ReqPasswordResetRequestDto requestDto
@@ -126,9 +129,11 @@ public class CustomerController {
 	}
 
 	@Operation(summary = "비밀번호 재설정 확인", description = "토큰을 사용하여 새 비밀번호로 재설정합니다")
-	@ApiResponse(responseCode = "200", description = "재설정 성공")
-	@ApiResponse(responseCode = "400", description = "유효하지 않거나 만료된 토큰", content = @Content())
-	@ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음", content = @Content())
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "재설정 성공"),
+		@ApiResponse(responseCode = "400", description = "유효하지 않거나 만료된 토큰", content = @Content()),
+		@ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음", content = @Content())
+	})
 	@PostMapping("/password-reset/confirm")
 	public ResponseEntity<Void> resetPassword(@Valid @RequestBody ReqPasswordResetDto requestDto) {
 		customerService.resetPassword(requestDto);
