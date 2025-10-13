@@ -14,9 +14,11 @@ import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.sparta.delivery.backend.category.entity.Category;
 import com.sparta.delivery.backend.category.repository.CategoryRepository;
@@ -79,11 +81,11 @@ public class StoreService {
 		Owner owner = ownerRepository.findByUser_PublicId(user.getPublicId());
 
 		if (owner == null && user.getRole() == UserRoleEnum.MANAGER){
-			owner = ownerRepository.findById(requestDto.getOwnerId()).orElse(null);
+			owner = ownerRepository.findById(requestDto.getOwnerId()).orElseThrow(()-> new ResponseStatusException(HttpStatus.BAD_REQUEST, "OwnerId가 적절하지 않습니다."));
 		}
 
 		// Region Dong 조회
-		Dong dong = dongRepository.findByCode(requestDto.getRegionCode()).orElseThrow(()->new IllegalArgumentException("존재하지 않는 주소지입니다."));
+		Dong dong = dongRepository.findByCode(requestDto.getRegionCode()).orElseThrow(()->new ResponseStatusException(HttpStatus.BAD_REQUEST,"존재하지 않는 주소지입니다."));
 
 		// 카테고리 조회
 
@@ -148,8 +150,8 @@ public class StoreService {
 
 	public ResGetStoreDto getStore(UUID storeId) {
 
-		Store store = storeRepository.findById(storeId).orElseThrow(()->new IllegalArgumentException("해당 가게가 존재하지 않습니다"));
-		StoreDetails details = storeDetailsRepository.findByStoreId(storeId).orElseThrow(()->new IllegalArgumentException("해당 가게가 존재하지 않습니다"));
+		Store store = storeRepository.findById(storeId).orElseThrow(()->new ResponseStatusException(HttpStatus.BAD_REQUEST,"해당 가게가 존재하지 않습니다"));
+		StoreDetails details = storeDetailsRepository.findByStoreId(storeId).orElseThrow(()->new ResponseStatusException(HttpStatus.BAD_REQUEST,"해당 가게가 존재하지 않습니다"));
 
 
 		StoreImage storeImage = storeImageRepository.findFirstByStoreIdAndStatusOrderByCreatedAtAsc(storeId, StoreImageStatusEnum.STORE);
@@ -175,12 +177,12 @@ public class StoreService {
 	public ResUpdateStoreInfoDto updateStoreInfo(UUID storeId, ReqUpdateStoreInfoDto requestDto, User user) {
 
 		// Store 검증
-		Store store = storeRepository.findById(storeId).orElseThrow(()-> new IllegalArgumentException("존재하지 않는 가게입니다."));
-		StoreDetails storeDetails = storeDetailsRepository.findByStoreId(storeId).orElseThrow(()-> new IllegalArgumentException("존재하지 않는 가게입니다."));
+		Store store = storeRepository.findById(storeId).orElseThrow(()-> new ResponseStatusException(HttpStatus.BAD_REQUEST,"존재하지 않는 가게입니다."));
+		StoreDetails storeDetails = storeDetailsRepository.findByStoreId(storeId).orElseThrow(()-> new ResponseStatusException(HttpStatus.BAD_REQUEST,"존재하지 않는 가게입니다."));
 
 		checkUserRole(user,store);
 
-		Dong dong = dongRepository.findByCode(requestDto.getRegionDong()).orElseThrow(()->new IllegalArgumentException("존재하지 않는 주소지입니다."));
+		Dong dong = dongRepository.findByCode(requestDto.getRegionDong()).orElseThrow(()->new ResponseStatusException(HttpStatus.BAD_REQUEST,"존재하지 않는 주소지입니다."));
 
 		// 현재 등록된 카테고리 조회
 		List<StoreCategory> currentCategories = store.getStoreCategories();
@@ -299,7 +301,7 @@ public class StoreService {
 				newImageMap.values().stream()
 					.filter(img -> img.getId().equals(imageId))
 					.findFirst()
-					.orElseThrow(() -> new IllegalStateException("요청된 이미지가 존재하지 않습니다."))
+					.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,"요청된 이미지가 존재하지 않습니다."))
 			);
 
 			StoreImage newStoreImage = StoreImage.builder()
@@ -334,8 +336,8 @@ public class StoreService {
 	public ResUpdateStoreDetailsDto updateStoreDetails(UUID storeId, @Valid ReqUpdateStoreDetailsDto requestDto, User user) {
 
 		// Store 검증
-		Store store = storeRepository.findById(storeId).orElseThrow(()-> new IllegalArgumentException("존재하지 않는 가게입니다."));
-		StoreDetails storeDetails = storeDetailsRepository.findByStoreId(storeId).orElseThrow(()-> new IllegalArgumentException("존재하지 않는 가게입니다."));
+		Store store = storeRepository.findById(storeId).orElseThrow(()-> new ResponseStatusException(HttpStatus.BAD_REQUEST,"존재하지 않는 가게입니다."));
+		StoreDetails storeDetails = storeDetailsRepository.findByStoreId(storeId).orElseThrow(()-> new ResponseStatusException(HttpStatus.BAD_REQUEST,"존재하지 않는 가게입니다."));
 
 		// Role 검증
 		checkUserRole(user,store);
@@ -383,7 +385,7 @@ public class StoreService {
 				categoryUUID = UUID.fromString(categoryId);
 			}
 			catch (IllegalArgumentException e){
-				throw new IllegalArgumentException("올바른 카테고리가 아닙니다.");
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"올바른 카테고리가 아닙니다.");
 			}
 		}
 
@@ -404,7 +406,7 @@ public class StoreService {
 	public ResUpdateStoreStatusDto updateStoreStatus(UUID storeId, @Valid ReqUpdateStoreStatusDto requestDto, User user) {
 
 		// Store 검증
-		Store store = storeRepository.findById(storeId).orElseThrow(()-> new IllegalArgumentException("존재하지 않는 가게입니다."));
+		Store store = storeRepository.findById(storeId).orElseThrow(()-> new ResponseStatusException(HttpStatus.BAD_REQUEST,"존재하지 않는 가게입니다."));
 
 		// Role 검증
 		checkUserRole(user,store);
@@ -413,7 +415,7 @@ public class StoreService {
 		StoreStatusEnum currentStatus = store.getStatus();
 		// 동일하면 Exception
 		if (currentStatus == requestDto.getStoreStatus()){
-			throw new IllegalArgumentException("현재와 동일한 상태로는 변경할 수 없습니다.");
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"현재와 동일한 상태로는 변경할 수 없습니다.");
 		}
 
 		store.updateStoreStatus(requestDto.getStoreStatus());
@@ -434,8 +436,8 @@ public class StoreService {
 	@Transactional
 	public ResDeleteStoreDto deleteStore(UUID storeId, @Valid ReqDeleteStoreDto requestDto, User user) {
 
-		Store store = storeRepository.findById(storeId).orElseThrow(()-> new IllegalArgumentException("존재하지 않는 가게입니다."));
-		StoreDetails storeDetails = storeDetailsRepository.findByStoreId(storeId).orElseThrow(()-> new IllegalArgumentException("존재하지 않는 가게입니다."));
+		Store store = storeRepository.findById(storeId).orElseThrow(()-> new ResponseStatusException(HttpStatus.BAD_REQUEST,"존재하지 않는 가게입니다."));
+		StoreDetails storeDetails = storeDetailsRepository.findByStoreId(storeId).orElseThrow(()-> new ResponseStatusException(HttpStatus.BAD_REQUEST,"존재하지 않는 가게입니다."));
 
 		// Role 검증
 		checkUserRole(user,store);
@@ -444,14 +446,14 @@ public class StoreService {
 		boolean isRightBN = requestDto.getBusinessNumber().equals(storeDetails.getBusinessNumber());
 
 		if (!isRightBN){
-			throw new IllegalArgumentException("잘못된 사업자등록번호입니다. 정확한 사업자번호를 입력하세요.");
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"잘못된 사업자등록번호입니다. 정확한 사업자번호를 입력하세요.");
 		}
 
 		if (!store.isDeleted() && !storeDetails.isDeleted()){
 			store.softDelete(user.getId());
 			storeDetails.softDelete(user.getId());
 		}else{
-			throw new IllegalArgumentException("이미 삭제된 가게입니다.");
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"이미 삭제된 가게입니다.");
 		}
 
 		storeRepository.save(store);

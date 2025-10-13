@@ -109,7 +109,6 @@ public class CartRepositoryTest {
 		requestDto.setDescription("조회용 설명");
 		requestDto.setPrepTime("7분");
 		requestDto.setStockStatus(null);
-		requestDto.setSortOrder(1);
 		requestDto.setIsHidden(false);
 
 		this.menu = storeMenuRepository.save(StoreMenu.builder()
@@ -192,7 +191,6 @@ public class CartRepositoryTest {
 		requestDto.setDescription("조회용 설명");
 		requestDto.setPrepTime("7분");
 		requestDto.setStockStatus(null);
-		requestDto.setSortOrder(1);
 		requestDto.setIsHidden(false);
 
 		StoreMenu menuB = storeMenuRepository.save(StoreMenu.builder()
