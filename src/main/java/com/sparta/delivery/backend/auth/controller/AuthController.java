@@ -1,7 +1,5 @@
 package com.sparta.delivery.backend.auth.controller;
 
-import java.util.Map;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,7 +11,6 @@ import com.sparta.delivery.backend.auth.dto.RefreshTokenResponseDto;
 import com.sparta.delivery.backend.auth.service.AuthService;
 import com.sparta.delivery.backend.security.util.JwtUtil;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
