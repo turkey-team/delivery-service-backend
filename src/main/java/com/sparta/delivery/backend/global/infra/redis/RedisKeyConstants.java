@@ -14,4 +14,7 @@ public final class RedisKeyConstants {
 	public static final String BLACKLIST_LOGOUT_PREFIX = "BL:LO:";        // 로그아웃된 토큰
 	public static final String BLACKLIST_ROTATE_PREFIX = "BL:RT:";      // 갱신된(무효화된) 토큰
 
+	// ===== 비밀번호 재설정 =====
+	public static final String PASSWORD_RESET_PREFIX = "password:reset:";           // 재설정 토큰
+
 }

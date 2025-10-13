@@ -42,4 +42,8 @@ public class Customer extends BaseEntity {
 	public UUID getUserPublicId() {
 		return this.user.getPublicId();
 	}
+
+	public void updateNickname(String nickname) {
+		this.nickname = nickname;
+	}
 }

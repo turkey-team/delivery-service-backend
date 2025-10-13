@@ -19,7 +19,14 @@ public interface CustomerRepository extends JpaRepository<Customer, UUID> {
 
 	@Query("SELECT c FROM Customer c " +
 		"JOIN FETCH c.user " +
+		"WHERE c.email = :email " +
+		"AND c.deletedAt IS NULL")
+	Optional<Customer> findByEmailAndDeletedAtIsNull(String email);
+
+	@Query("SELECT c FROM Customer c " +
+		"JOIN FETCH c.user " +
 		"WHERE c.user.publicId = :publicId " +
 		"AND c.deletedAt IS NULL")
 	Optional<Customer> findByUserPublicIdAndDeletedAtNull(@Param("publicId") UUID publicId);
+
 }
