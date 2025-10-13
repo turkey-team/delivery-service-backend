@@ -1,7 +1,6 @@
 package com.sparta.delivery.backend.customer.dto;
 
 import java.time.Instant;
-import java.util.UUID;
 
 import com.sparta.delivery.backend.customer.entity.Customer;
 
@@ -11,11 +10,8 @@ import lombok.Getter;
 
 @Getter
 @Builder
-@Schema(name = "ResGetCustomerDto", description = "고객 정보 조회 응답 (관리자용)")
-public class ResGetCustomerDto {
-	@Schema(description = "고객 사용자 공개 ID", example = "550e8400-e29b-41d4-a716-446655440000")
-	private UUID customerUserPublicId;
-
+@Schema(name = "ResGetMyCustomerDto", description = "고객 마이페이지 조회")
+public class ResGetMyCustomerDto {
 	@Schema(description = "사용자 아이디", example = "customer1")
 	private String username;
 
@@ -31,18 +27,13 @@ public class ResGetCustomerDto {
 	@Schema(description = "가입일시", example = "2025-01-15T10:30:00Z")
 	private Instant createdAt;
 
-	@Schema(description = "수정일시", example = "2025-01-20T14:20:00Z")
-	private Instant updatedAt;
-
-	public static ResGetCustomerDto from(Customer customer) {
-		return ResGetCustomerDto.builder()
-			.customerUserPublicId(customer.getUserPublicId())
+	public static ResGetMyCustomerDto from(Customer customer) {
+		return ResGetMyCustomerDto.builder()
 			.username(customer.getUsername())
 			.nickname(customer.getNickname())
 			.email(customer.getEmail())
 			.phoneNumber(customer.getPhoneNumber())
 			.createdAt(customer.getCreatedAt())
-			.updatedAt(customer.getUpdatedAt())
 			.build();
 	}
 }
