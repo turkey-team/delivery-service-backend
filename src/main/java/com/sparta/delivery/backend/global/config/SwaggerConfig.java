@@ -16,7 +16,11 @@ import com.sparta.delivery.backend.security.dto.LoginRequestDto;
 import com.sparta.delivery.backend.security.filter.JwtAuthenticationFilter;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.Content;
@@ -30,7 +34,15 @@ import io.swagger.v3.oas.models.responses.ApiResponses;
 @OpenAPIDefinition(
 	info = @Info(title = "Delivery Backend Service API",
 		description = "Delivery Backend Service의 REST API 명세서입니다.",
-		version = "v1.0.0")
+		version = "v1.0.0"),
+	security = { @SecurityRequirement(name = "Authentication") }
+)
+@SecurityScheme(
+	name = "Authentication",
+	type = SecuritySchemeType.HTTP,
+	bearerFormat = "JWT",
+	scheme = "bearer",
+	in = SecuritySchemeIn.HEADER
 )
 @Configuration
 public class SwaggerConfig {
