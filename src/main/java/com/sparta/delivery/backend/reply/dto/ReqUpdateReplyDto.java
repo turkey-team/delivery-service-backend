@@ -2,9 +2,13 @@ package com.sparta.delivery.backend.reply.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor
+@AllArgsConstructor
 @Schema(name = "ReqUpdateReplyDto", description = "리뷰 답글 수정 요청 DTO")
 public class ReqUpdateReplyDto {
 

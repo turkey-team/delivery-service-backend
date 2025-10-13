@@ -4,12 +4,14 @@ import java.util.UUID;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Schema(name = "ReqCreateReviewDto", description = "리뷰 작성 요청 DTO")
 public class ReqCreateReviewDto {
 

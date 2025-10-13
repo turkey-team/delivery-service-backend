@@ -1,9 +1,46 @@
 package com.sparta.delivery.backend.reply.service;
 
-//@ExtendWith(MockitoExtension.class)
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import java.util.Optional;
+import java.util.UUID;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import com.sparta.delivery.backend.customer.entity.Customer;
+import com.sparta.delivery.backend.global.excpetion.UnauthorizedException;
+import com.sparta.delivery.backend.manager.entity.Manager;
+import com.sparta.delivery.backend.manager.repository.ManagerRepository;
+import com.sparta.delivery.backend.owner.entity.Owner;
+import com.sparta.delivery.backend.owner.repository.OwnerRepository;
+import com.sparta.delivery.backend.reply.dto.ReqCreateReplyDto;
+import com.sparta.delivery.backend.reply.dto.ReqUpdateReplyDto;
+import com.sparta.delivery.backend.reply.dto.ResDeleteReplyDto;
+import com.sparta.delivery.backend.reply.dto.ResViewReplyDto;
+import com.sparta.delivery.backend.reply.entity.Reply;
+import com.sparta.delivery.backend.reply.repository.ReplyRepository;
+import com.sparta.delivery.backend.review.entity.Review;
+import com.sparta.delivery.backend.review.repository.ReviewRepository;
+import com.sparta.delivery.backend.security.UserDetailsImpl;
+import com.sparta.delivery.backend.store.entity.Store;
+import com.sparta.delivery.backend.store.entity.StoreStatusEnum;
+import com.sparta.delivery.backend.user.entity.User;
+import com.sparta.delivery.backend.user.entity.UserRoleEnum;
+
+@ExtendWith(MockitoExtension.class)
 class ReplyServiceTest {
 
-	/*@InjectMocks
+	@InjectMocks
 	private ReplyService replyService;
 
 	@Mock
@@ -34,11 +71,14 @@ class ReplyServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		// Owner User & Owner
-		ownerUser = new User();
-		ownerUser.setId(testOwnerId);
-		ownerUser.setUsername("testOwner");
-		ownerUser.setRole(UserRoleEnum.OWNER);
+		// ===== 1️⃣ Owner User & Owner =====
+		ownerUser = User.builder()
+			.username("testOwner")
+			.password("testPassword")
+			.role(UserRoleEnum.OWNER)
+			.build();
+		ReflectionTestUtils.setField(ownerUser, "id", testOwnerId);
+		ReflectionTestUtils.setField(ownerUser, "publicId", UUID.randomUUID());
 
 		testOwner = Owner.builder()
 			.user(ownerUser)
@@ -47,13 +87,16 @@ class ReplyServiceTest {
 			.phoneNumber("010-1111-2222")
 			.businessNumber("123-45-67890")
 			.build();
-		testOwner.setId(UUID.randomUUID());
+		ReflectionTestUtils.setField(testOwner, "id", UUID.randomUUID());
 
-		// Manager User & Manager
-		managerUser = new User();
-		managerUser.setId(testManagerId);
-		managerUser.setUsername("testManager");
-		managerUser.setRole(UserRoleEnum.MANAGER);
+		// ===== 2️⃣ Manager User & Manager =====
+		managerUser = User.builder()
+			.username("testManager")
+			.password("testPassword")
+			.role(UserRoleEnum.MANAGER)
+			.build();
+		ReflectionTestUtils.setField(managerUser, "id", testManagerId);
+		ReflectionTestUtils.setField(managerUser, "publicId", UUID.randomUUID());
 
 		testManager = Manager.builder()
 			.user(managerUser)
@@ -61,12 +104,16 @@ class ReplyServiceTest {
 			.email("manager@test.com")
 			.phoneNumber("010-2222-3333")
 			.build();
-		testManager.setId(UUID.randomUUID());
+		ReflectionTestUtils.setField(testManager, "id", UUID.randomUUID());
 
-		customerUser = new User();
-		customerUser.setId(testCustomerId);
-		customerUser.setUsername("testCustomer");
-		customerUser.setRole(UserRoleEnum.CUSTOMER);
+		// ===== 3️⃣ Customer User & Customer =====
+		customerUser = User.builder()
+			.username("testCustomer")
+			.password("testPassword")
+			.role(UserRoleEnum.CUSTOMER)
+			.build();
+		ReflectionTestUtils.setField(customerUser, "id", testCustomerId);
+		ReflectionTestUtils.setField(customerUser, "publicId", UUID.randomUUID());
 
 		testCustomer = Customer.builder()
 			.user(customerUser)
@@ -74,39 +121,49 @@ class ReplyServiceTest {
 			.email("customer@test.com")
 			.phoneNumber("010-3333-4444")
 			.build();
-		testCustomer.setId(UUID.randomUUID());
+		ReflectionTestUtils.setField(testCustomer, "id", UUID.randomUUID());
 
-		// Store & Review
-		testStore = new Store();
-		testStore.setOwner(testOwner);
-		testStore.setName("테스트가게");
+		// ===== 4️⃣ Store =====
+		testStore = Store.builder()
+			.owner(testOwner)
+			.name("테스트가게")
+			.addressDetails("서울시 테스트구 테스트동 123")
+			.reviewRate(0.0)
+			.minOrderPrice(15000)
+			.deliveryFee(3000)
+			.regionDong(null)
+			.status(StoreStatusEnum.OPEN)
+			.phoneNumber("010-5555-6666")
+			.build();
+		ReflectionTestUtils.setField(testStore, "id", UUID.randomUUID());
 
+		// ===== 5️⃣ Review =====
 		testReview = Review.builder()
-			.customer(null)
+			.customer(testCustomer)
 			.store(testStore)
 			.context("리뷰 내용")
 			.rate(5)
 			.build();
-		testReview.setId(UUID.randomUUID());
+		ReflectionTestUtils.setField(testReview, "id", UUID.randomUUID());
 
-		// SecurityContext: Manager로 설정
+		// ===== 6️⃣ SecurityContext (CUSTOMER로 로그인된 상태) =====
 		UserDetailsImpl userDetails = new UserDetailsImpl(customerUser);
-		Authentication auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+		Authentication auth = new UsernamePasswordAuthenticationToken(
+			userDetails, null, userDetails.getAuthorities());
 		SecurityContextHolder.getContext().setAuthentication(auth);
 	}
 
 	// ==================== 답글 등록 ====================
 	@Test
 	void testCreateReply_manager() {
-		ReqCreateReplyDto dto = new ReqCreateReplyDto();
-		//dto.setContext("매니저 답글 내용");
+		ReqCreateReplyDto dto = new ReqCreateReplyDto("매니저 답글 내용");
 
 		when(reviewRepository.findById(testReview.getId())).thenReturn(Optional.of(testReview));
 		when(managerRepository.findByUserId(testManagerId)).thenReturn(Optional.of(testManager));
 		when(ownerRepository.findByUserId(testManagerId)).thenReturn(Optional.empty());
 		when(replyRepository.save(any(Reply.class))).thenAnswer(invocation -> {
 			Reply r = invocation.getArgument(0);
-			r.setId(UUID.randomUUID());
+			ReflectionTestUtils.setField(r, "id", UUID.randomUUID());
 			return r;
 		});
 
@@ -120,20 +177,18 @@ class ReplyServiceTest {
 
 	@Test
 	void testCreateReply_notStoreOwner_throwsException() {
-		ReqCreateReplyDto dto = new ReqCreateReplyDto();
-		dto.setContext("권한 없는 답글");
+		ReqCreateReplyDto dto = new ReqCreateReplyDto("권한 없는 답글");
 
 		// 리뷰의 가게 Owner는 다른 Owner
 		Owner otherOwner = Owner.builder()
-			.user(new User() {{
-				setId(999L);
-			}})
+			.user(User.builder().username("otherOwner").password("pw").role(UserRoleEnum.OWNER).build())
 			.nickname("다른점주")
 			.email("other@test.com")
 			.phoneNumber("010-9999-8888")
 			.businessNumber("987-65-43210")
 			.build();
-		otherOwner.setId(UUID.randomUUID());
+		ReflectionTestUtils.setField(otherOwner.getUser(), "id", 999L);
+		ReflectionTestUtils.setField(otherOwner, "id", UUID.randomUUID());
 
 		when(reviewRepository.findById(testReview.getId())).thenReturn(Optional.of(testReview));
 		when(ownerRepository.findByUserId(testOwnerId)).thenReturn(Optional.of(otherOwner));
@@ -142,24 +197,19 @@ class ReplyServiceTest {
 		UnauthorizedException exception = assertThrows(UnauthorizedException.class,
 			() -> replyService.createReply(dto, testReview.getId(), testOwnerId));
 
-		System.out.println("exception = " + exception.getMessage());
-
 		assertEquals("해당 가게의 점주만 리뷰 답글을 등록할 수 있습니다.", exception.getMessage());
 	}
 
 	@Test
 	void testCreateReply_customerCannotRegister_throwsException() {
-		ReqCreateReplyDto dto = new ReqCreateReplyDto();
-		dto.setContext("고객 답글");
+		ReqCreateReplyDto dto = new ReqCreateReplyDto("고객 답글");
 
-		// 고객은 Owner도 Manager도 아님
 		when(reviewRepository.findById(testReview.getId())).thenReturn(Optional.of(testReview));
-		when(ownerRepository.findByUserId(testOwnerId)).thenReturn(Optional.empty());
-		when(managerRepository.findByUserId(testManagerId)).thenReturn(Optional.empty());
+		when(ownerRepository.findByUserId(testCustomerId)).thenReturn(Optional.empty());
+		when(managerRepository.findByUserId(testCustomerId)).thenReturn(Optional.empty());
 
 		UnauthorizedException exception = assertThrows(UnauthorizedException.class,
 			() -> replyService.createReply(dto, testReview.getId(), testCustomerId));
-		System.out.println("exception.getMessage() = " + exception.getMessage());
 
 		assertEquals("리뷰 답글을 등록할 권한이 없습니다.", exception.getMessage());
 	}
@@ -168,62 +218,55 @@ class ReplyServiceTest {
 	@Test
 	void testUpdateReply_manager() {
 		UUID replyId = UUID.randomUUID();
-		ReqUpdateReplyDto dto = new ReqUpdateReplyDto();
-		dto.setContext("매니저 수정 답글");
+		ReqUpdateReplyDto dto = new ReqUpdateReplyDto("매니저 수정 답글");
 
 		Reply reply = Reply.builder()
 			.context("원본 답글")
 			.manager(testManager)
 			.review(testReview)
 			.build();
-		reply.setId(replyId);
+		ReflectionTestUtils.setField(reply, "id", replyId);
 
 		when(replyRepository.findById(replyId)).thenReturn(Optional.of(reply));
 		when(managerRepository.findByUserId(testManagerId)).thenReturn(Optional.of(testManager));
 		when(ownerRepository.findByUserId(testManagerId)).thenReturn(Optional.empty());
 
 		ResViewReplyDto result = replyService.updateReply(dto, replyId, testManagerId);
-		System.out.println("result = " + result);
 
-		assertEquals(dto.getContext(), result.getContext());
-		assertEquals(reply.getContext(), result.getContext());
+		assertEquals("매니저 수정 답글", result.getContext());
+		assertEquals("매니저 수정 답글", reply.getContext());
 	}
 
 	@Test
 	void testUpdateReply_notStoreOwner_throwsException() {
 		UUID replyId = UUID.randomUUID();
-		ReqUpdateReplyDto dto = new ReqUpdateReplyDto();
-		dto.setContext("권한 없는 수정");
+		ReqUpdateReplyDto dto = new ReqUpdateReplyDto("권한 없는 수정");
 
-		// 실제 가게 점주
 		Owner storeOwner = testOwner;
 
-		// 다른 사용자가 수정 시도
 		Owner otherOwner = Owner.builder()
-			.user(new User() {{
-				setId(999L);
-			}})
+			.user(User.builder().username("otherOwner").password("pw").role(UserRoleEnum.OWNER).build())
 			.nickname("다른점주")
 			.email("other@test.com")
 			.phoneNumber("010-9999-8888")
 			.businessNumber("987-65-43210")
 			.build();
-		otherOwner.setId(UUID.randomUUID());
+		ReflectionTestUtils.setField(otherOwner.getUser(), "id", 999L);
+		ReflectionTestUtils.setField(otherOwner, "id", UUID.randomUUID());
 
-		// Reply는 가게 점주가 작성
 		Reply reply = Reply.builder()
 			.context("원본 답글")
-			.owner(storeOwner)  // 여기서 storeOwner
+			.owner(storeOwner)
 			.review(testReview)
 			.build();
-		reply.setId(replyId);
+		ReflectionTestUtils.setField(reply, "id", replyId);
 
 		when(replyRepository.findById(replyId)).thenReturn(Optional.of(reply));
-		when(ownerRepository.findByUserId(otherOwner.getUser().getId())).thenReturn(Optional.of(otherOwner));
-		when(managerRepository.findByUserId(otherOwner.getUser().getId())).thenReturn(Optional.empty());
+		when(ownerRepository.findByUserId(999L)).thenReturn(Optional.of(otherOwner));
+		when(managerRepository.findByUserId(999L)).thenReturn(Optional.empty());
 
 		UnauthorizedException exception = assertThrows(UnauthorizedException.class,
-			() -> replyService.updateReply(dto, replyId, otherOwner.getUser().getId()));
+			() -> replyService.updateReply(dto, replyId, 999L));
 
 		assertEquals("해당 가게의 점주만 리뷰 답글을 수정할 수 있습니다.", exception.getMessage());
 	}
@@ -231,14 +274,13 @@ class ReplyServiceTest {
 	@Test
 	void testUpdateReply_customerCannotUpdate_throwsException() {
 		UUID replyId = UUID.randomUUID();
-		ReqUpdateReplyDto dto = new ReqUpdateReplyDto();
-		dto.setContext("고객 수정");
+		ReqUpdateReplyDto dto = new ReqUpdateReplyDto("고객 수정");
 
 		Reply reply = Reply.builder()
 			.context("원본 답글")
 			.review(testReview)
 			.build();
-		reply.setId(replyId);
+		ReflectionTestUtils.setField(reply, "id", replyId);
 
 		when(replyRepository.findById(replyId)).thenReturn(Optional.of(reply));
 
@@ -258,14 +300,13 @@ class ReplyServiceTest {
 			.manager(testManager)
 			.review(testReview)
 			.build();
-		reply.setId(replyId);
+		ReflectionTestUtils.setField(reply, "id", replyId);
 
 		when(replyRepository.findById(replyId)).thenReturn(Optional.of(reply));
 		when(managerRepository.findByUserId(testManagerId)).thenReturn(Optional.of(testManager));
 		when(ownerRepository.findByUserId(testManagerId)).thenReturn(Optional.empty());
 
 		ResDeleteReplyDto dto = replyService.deleteReply(replyId, testManagerId);
-		System.out.println("dto = " + dto);
 
 		assertNotNull(dto);
 	}
@@ -274,34 +315,31 @@ class ReplyServiceTest {
 	void testDeleteReply_notStoreOwner_throwsException() {
 		UUID replyId = UUID.randomUUID();
 
-		// 실제 리뷰 작성자는 가게 점주
 		Owner storeOwner = testOwner;
 
-		// 권한 없는 다른 Owner
 		Owner otherOwner = Owner.builder()
-			.user(new User() {{
-				setId(999L);
-			}})
+			.user(User.builder().username("otherOwner").password("pw").role(UserRoleEnum.OWNER).build())
 			.nickname("다른점주")
 			.email("other@test.com")
 			.phoneNumber("010-9999-8888")
 			.businessNumber("987-65-43210")
 			.build();
-		otherOwner.setId(UUID.randomUUID());
+		ReflectionTestUtils.setField(otherOwner.getUser(), "id", 999L);
+		ReflectionTestUtils.setField(otherOwner, "id", UUID.randomUUID());
 
 		Reply reply = Reply.builder()
 			.context("삭제할 답글")
-			.owner(storeOwner)  // 가게 점주
+			.owner(storeOwner)
 			.review(testReview)
 			.build();
-		reply.setId(replyId);
+		ReflectionTestUtils.setField(reply, "id", replyId);
 
 		when(replyRepository.findById(replyId)).thenReturn(Optional.of(reply));
-		when(ownerRepository.findByUserId(otherOwner.getUser().getId())).thenReturn(Optional.of(otherOwner));
-		when(managerRepository.findByUserId(otherOwner.getUser().getId())).thenReturn(Optional.empty());
+		when(ownerRepository.findByUserId(999L)).thenReturn(Optional.of(otherOwner));
+		when(managerRepository.findByUserId(999L)).thenReturn(Optional.empty());
 
 		UnauthorizedException exception = assertThrows(UnauthorizedException.class,
-			() -> replyService.deleteReply(replyId, otherOwner.getUser().getId()));
+			() -> replyService.deleteReply(replyId, 999L));
 
 		assertEquals("해당 가게의 점주만 리뷰 답글을 삭제할 수 있습니다.", exception.getMessage());
 	}
@@ -314,7 +352,7 @@ class ReplyServiceTest {
 			.context("삭제할 답글")
 			.review(testReview)
 			.build();
-		reply.setId(replyId);
+		ReflectionTestUtils.setField(reply, "id", replyId);
 
 		when(replyRepository.findById(replyId)).thenReturn(Optional.of(reply));
 
@@ -322,5 +360,5 @@ class ReplyServiceTest {
 			() -> replyService.deleteReply(replyId, testCustomerId));
 
 		assertEquals("답글을 삭제할 권한이 없습니다.", exception.getMessage());
-	}*/
+	}
 }
