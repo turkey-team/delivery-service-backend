@@ -69,7 +69,7 @@ public class StoreMenu extends BaseEntity {
 	@Column(name = "hidden_at")
 	private Instant hiddenAt;
 
-	@OneToMany(mappedBy = "order")
+	@OneToMany(mappedBy = "storeMenu")
 	private List<OrderMenu> orderMenus;
 
 	@Builder
