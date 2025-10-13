@@ -1,8 +1,10 @@
 package com.sparta.delivery.backend.customer.repository;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -85,6 +87,57 @@ public class CustomerRepositoryTest {
 
 			// then
 			assertFalse(result.isPresent());
+		}
+	}
+
+	@Nested
+	@DisplayName("유저 공개 ID로 삭제되지 않은 고객 조회 테스트")
+	class FindByUserPublicIdAndDeletedAtNullTest {
+
+		@Test
+		@DisplayName("성공 - 유저 공개 ID로 삭제되지 않은 고객 조회")
+		void findActiveCustomerByPublicId_Success() {
+			// when
+			Optional<Customer> result = customerRepository.findByUserPublicIdAndDeletedAtNull(user.getPublicId());
+
+			// then
+			assertThat(result)
+				.isPresent()
+				.get()
+				.satisfies(foundCustomer -> {
+					assertThat(foundCustomer.getNickname()).isEqualTo(customer.getNickname());
+					assertThat(foundCustomer.getEmail()).isEqualTo(customer.getEmail());
+					assertThat(foundCustomer.getUser().getPublicId()).isEqualTo(user.getPublicId());
+					assertThat(foundCustomer.getDeletedAt()).isNull();
+				});
+		}
+
+		@Test
+		@DisplayName("실패 - 삭제된 고객은 조회 안됨")
+		void findDeletedCustomerByPublicId_NotFound() {
+			// given
+			customer.softDelete(1L);
+			entityManager.persist(customer);
+			entityManager.flush();
+
+			// when
+			Optional<Customer> result = customerRepository.findByUserPublicIdAndDeletedAtNull(user.getPublicId());
+
+			// then
+			assertThat(result).isEmpty();
+		}
+
+		@Test
+		@DisplayName("실패 - 존재하지 않는 유저 공개 ID")
+		void findByNonExistentPublicId_NotFound() {
+			// given
+			UUID nonExistentPublicId = UUID.randomUUID();
+
+			// when
+			Optional<Customer> result = customerRepository.findByUserPublicIdAndDeletedAtNull(nonExistentPublicId);
+
+			// then
+			assertThat(result).isEmpty();
 		}
 	}
 }

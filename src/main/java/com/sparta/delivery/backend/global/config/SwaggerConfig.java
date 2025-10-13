@@ -16,26 +16,10 @@ import io.swagger.v3.oas.annotations.info.Info;
 public class SwaggerConfig {
 
 	@Bean
-	public GroupedOpenApi reviewApi() {
-		String[] paths = {
-			"/v1/stores/**/reviews",
-			"/v1/stores/**/reviews/**",
-			"/v1/customer/**/reviews",
-			"/v1/stores/**/review"
-		};
-
+	public GroupedOpenApi allApi() {
 		return GroupedOpenApi.builder()
-			.group("리뷰 API")
-			.pathsToMatch(paths)
+			.group("전체 API")
+			.pathsToMatch("/v1/**")  // v1으로 시작하는 모든 경로
 			.build();
 	}
-
-	@Bean
-	public GroupedOpenApi replyApi() {
-		return GroupedOpenApi.builder()
-			.group("답글 API")
-			.pathsToMatch("/v1/replies/**")
-			.build();
-	}
-
 }

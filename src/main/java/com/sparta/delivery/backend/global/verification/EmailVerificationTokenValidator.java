@@ -23,11 +23,7 @@ public class EmailVerificationTokenValidator {
 		String key = EMAIL_VERIFIED_PREFIX + email;
 		String storedToken = redisTemplate.opsForValue().get(key);
 
-		if (storedToken == null) {
-			throw new IllegalArgumentException("이메일 인증이 만료되었습니다. 다시 인증해주세요.");
-		}
-
-		if (!storedToken.equals(token)) {
+		if (storedToken == null || !storedToken.equals(token)) {
 			throw new IllegalArgumentException("유효하지 않은 인증 토큰입니다.");
 		}
 

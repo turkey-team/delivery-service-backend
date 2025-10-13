@@ -21,6 +21,15 @@ public class GlobalExceptionHandler {
 		);
 	}
 
+	@ExceptionHandler({IllegalArgumentException.class})
+	public ResponseEntity<ApiException> handleException(IllegalArgumentException ex) {
+		ApiException apiException = new ApiException(ex.getMessage(), HttpStatus.BAD_REQUEST.value());
+		return new ResponseEntity<>(
+			apiException,
+			HttpStatus.BAD_REQUEST
+		);
+	}
+
 	@ExceptionHandler({DuplicateUsernameException.class})
 	public ResponseEntity<ApiException> handleException(DuplicateUsernameException ex) {
 		ApiException apiException = new ApiException(ex.getMessage(), HttpStatus.CONFLICT.value());

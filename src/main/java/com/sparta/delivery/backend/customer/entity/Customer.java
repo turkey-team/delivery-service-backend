@@ -38,4 +38,8 @@ public class Customer extends BaseEntity {
 	public String getUsername() {
 		return this.user.getUsername();
 	}
+
+	public UUID getUserPublicId() {
+		return this.user.getPublicId();
+	}
 }

@@ -1,11 +1,14 @@
 package com.sparta.delivery.backend.customer.service;
 
+import java.util.UUID;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sparta.delivery.backend.customer.dto.ReqCreateCustomerDto;
 import com.sparta.delivery.backend.customer.dto.ResGetCustomerDto;
+import com.sparta.delivery.backend.customer.dto.ResGetMyCustomerDto;
 import com.sparta.delivery.backend.customer.entity.Customer;
 import com.sparta.delivery.backend.customer.repository.CustomerRepository;
 import com.sparta.delivery.backend.global.excpetion.DuplicateUsernameException;
@@ -50,8 +53,15 @@ public class CustomerService {
 		customerRepository.save(customer);
 	}
 
-	public ResGetCustomerDto getCustomerById(UserDetailsImpl userDetails) {
+	public ResGetMyCustomerDto getCurrentCustomer(UserDetailsImpl userDetails) {
 		Customer customer = customerRepository.findByUserIdAndDeletedAtIsNull(userDetails.getId())
+			.orElseThrow(() -> new IllegalArgumentException("잘못된 유저 아이디 입니다."));
+
+		return ResGetMyCustomerDto.from(customer);
+	}
+
+	public ResGetCustomerDto getCustomerByUserPublicId(UUID customerUserPublicId) {
+		Customer customer = customerRepository.findByUserPublicIdAndDeletedAtNull(customerUserPublicId)
 			.orElseThrow(() -> new IllegalArgumentException("잘못된 유저 아이디 입니다."));
 
 		return ResGetCustomerDto.from(customer);
