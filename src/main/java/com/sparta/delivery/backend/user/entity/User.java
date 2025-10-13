@@ -41,4 +41,8 @@ public class User {
             this.publicId = UUID.randomUUID();
         }
     }
+
+	public void changePassword(String encodedPassword) {
+		password = encodedPassword;
+	}
 }
