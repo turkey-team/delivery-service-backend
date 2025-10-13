@@ -87,7 +87,7 @@ public class AddressController {
 	@Operation(summary = "기본 주소 조회", description = "내 기본 주소를 조회합니다. CUSTOMER 권한 필요")
 	@ApiResponses({
 		@ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(
-			array = @ArraySchema(schema = @Schema(implementation = ResAddressDto.class)))),
+			schema = @Schema(implementation = ResAddressDto.class))),
 		@ApiResponse(responseCode = "401", description = "인증 실패", content = @Content),
 		@ApiResponse(responseCode = "403", description = "Authorization 헤더가 없거나 권한 없음", content = @Content),
 		@ApiResponse(responseCode = "404", description = "기본 배송지를 찾을 수 없음", content = @Content)
@@ -105,18 +105,18 @@ public class AddressController {
 	@Operation(summary = "주소 수정", description = "내 주소를 수정합니다. CUSTOMER 권한 필요")
 	@ApiResponses({
 		@ApiResponse(responseCode = "200", description = "수정 성공", content = @Content(
-			array = @ArraySchema(schema = @Schema(implementation = ResAddressDto.class)))),
+			schema = @Schema(implementation = ResAddressDto.class))),
 		@ApiResponse(responseCode = "401", description = "인증 실패", content = @Content),
 		@ApiResponse(responseCode = "403", description = "Authorization 헤더가 없거나 권한 없음", content = @Content),
 		@ApiResponse(responseCode = "404", description = "요청한 리소스를 찾을 수 없음", content = @Content)
 	})
 	@PreAuthorize("hasRole('CUSTOMER') and @addressPermissionEvaluator.isOwner(#id, authentication.principal)")
 	@PutMapping("/{id}")
-	public ResAddressDto updateAddress(
+	public ResponseEntity<ResAddressDto> updateAddress(
 		@PathVariable UUID id,
 		@Valid @RequestBody ReqUpdateAddressDto requestDto
 	) {
-		return addressService.updateAddress(id, requestDto);
+		return ResponseEntity.ok(addressService.updateAddress(id, requestDto));
 	}
 
 	/**
@@ -126,7 +126,7 @@ public class AddressController {
 	@Operation(summary = "기본 주소 설정", description = "기본 주소를 설정합니다. CUSTOMER 권한 필요")
 	@ApiResponses({
 		@ApiResponse(responseCode = "200", description = "설정 성공", content = @Content(
-			array = @ArraySchema(schema = @Schema(implementation = ResAddressDto.class)))),
+			schema = @Schema(implementation = ResAddressDto.class))),
 		@ApiResponse(responseCode = "401", description = "인증 실패", content = @Content),
 		@ApiResponse(responseCode = "403", description = "Authorization 헤더가 없거나 권한 없음", content = @Content),
 		@ApiResponse(responseCode = "404", description = "요청한 리소스를 찾을 수 없음", content = @Content)
@@ -146,10 +146,10 @@ public class AddressController {
 	 */
 	@Operation(summary = "주소 삭제", description = "주소를 삭제합니다. CUSTOMER 권한 필요")
 	@ApiResponses({
-		@ApiResponse(responseCode = "204", description = "삭제 성공", content = @Content),
-		@ApiResponse(responseCode = "401", description = "인증 실패", content = @Content),
-		@ApiResponse(responseCode = "403", description = "Authorization 헤더가 없거나 권한 없음", content = @Content),
-		@ApiResponse(responseCode = "404", description = "요청한 리소스를 찾을 수 없음", content = @Content)
+		@ApiResponse(responseCode = "204", description = "삭제 성공"),
+		@ApiResponse(responseCode = "401", description = "인증 실패"),
+		@ApiResponse(responseCode = "403", description = "Authorization 헤더가 없거나 권한 없음"),
+		@ApiResponse(responseCode = "404", description = "요청한 리소스를 찾을 수 없음")
 	})
 	@PreAuthorize("hasRole('CUSTOMER') and @addressPermissionEvaluator.isOwner(#id, authentication.principal)")
 	@DeleteMapping("/{id}")
