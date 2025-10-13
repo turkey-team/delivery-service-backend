@@ -105,7 +105,7 @@ public class ReviewService {
 		Order order = orderRepository.findById(registerDto.getOrderId())
 			.orElseThrow(() -> new NoSuchElementException("해당 Order를 찾을 수 없습니다."));
 
-		if (!order.getOrderStatus().equals(OrderStatus.SUCCESS)) {
+		if (!order.getOrderStatus().equals(OrderStatus.ACCEPTED)) {
 			throw new IllegalStateException("배송 완료된 주문만 리뷰 작성 가능");
 		}
 

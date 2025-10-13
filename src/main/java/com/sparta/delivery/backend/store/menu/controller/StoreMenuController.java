@@ -20,7 +20,8 @@ import com.sparta.delivery.backend.store.menu.dto.ReqCreateStoreMenuDto;
 import com.sparta.delivery.backend.store.menu.dto.ReqUpdateSortOrderDto;
 import com.sparta.delivery.backend.store.menu.dto.ReqUpdateStoreMenuDto;
 import com.sparta.delivery.backend.store.menu.dto.ReqUpdateVisibilityDto;
-import com.sparta.delivery.backend.store.menu.dto.ResStoreMenuDto;
+import com.sparta.delivery.backend.store.menu.dto.ResGetListStoreMenuDto;
+import com.sparta.delivery.backend.store.menu.dto.ResGetStoreMenuDto;
 import com.sparta.delivery.backend.store.menu.service.StoreMenuService;
 
 import lombok.RequiredArgsConstructor;
@@ -42,21 +43,21 @@ public class StoreMenuController {
 	}
 
 	@GetMapping
-	public ResponseEntity<Page<ResStoreMenuDto>> getAllStoreMenusByStoreId(
+	public ResponseEntity<Page<ResGetListStoreMenuDto>> getAllStoreMenusByStoreId(
 		@PathVariable UUID storeId,
 		@RequestParam("page") int page,
 		@RequestParam("size") int size
 	) {
-		Page<ResStoreMenuDto> menus = storeMenuService.getStoreMenusByStoreId(storeId, page - 1, size);
+		Page<ResGetListStoreMenuDto> menus = storeMenuService.getStoreMenusByStoreId(storeId, page - 1, size);
 		return ResponseEntity.ok(menus);
 	}
 
 	@GetMapping("/{menuId}")
-	public ResponseEntity<ResStoreMenuDto> getStoreMenuByStoreMenuId(
+	public ResponseEntity<ResGetStoreMenuDto> getStoreMenuByStoreMenuId(
 		@PathVariable UUID storeId,
 		@PathVariable UUID menuId
 	) {
-		ResStoreMenuDto menu = storeMenuService.getStoreMenuByStoreMenuId(storeId, menuId);
+		ResGetStoreMenuDto menu = storeMenuService.getStoreMenuByStoreMenuId(storeId, menuId);
 		return ResponseEntity.ok(menu);
 	}
 

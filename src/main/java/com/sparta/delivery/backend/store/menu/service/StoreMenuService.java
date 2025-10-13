@@ -18,7 +18,8 @@ import com.sparta.delivery.backend.store.menu.dto.ReqCreateStoreMenuDto;
 import com.sparta.delivery.backend.store.menu.dto.ReqUpdateSortOrderDto;
 import com.sparta.delivery.backend.store.menu.dto.ReqUpdateStoreMenuDto;
 import com.sparta.delivery.backend.store.menu.dto.ReqUpdateVisibilityDto;
-import com.sparta.delivery.backend.store.menu.dto.ResStoreMenuDto;
+import com.sparta.delivery.backend.store.menu.dto.ResGetListStoreMenuDto;
+import com.sparta.delivery.backend.store.menu.dto.ResGetStoreMenuDto;
 import com.sparta.delivery.backend.store.menu.entity.StoreMenu;
 import com.sparta.delivery.backend.store.menu.repository.StoreMenuRepository;
 import com.sparta.delivery.backend.store.repository.StoreRepository;
@@ -63,18 +64,18 @@ public class StoreMenuService {
 	/** 조회 **/
 	// 단일 메뉴 조회 (세부)
 	@Transactional(readOnly = true)
-	public ResStoreMenuDto getStoreMenuByStoreMenuId(
+	public ResGetStoreMenuDto getStoreMenuByStoreMenuId(
 		UUID storeId,
 		UUID menuId
 	) {
 		validateStore(storeId);
 		StoreMenu storeMenu = findStoreMenu(storeId, menuId);
-		return new ResStoreMenuDto(storeMenu);
+		return new ResGetStoreMenuDto(storeMenu);
 	}
 
 	// 전체 메뉴 조회 (페이징)
 	@Transactional(readOnly = true)
-	public Page<ResStoreMenuDto> getStoreMenusByStoreId(
+	public Page<ResGetListStoreMenuDto> getStoreMenusByStoreId(
 		UUID storeId,
 		int page,
 		int size
@@ -82,9 +83,9 @@ public class StoreMenuService {
 		Pageable pageable = PageRequest.of(page, size, Sort.by("sortOrder").ascending());
 
 		Page<StoreMenu> storeMenuList =
-			storeMenuRepository.findAllByStoreIdAndDeletedAtIsNull(storeId, pageable, null);
+			storeMenuRepository.findAllByStoreIdAndDeletedAtIsNull(storeId, pageable);
 
-		return storeMenuList.map(ResStoreMenuDto::new);
+		return storeMenuList.map(ResGetListStoreMenuDto::new);
 	}
 
 	/** 수정 **/
@@ -176,7 +177,7 @@ public class StoreMenuService {
 	/** 삭제 시 재정렬 **/
 	// 메뉴 삭제 시 모든 메뉴 순서 1부터 오름차순 재배치
 	private void reorderSortOrder(UUID storeId) {
-		List<StoreMenu> menus = storeMenuRepository.findAllByStoreIdOrderBySortAsc(storeId);
+		List<StoreMenu> menus = storeMenuRepository.findAllByStoreIdAndSortOrderGreaterThanEqualAndDeletedAtIsNull(storeId, 1);
 
 		int order = 1;
 		for (StoreMenu menu : menus) {
