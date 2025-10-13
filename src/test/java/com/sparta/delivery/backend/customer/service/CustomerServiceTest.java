@@ -536,4 +536,97 @@ public class CustomerServiceTest {
 			assertEquals("사용자를 찾을 수 없습니다.", exception.getMessage());
 		}
 	}
+
+	@Nested
+	@DisplayName("고객 삭제 테스트 (본인)")
+	class DeleteCurrentCustomerTest {
+
+		@Test
+		@DisplayName("성공 - 본인 계정 삭제")
+		void success() {
+			// given
+			Long userId = 1L;
+			ReflectionTestUtils.setField(user, "id", userId);
+
+			when(userDetails.getId()).thenReturn(userId);
+			when(customerRepository.findByUserIdAndDeletedAtIsNull(userId))
+				.thenReturn(Optional.of(customer));
+
+			// when
+			customerService.deleteCurrentCustomer(userDetails);
+
+			// then
+			verify(customerRepository, times(1)).findByUserIdAndDeletedAtIsNull(userId);
+			assertNotNull(customer.getDeletedAt());
+			assertEquals(userId, customer.getDeletedBy());
+		}
+
+		@Nested
+		@DisplayName("실패")
+		class FailCase {
+
+			@Test
+			@DisplayName("존재하지 않는 유저")
+			void userNotFound() {
+				// given
+				Long userId = 999L;
+				when(userDetails.getId()).thenReturn(userId);
+				when(customerRepository.findByUserIdAndDeletedAtIsNull(userId))
+					.thenReturn(Optional.empty());
+
+				// when & then
+				IllegalArgumentException exception = assertThrows(
+					IllegalArgumentException.class,
+					() -> customerService.deleteCurrentCustomer(userDetails)
+				);
+			}
+		}
+	}
+
+	@Nested
+	@DisplayName("고객 삭제 테스트 (관리자)")
+	class DeleteCustomerByManagerTest {
+
+		@Test
+		@DisplayName("성공 - 관리자가 고객 삭제")
+		void success() {
+			// given
+			Long managerId = 2L;
+			UUID customerPublicId = UUID.randomUUID();
+
+			when(userDetails.getId()).thenReturn(managerId);
+			when(customerRepository.findByUserPublicIdAndDeletedAtNull(customerPublicId))
+				.thenReturn(Optional.of(customer));
+
+			// when
+			customerService.deleteCustomerByManager(userDetails, customerPublicId);
+
+			// then
+			verify(customerRepository, times(1)).findByUserPublicIdAndDeletedAtNull(customerPublicId);
+			assertNotNull(customer.getDeletedAt());
+			assertEquals(managerId, customer.getDeletedBy());
+		}
+
+		@Nested
+		@DisplayName("실패")
+		class FailCase {
+
+			@Test
+			@DisplayName("존재하지 않는 고객 공개 ID")
+			void customerNotFound() {
+				// given
+				Long managerId = 2L;
+				UUID invalidPublicId = UUID.randomUUID();
+
+				when(customerRepository.findByUserPublicIdAndDeletedAtNull(invalidPublicId))
+					.thenReturn(Optional.empty());
+
+				// when & then
+				IllegalArgumentException exception = assertThrows(
+					IllegalArgumentException.class,
+					() -> customerService.deleteCustomerByManager(userDetails, invalidPublicId)
+				);
+			}
+		}
+	}
 }

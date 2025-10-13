@@ -3,6 +3,7 @@ package com.sparta.delivery.backend.user.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Entity
@@ -18,7 +19,7 @@ public class User {
     @Column(name = "public_id", nullable = false, unique = true)
     private UUID publicId;
 
-    @Column(name = "username", length = 50, nullable = false, unique = true)
+    @Column(name = "username", length = 100, nullable = false, unique = true)
     private String username;
 
     @Column(name = "password", length = 255, nullable = false)
@@ -27,6 +28,10 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(name = "role", length = 20, nullable = false)
     private UserRoleEnum role;
+
+	private Instant deletedAt;
+
+	private Long deletedBy;
 
     @Builder
     private User(String username, String password, UserRoleEnum role) {
@@ -44,5 +49,11 @@ public class User {
 
 	public void changePassword(String encodedPassword) {
 		password = encodedPassword;
+	}
+
+	public void softDelete(Long userId) {
+		this.username = username + "_deleted_" + this.id;
+		this.deletedAt = Instant.now();
+		this.deletedBy = userId;
 	}
 }
