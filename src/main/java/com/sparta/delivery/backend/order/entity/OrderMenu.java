@@ -28,9 +28,12 @@ public class OrderMenu extends BaseEntity {
 	@JoinColumn(name = "p_store_menu_id", nullable = false)
 	private StoreMenu storeMenu;
 
+	private int quantity;
+
 	@Builder
-	public OrderMenu(Order order, StoreMenu storeMenu) {
+	public OrderMenu(Order order, StoreMenu storeMenu, int quantity) {
 		this.order = order;
 		this.storeMenu = storeMenu;
+		this.quantity = quantity;
 	}
 }
