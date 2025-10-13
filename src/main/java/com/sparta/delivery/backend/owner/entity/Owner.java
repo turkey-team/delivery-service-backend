@@ -22,7 +22,7 @@ public class Owner extends BaseEntity {
     @Column(name = "nickname", length = 50, nullable = false)
     private String nickname;
 
-    @Column(name = "email", length = 320, unique = true, nullable = false)
+    @Column(name = "email", length = 512, unique = true, nullable = false)
     private String email;
 
     @Column(name = "phone_number", length = 20)
