@@ -49,7 +49,7 @@ public class AuthService {
 		String username = claims.getSubject();
 
 		// User 조회
-		User user = userRepository.findByUsername(username)
+		User user = userRepository.findByUsernameAndDeletedAtIsNull(username)
 			.orElseThrow(() -> new RuntimeException("User not found"));
 
 		// 새 토큰 발급 (Rotation)

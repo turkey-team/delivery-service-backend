@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sparta.delivery.backend.global.excpetion.DuplicateUsernameException;
-import com.sparta.delivery.backend.global.verification.EmailVerificationTokenValidator;
 import com.sparta.delivery.backend.manager.dto.ReqCreateManagerDto;
 import com.sparta.delivery.backend.manager.entity.Manager;
 import com.sparta.delivery.backend.manager.repository.ManagerRepository;
@@ -26,7 +25,7 @@ public class ManagerService {
 	@Transactional
 	public void createManager(ReqCreateManagerDto requestDto) {
 		//같은 메일로 다른 사용자 요청 가능하도록 할지 정책 결정필요
-		userRepository.findByUsername(requestDto.getUsername())
+		userRepository.findByUsernameAndDeletedAtIsNull(requestDto.getUsername())
 			.ifPresent(user -> {
 				throw new DuplicateUsernameException("이미 존재하는 사용자명입니다.");
 			});
