@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +19,8 @@ import com.sparta.delivery.backend.customer.dto.ReqCreateCustomerDto;
 import com.sparta.delivery.backend.customer.dto.ResGetCustomerDto;
 import com.sparta.delivery.backend.customer.dto.ResGetMyCustomerDto;
 import com.sparta.delivery.backend.customer.service.CustomerService;
+import com.sparta.delivery.backend.global.excpetion.ApiException;
+import com.sparta.delivery.backend.global.excpetion.DuplicateUsernameException;
 import com.sparta.delivery.backend.security.UserDetailsImpl;
 import com.sparta.delivery.backend.user.entity.UserRoleEnum;
 
@@ -39,18 +42,10 @@ public class CustomerController {
 
 	@Operation(summary = "고객 회원가입", description = "새로운 고객을 등록합니다")
 	@ApiResponses({
-		@ApiResponse(
-			responseCode = "201",
-			description = "회원가입 성공"
-		),
-		@ApiResponse(
-			responseCode = "400",
-			description = "잘못된 요청 데이터"
-		),
-		@ApiResponse(
-			responseCode = "409",
-			description = "이미 존재하는 사용자"
-		)})
+		@ApiResponse(responseCode = "201", description = "회원가입 성공"),
+		@ApiResponse(responseCode = "400", description = "잘못된 요청 데이터"),
+		@ApiResponse(responseCode = "409", description = "이미 존재하는 사용자")
+	})
 	@PostMapping
 	public ResponseEntity<Void> createCustomer(@Valid @RequestBody ReqCreateCustomerDto requestDto) {
 		customerService.createCustomer(requestDto);
@@ -58,20 +53,10 @@ public class CustomerController {
 	}
 
 	@Operation(summary = "내 정보 조회", description = "로그인한 고객의 마이페이지 정보를 조회합니다")
-	@ApiResponses({
-		@ApiResponse(
-			responseCode = "200",
-			description = "조회 성공",
-			content = @Content(schema = @Schema(implementation = ResGetMyCustomerDto.class))
-		),
-		@ApiResponse(
-			responseCode = "403",
-			description = "권한 없음 (CUSTOMER 권한 필요)"
-		),
-		@ApiResponse(
-			responseCode = "404",
-			description = "고객 정보를 찾을 수 없음"
-		)
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "조회 성공"),
+		@ApiResponse(responseCode = "403", description = "권한 없음", content = @Content(schema = @Schema(hidden = true))),
+		@ApiResponse(responseCode = "404", description = "고객 정보를 찾을 수 없음",content = @Content(schema = @Schema(hidden = true)))
 	})
 	@Secured(UserRoleEnum.Authority.CUSTOMER)
 	@GetMapping("/me")
@@ -81,20 +66,10 @@ public class CustomerController {
 	}
 
 	@Operation(summary = "고객 정보 조회 (관리자용)", description = "관리자가 특정 고객의 정보를 조회합니다")
-	@ApiResponses({
-		@ApiResponse(
-			responseCode = "200",
-			description = "조회 성공",
-			content = @Content(schema = @Schema(implementation = ResGetCustomerDto.class))
-		),
-		@ApiResponse(
-			responseCode = "403",
-			description = "권한 없음 (MANAGER 권한 필요)"
-		),
-		@ApiResponse(
-			responseCode = "404",
-			description = "고객을 찾을 수 없음"
-		)
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "조회 성공"),
+		@ApiResponse(responseCode = "403", description = "권한 없음", content = @Content(schema = @Schema(hidden = true))),
+		@ApiResponse(responseCode = "404", description = "고객 정보를 찾을 수 없음",content = @Content(schema = @Schema(hidden = true)))
 	})
 	@Secured(UserRoleEnum.Authority.MANAGER)
 	@GetMapping("/{customerUserPublicId}")
