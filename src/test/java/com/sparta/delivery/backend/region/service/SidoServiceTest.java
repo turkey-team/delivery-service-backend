@@ -42,6 +42,7 @@ public class SidoServiceTest {
 		@Test
 		@DisplayName("성공")
 		void success() {
+			// given
 			List<ReqCreateSidoDto> requestDtoList = List.of(
 				new ReqCreateSidoDto("이름1", "11")
 			);
@@ -51,8 +52,10 @@ public class SidoServiceTest {
 			given(sidoRepository.existsByCodeInCustom(anyList())).willReturn(false);
 			given(sidoRepository.saveAll(anyList())).willReturn(sidoList);
 
+			// when
 			List<ResCreateSidoDto> responseDtoList = sidoService.createSidos(requestDtoList);
 
+			// then
 			assertThat(responseDtoList).hasSize(1);
 			then(sidoRepository).should(times(1)).existsByNameInCustom(anyList());
 			then(sidoRepository).should(times(1)).existsByCodeInCustom(anyList());
@@ -62,11 +65,13 @@ public class SidoServiceTest {
 		@Test
 		@DisplayName("실패 - Request에 중복된 이름 포함")
 		void failure_duplicatedSidoNameInRequest() {
+			// given
 			List<ReqCreateSidoDto> requestDtoList = List.of(
 				new ReqCreateSidoDto("이름1", "11"),
 				new ReqCreateSidoDto("이름1", "12")
 			);
 
+			// when & then
 			assertThatThrownBy(() -> sidoService.createSidos(requestDtoList))
 				.isInstanceOf(RegionDuplicateRequestException.class)
 				.hasMessage("요청에 중복된 시/도 이름이 포함되어 있습니다.");
@@ -76,12 +81,14 @@ public class SidoServiceTest {
 		@Test
 		@DisplayName("실패 - DB에 중복된 이름 포함")
 		void failure_duplicatedSidoNameInDB() {
+			// given
 			List<ReqCreateSidoDto> requestDtoList = List.of(
 				new ReqCreateSidoDto("이름1", "11")
 			);
 
 			given(sidoRepository.existsByNameInCustom(anyList())).willReturn(true);
 
+			// when & then
 			assertThatThrownBy(() -> sidoService.createSidos(requestDtoList))
 				.isInstanceOf(RegionAlreadyExistsException.class)
 				.hasMessage("이미 존재하는 시/도 이름이 포함되어 있습니다.");
@@ -92,11 +99,13 @@ public class SidoServiceTest {
 		@Test
 		@DisplayName("실패 - Request에 중복된 코드 포함")
 		void failure_duplicatedSidoCodeInRequest() {
+			// given
 			List<ReqCreateSidoDto> requestDtoList = List.of(
 				new ReqCreateSidoDto("이름1", "11"),
 				new ReqCreateSidoDto("이름2", "11")
 			);
 
+			// when & then
 			assertThatThrownBy(() -> sidoService.createSidos(requestDtoList))
 				.isInstanceOf(RegionDuplicateRequestException.class)
 				.hasMessage("요청에 중복된 시/도 코드가 포함되어 있습니다.");
@@ -106,12 +115,14 @@ public class SidoServiceTest {
 		@Test
 		@DisplayName("실패 - DB에 중복된 코드 포함")
 		void failure_duplicatedSidoCodeInDB() {
+			// given
 			List<ReqCreateSidoDto> requestDtoList = List.of(
 				new ReqCreateSidoDto("이름1", "11")
 			);
 
 			given(sidoRepository.existsByCodeInCustom(anyList())).willReturn(true);
 
+			// when & then
 			assertThatThrownBy(() -> sidoService.createSidos(requestDtoList))
 				.isInstanceOf(RegionAlreadyExistsException.class)
 				.hasMessage("이미 존재하는 시/도 코드가 포함되어 있습니다.");
@@ -128,6 +139,7 @@ public class SidoServiceTest {
 		@Test
 		@DisplayName("성공")
 		void success() {
+			// given
 			List<Sido> sidoList = List.of(
 				Sido.builder().name("이름1").code("11").build(),
 				Sido.builder().name("이름2").code("12").build()
@@ -135,8 +147,10 @@ public class SidoServiceTest {
 
 			given(sidoRepository.findAllCustom()).willReturn(sidoList);
 
+			// when
 			List<ResReadSidoDto> responseDto = sidoService.getAllSido();
 
+			// then
 			assertThat(responseDto).hasSize(2);
 			assertThat(responseDto.get(0).getName()).isEqualTo("이름1");
 			assertThat(responseDto.get(0).getCode()).isEqualTo("11");
@@ -154,6 +168,7 @@ public class SidoServiceTest {
 		@Test
 		@DisplayName("성공")
 		void success() {
+			// given
 			Sido sido = Sido.builder().name("이름1").code("11").build();
 			ReqUpdateSidoDto requestDto = new ReqUpdateSidoDto("이름2", "12");
 			UUID sidoId = UUID.randomUUID();
@@ -162,8 +177,10 @@ public class SidoServiceTest {
 			given(sidoRepository.existsByNameAndIdNotCustom(requestDto.getName(), sidoId)).willReturn(false);
 			given(sidoRepository.existsByCodeAndIdNotCustom(requestDto.getCode(), sidoId)).willReturn(false);
 
+			// when
 			ResUpdateSidoDto responseDto = sidoService.updateSido(sidoId, requestDto);
 
+			// then
 			assertThat(responseDto.getName()).isEqualTo("이름2");
 			assertThat(responseDto.getCode()).isEqualTo("12");
 			then(sidoRepository).should(times(1)).findByIdCustom(any());
@@ -174,11 +191,13 @@ public class SidoServiceTest {
 		@Test
 		@DisplayName("실패 - 존재하지 않는 시·도")
 		void failure_notFoundSido() {
+			// given
 			ReqUpdateSidoDto requestDto = new ReqUpdateSidoDto("이름2", "12");
 			UUID sidoId = UUID.randomUUID();
 
 			given(sidoRepository.findByIdCustom(sidoId)).willReturn(Optional.empty());
 
+			// when & then
 			assertThatThrownBy(() -> sidoService.updateSido(sidoId, requestDto))
 				.isInstanceOf(RegionNotFoundException.class)
 				.hasMessage("존재하지 않는 시/도입니다.");
@@ -190,6 +209,7 @@ public class SidoServiceTest {
 		@Test
 		@DisplayName("실패 - DB에 중복된 이름 존재")
 		void failure_duplicatedSidoNameInDB() {
+			// given
 			Sido sido = Sido.builder().name("이름1").code("11").build();
 			ReqUpdateSidoDto requestDto = new ReqUpdateSidoDto("이름2", "12");
 			UUID sidoId = UUID.randomUUID();
@@ -197,6 +217,7 @@ public class SidoServiceTest {
 			given(sidoRepository.findByIdCustom(sidoId)).willReturn(Optional.of(sido));
 			given(sidoRepository.existsByNameAndIdNotCustom(requestDto.getName(), sidoId)).willReturn(true);
 
+			// when & then
 			assertThatThrownBy(() -> sidoService.updateSido(sidoId, requestDto))
 				.isInstanceOf(RegionAlreadyExistsException.class)
 				.hasMessage("이미 존재하는 시/도 이름입니다.");
@@ -208,6 +229,7 @@ public class SidoServiceTest {
 		@Test
 		@DisplayName("실패 - DB에 중복된 코드 존재")
 		void failure_duplicatedSidoCodeInDB() {
+			// given
 			Sido sido = Sido.builder().name("이름1").code("11").build();
 			ReqUpdateSidoDto requestDto = new ReqUpdateSidoDto("이름2", "12");
 			UUID sidoId = UUID.randomUUID();
@@ -216,6 +238,7 @@ public class SidoServiceTest {
 			given(sidoRepository.existsByNameAndIdNotCustom(requestDto.getName(), sidoId)).willReturn(false);
 			given(sidoRepository.existsByCodeAndIdNotCustom(requestDto.getCode(), sidoId)).willReturn(true);
 
+			// when & then
 			assertThatThrownBy(() -> sidoService.updateSido(sidoId, requestDto))
 				.isInstanceOf(RegionAlreadyExistsException.class)
 				.hasMessage("이미 존재하는 시/도 코드입니다.");
@@ -233,14 +256,17 @@ public class SidoServiceTest {
 		@Test
 		@DisplayName("성공")
 		void success() {
+			// given
 			Sido sido = Sido.builder().name("이름1").code("11").build();
 			UUID sidoId = UUID.randomUUID();
 			Long userId = 1L;
 
 			given(sidoRepository.findByIdCustom(any(UUID.class))).willReturn(Optional.of(sido));
 
+			// when
 			sidoService.deleteSido(sidoId, userId);
 
+			// then
 			assertThat(sido.getDeletedAt()).isNotNull();
 			assertThat(sido.getDeletedBy()).isEqualTo(1L);
 			then(sidoRepository).should(times(1)).findByIdCustom(any());
@@ -249,11 +275,12 @@ public class SidoServiceTest {
 		@Test
 		@DisplayName("실패 - 존재하지 않는 시·도")
 		void failure_notFoundSido() {
+			// given
 			UUID sidoId = UUID.randomUUID();
 			Long userId = 1L;
-
 			given(sidoRepository.findByIdCustom(sidoId)).willReturn(Optional.empty());
 
+			// when & then
 			assertThatThrownBy(() -> sidoService.deleteSido(sidoId, userId))
 				.isInstanceOf(RegionNotFoundException.class)
 				.hasMessage("존재하지 않는 시/도입니다.");
