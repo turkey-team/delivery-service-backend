@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.sparta.delivery.backend.address.dto.ResAddressDto;
 import com.sparta.delivery.backend.image.dto.ReqGeneratePresignedUrlDto;
 import com.sparta.delivery.backend.image.dto.ResPresignedUrlDto;
 import com.sparta.delivery.backend.image.service.S3Service;
