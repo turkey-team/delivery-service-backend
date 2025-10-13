@@ -38,4 +38,19 @@ public class SwaggerConfig {
 			.build();
 	}
 
+	@Bean
+	public GroupedOpenApi storeMenuApi() {
+		return GroupedOpenApi.builder()
+				.group("가게 메뉴 API")
+				.pathsToMatch("/v1/stores/**/menus/**")
+				.build();
+	}
+
+	@Bean
+	public GroupedOpenApi orderApi() {
+		return GroupedOpenApi.builder()
+				.group("주문 API")
+				.pathsToMatch("/v1/orders/**")
+				.build();
+	}
 }
