@@ -1,9 +1,11 @@
 package com.sparta.delivery.backend.order.service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.sparta.delivery.backend.store.menu.entity.StoreMenu;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -78,14 +80,25 @@ public class OrderService {
 		orderRepository.save(order);
 
 		// Cart → OrderMenu 변환 후, Cart 비우기
+		// Cart 조회
 		List<Cart> carts = cartRepository.findAllByCustomerIdAndDeletedAtIsNull(customer.getId());
-		carts.forEach(cart -> {
+		if (carts.isEmpty()) throw new IllegalStateException("장바구니가 비어 있습니다.");
+
+		// 메뉴별로 Grouping + row 개수 count
+		Map<StoreMenu, Long> menuCountMap = carts.stream()
+				.collect(Collectors.groupingBy(Cart::getMenu, Collectors.counting()));
+
+		// OrderMenu 생성
+		menuCountMap.forEach((menu, count) -> {
 			orderMenuRepository.save(OrderMenu.builder()
-				.order(order)
-				.storeMenu(cart.getMenu())
-				.build());
-			cart.softDelete();
+					.order(order)
+					.storeMenu(menu)
+					.quantity(count.intValue()) // count를 quantity로
+					.build());
 		});
+
+		// Cart 삭제
+		carts.forEach(Cart::softDelete);
 
 		return order.getId(); // 생성된 Order ID 반환
 	}
@@ -208,7 +221,7 @@ public class OrderService {
 		return ResCheckOutOrderDto.from(customer, defaultAddress, menusPrice, deliveryFee);
 	}
 
-	// Cart에서 Store 가져오기
+	// Cart 에서 Store 가져오기
 	private Store getStoreFromCart(User user) {
 		Customer customer = getCustomerOrThrow(user);
 		List<Cart> carts = cartRepository.findAllByCustomerIdAndDeletedAtIsNull(customer.getId());
@@ -216,7 +229,7 @@ public class OrderService {
 		return carts.get(0).getMenu().getStore();
 	}
 
-	// User로 Customer 조회
+	// User 로 Customer 조회
 	private Customer getCustomerOrThrow(User user) {
 		return customerRepository.findByUserId(user.getId())
 			.orElseThrow(() -> new IllegalArgumentException("고객 정보가 존재하지 않습니다."));
