@@ -22,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sparta.delivery.backend.customer.entity.Customer;
 import com.sparta.delivery.backend.image.entity.Image;
 import com.sparta.delivery.backend.image.repository.ImageRepository;
 import com.sparta.delivery.backend.owner.entity.Owner;
@@ -58,6 +59,7 @@ class StoreMenuServiceTest {
 
 	private User user;
 	private Owner owner;
+	private Customer customer;
 	private Store store;
 	private StoreMenu menu1;
 	private StoreMenu menu2;
@@ -269,6 +271,32 @@ class StoreMenuServiceTest {
 			);
 
 			assertEquals("Menu name already exists", exception.getMessage());
+		}
+
+		@Test
+		@DisplayName("실패 - 권한이 없는 사용자(Customer)가 생성")
+		void failure_noPermission() {
+			/* given */
+			UUID storeId = store.getId();
+
+			// 테스트용 User(Customer) 생성
+			user = User.builder()
+				.username("customerUser")
+				.password("pass")
+				.role(UserRoleEnum.CUSTOMER)
+				.build();
+			ReflectionTestUtils.setField(user, "publicId", UUID.randomUUID());
+
+			// storeRepository.findById()는 정상적으로 store 반환
+			when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+
+			/* when & then */
+			SecurityException exception = assertThrows(
+				SecurityException.class,
+				() -> storeMenuService.createStoreMenu(user, storeId, reqCreateStoreMenuDto)
+			);
+
+			assertEquals("You do not have permission", exception.getMessage());
 		}
 
 		/* 리뷰 이벤트 같은 경우 +0 을 의도적으로 설정하는 경우가 있어서 예외처리하는게 맞을지 의문

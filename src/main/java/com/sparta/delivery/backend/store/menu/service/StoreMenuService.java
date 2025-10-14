@@ -189,8 +189,6 @@ public class StoreMenuService {
 		reorderSortOrder(storeId);
 	}
 
-
-
 	/** 삭제 시 재정렬 **/
 	// 메뉴 삭제 시 모든 메뉴 순서 1부터 오름차순 재배치
 	private void reorderSortOrder(UUID storeId) {
