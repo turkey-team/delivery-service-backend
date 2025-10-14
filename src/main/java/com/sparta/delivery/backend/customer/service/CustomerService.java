@@ -46,7 +46,7 @@ public class CustomerService {
 	@Transactional
 	public void createCustomer(ReqCreateCustomerDto requestDto) {
 		//같은 메일로 다른 사용자 요청 가능하도록 할지 정책 결정필요
-		userRepository.findByUsername(requestDto.getUsername())
+		userRepository.findByUsernameAndDeletedAtIsNull(requestDto.getUsername())
 			.ifPresent(user -> {
 				throw new DuplicateUsernameException("이미 존재하는 사용자명입니다.");
 			});
@@ -89,7 +89,7 @@ public class CustomerService {
 
 	@Transactional
 	public void changePassword(UserDetailsImpl userDetails, @Valid ReqChangePasswordDto requestDto) {
-		User user = userRepository.findById(userDetails.getId())
+		User user = userRepository.findByIdAndDeletedAtIsNull(userDetails.getId())
 			.orElseThrow(() -> new IllegalArgumentException("잘못된 유저 아이디 입니다."));
 
 		if (!passwordEncoder.matches(requestDto.getCurrentPassword(), user.getPassword())) {
