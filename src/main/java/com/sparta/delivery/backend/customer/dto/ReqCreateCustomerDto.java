@@ -1,7 +1,7 @@
 package com.sparta.delivery.backend.customer.dto;
 
-import com.sparta.delivery.backend.global.annotation.validate.ValidPassword;
-import com.sparta.delivery.backend.global.annotation.validate.ValidUsername;
+import com.sparta.delivery.backend.global.validation.annotation.ValidPassword;
+import com.sparta.delivery.backend.global.validation.annotation.ValidUsername;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-@Schema(description = "고객 회원가입 요청")
+@Schema(name = "ReqCreateCustomerDto", description = "고객 회원가입 요청")
 public class ReqCreateCustomerDto {
 
 	@Schema(description = "사용자 아이디", example = "customer1", requiredMode = Schema.RequiredMode.REQUIRED)

@@ -1,4 +1,4 @@
-package com.sparta.delivery.backend.customer.dto;
+package com.sparta.delivery.backend.owner.dto;
 
 import com.sparta.delivery.backend.global.validation.annotation.ValidPassword;
 
@@ -13,12 +13,12 @@ import lombok.NoArgsConstructor;
 @Schema(name = "ReqPasswordResetDto", description = "비밀번호 재설정")
 public class ReqPasswordResetDto {
 
-	@Schema(description = "이메일", example = "customer@example.com")
+	@Schema(description = "이메일", example = "owner@example.com")
 	@NotBlank(message = "이메일은 필수입니다.")
-	@Email(message = "올바른 이메일 형식이 아닙니다.")
+	@Email(message = "유효한 이메일 형식이 아닙니다.")
 	private String email;
 
-	@Schema(description = "재설정 토큰", example = "abc123-def456-ghi789")
+	@Schema(description = "재설정 토큰", example = "550e8400-e29b-41d4-a716-446655440000")
 	@NotBlank(message = "토큰은 필수입니다.")
 	private String token;
 

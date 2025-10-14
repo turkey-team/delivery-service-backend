@@ -68,6 +68,8 @@ public class WebSecurityConfig {
 					.requestMatchers("/v1/email/send-verification").permitAll()
 					.requestMatchers("/v1/customers/password-reset/request").authenticated()
 					.requestMatchers("/v1/customers/password-reset/confirm").authenticated()
+					.requestMatchers("/v1/owners/password-reset/confirm").authenticated()
+					.requestMatchers("/v1/owners/password-reset/request").authenticated()
 					.requestMatchers("/v1/email/verify").permitAll()
 					//TODO: 추후 개발 완성전 manager등록 API 필터 거치도록 변경
 					.requestMatchers("/v1/managers").permitAll()

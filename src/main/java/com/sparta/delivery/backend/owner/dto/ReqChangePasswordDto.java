@@ -1,4 +1,4 @@
-package com.sparta.delivery.backend.customer.dto;
+package com.sparta.delivery.backend.owner.dto;
 
 import com.sparta.delivery.backend.global.validation.annotation.ValidPassword;
 
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-@Schema(name = "ReqChangePasswordDto",description = "비밀번호 변경 요청")
+@Schema(name = "ReqChangePasswordDto", description = "비밀번호 변경 요청")
 public class ReqChangePasswordDto {
 
 	@Schema(description = "현재 비밀번호", example = "OldPassword123!")

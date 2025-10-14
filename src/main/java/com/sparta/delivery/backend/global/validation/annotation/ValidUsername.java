@@ -1,4 +1,4 @@
-package com.sparta.delivery.backend.global.annotation.validate;
+package com.sparta.delivery.backend.global.validation.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
