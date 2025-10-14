@@ -8,9 +8,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.sparta.delivery.backend.category.dto.ResCreateCategoryDto;
 import com.sparta.delivery.backend.category.dto.ResDeleteCategoryDto;
@@ -42,7 +44,7 @@ public class CategoryService {
 
 		//카테고리명 중복일때
 		 if (flag) {
-		 	throw new IllegalArgumentException(name+"은(는) 중복된 카테고리 이름입니다");
+		 	throw new ResponseStatusException(HttpStatus.BAD_REQUEST,name+"은(는) 중복된 카테고리 이름입니다");
 		 }
 
 		Category category = Category.builder().name(name).build();
@@ -58,10 +60,10 @@ public class CategoryService {
 		//권한확인
 		checkUserRole(user);
 
-		Category category = categoryRepository.findById(id).orElseThrow(()->new IllegalArgumentException("해당 카테고리가 존재하지 않습니다."));
+		Category category = categoryRepository.findById(id).orElseThrow(()-> new ResponseStatusException(HttpStatus.BAD_REQUEST,"해당 카테고리가 존재하지 않습니다."));
 
 		if (category.getName().equals(name)) {
-			throw new IllegalArgumentException("수정하려는 이름과 기존 카테고리 명이 중복됩니다.");
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"수정하려는 이름과 기존 카테고리 명이 중복됩니다.");
 		}
 
 		category.updateCategoryName(name);
@@ -98,10 +100,10 @@ public class CategoryService {
 	public ResGetCategoryDto getCategory(UUID categoryId) {
 
 		if (!categoryRepository.existsById(categoryId)) {
-			throw new IllegalArgumentException("해당 카테고리는 존재하지 않습니다");
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"해당 카테고리는 존재하지 않습니다");
 		}
 
-		Category category = categoryRepository.findByIdAndDeletedAtIsNull(categoryId).orElseThrow(()->new IllegalArgumentException("이미 삭제된 카테고리입니다."));
+		Category category = categoryRepository.findByIdAndDeletedAtIsNull(categoryId).orElseThrow(()->new ResponseStatusException(HttpStatus.BAD_REQUEST,"이미 삭제된 카테고리입니다."));
 
 		ResGetCategoryDto resGetCategoryDto = ResGetCategoryDto.builder().id(category.getId()).categoryName(category.getName())
 												.createdAt(category.getCreatedAt()).updatedAt(category.getUpdatedAt()).build();
@@ -115,12 +117,12 @@ public class CategoryService {
 		//권한확인
 		checkUserRole(user);
 
-		Category category = categoryRepository.findById(categoryId).orElseThrow(()->new IllegalArgumentException("해당 카테고리가 존재하지 않습니다"));
+		Category category = categoryRepository.findById(categoryId).orElseThrow(()->new ResponseStatusException(HttpStatus.BAD_REQUEST,"해당 카테고리가 존재하지 않습니다"));
 
 		boolean isUsed = storeCategoryRepository.existsByCategoryIdAndDeletedAtIsNull(categoryId);
 
 		if (isUsed) {
-			throw new IllegalArgumentException("현재 사용중인 카테고리는 삭제할 수 없습니다.");
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"현재 사용중인 카테고리는 삭제할 수 없습니다.");
 		}
 
 		category.softDelete(user.getId());

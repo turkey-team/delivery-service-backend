@@ -29,44 +29,54 @@ import com.sparta.delivery.backend.store.dto.ResUpdateStoreInfoDto;
 import com.sparta.delivery.backend.store.dto.ResUpdateStoreStatusDto;
 import com.sparta.delivery.backend.store.service.StoreService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1")
+@Tag(name="Store-Controller", description = "가게 관련 API")
 public class StoreController {
 
 	private final StoreService storeService;
 
-	/**
-	 * 가게 등록
-	 * @param requestDto
-	 * @param @AuthenticationPrincipal UserDetailsImpl userDetails
-	 * @return responseDto(Id, name)
-	 * 추후 @AuthenticationPrincipal UserDetailsImpl userDetails로 변경
-	 */
 	@PostMapping("/stores")
+	@Operation(summary = "가게 추가", description = "가게를 추가합니다.")
+	@ApiResponses(value= {
+		@ApiResponse(responseCode = "200", description = "가게 추가 성공"
+			,content = @Content(schema = @Schema(implementation = ResCreateStoreDto.class)))
+		,@ApiResponse(responseCode = "400", description = "주소지 오류")
+		,@ApiResponse(responseCode = "403", description = "Manager 혹은 Owner 아니면 생성 불가")
+	})
 	public ResCreateStoreDto createStore(@RequestBody @Valid ReqCreateStoreDto requestDto, @AuthenticationPrincipal UserDetailsImpl userDetails){
 		return storeService.createStore(requestDto, userDetails.getUser());
 	}
 
-	/**
-	 *
-	 * @param storeId
-		상세조회
-	 * @return resGetStoreDto
-	 */
 	@GetMapping("/stores/{storeId}")
+	@Operation(summary = "가게 상세 조회", description = "가게를 조회합니다.")
+	@ApiResponses(value= {
+		@ApiResponse(responseCode = "200", description = "가게 조회 성공"
+			,content = @Content(schema = @Schema(implementation = ResGetStoreDto.class)))
+		,@ApiResponse(responseCode = "400", description = "가게 없음")
+	})
 	public ResGetStoreDto getStore(@PathVariable UUID storeId){
 		return storeService.getStore(storeId);
 	}
 
 
-	/**
-	 * 목록 조회
-	 */
 	@GetMapping("/stores")
+	@Operation(summary = "가게 목록 조회", description = "가게 목록을 조회합니다.")
+	@ApiResponses(value= {
+		@ApiResponse(responseCode = "200", description = "가게 목록 조회 성공"
+			,content = @Content(schema = @Schema(implementation = ResGetStoreDto.class)))
+		,@ApiResponse(responseCode = "400", description = "카테고리 없음")
+	})
 	public Page<ResGetListStoreDto> getStores(
 		@RequestParam(value = "page", required = false, defaultValue = "1") int page,
 		@RequestParam(value = "size", required = false, defaultValue = "10") int size,
@@ -79,49 +89,50 @@ public class StoreController {
 		return storeService.getStores(page, size, sort, keyword, categoryId, userDetails.getUser());
 	}
 
-	/**
-	 * 정보수정
-	 * Owner만 가능
-	 */
 	@PatchMapping("/stores/{storeId}")
+	@Operation(summary = "가게 수정", description = "가게 정보를 수정합니다.")
+	@ApiResponses(value= {
+		@ApiResponse(responseCode = "200", description = "가게 정보 수정 성공"
+			,content = @Content(schema = @Schema(implementation = ResUpdateStoreInfoDto.class)))
+		,@ApiResponse(responseCode = "400", description = "가게 없음 혹은 주소지, 이미지 없음")
+		,@ApiResponse(responseCode = "403", description = "Manager 혹은 Owner 아니면 수정 불가")
+	})
 	public ResUpdateStoreInfoDto updateStoreInfo(@PathVariable UUID storeId, @RequestBody @Valid ReqUpdateStoreInfoDto requestDto, @AuthenticationPrincipal UserDetailsImpl userDetails){
 		return storeService.updateStoreInfo(storeId, requestDto, userDetails.getUser());
 	}
 
-	/**
-	 * 배달 관련 수정
-	 * Owner / Manager
-	 * @param storeId
-	 * @param requestDto
-	 * @param userDetails
-	 * @return
-	 */
 	@PatchMapping("/stores/{storeId}/details")
+	@Operation(summary = "가게 배달 정보 수정", description = "가게의 배달 관련된 정보를 수정합니다.")
+	@ApiResponses(value= {
+		@ApiResponse(responseCode = "200", description = "가게 정보 수정 성공"
+			,content = @Content(schema = @Schema(implementation = ResUpdateStoreDetailsDto.class)))
+		,@ApiResponse(responseCode = "400", description = "가게 없음")
+		,@ApiResponse(responseCode = "403", description = "Manager 혹은 Owner 아니면 수정 불가")
+	})
 	public ResUpdateStoreDetailsDto updateStoreDetails(@PathVariable UUID storeId, @RequestBody @Valid ReqUpdateStoreDetailsDto requestDto, @AuthenticationPrincipal UserDetailsImpl userDetails){
 		return storeService.updateStoreDetails(storeId, requestDto, userDetails.getUser());
 	}
 
-	/**
-	 * 가게 상태 수정
-	 * Owner / Manager
-	 * @param storeId
-	 * @param requestDto
-	 * @param userDetails
-	 * @return
-	 */
 	@PatchMapping("/stores/{storeId}/status")
+	@Operation(summary = "가게 상태 정보 수정", description = "가게 상태 정보를 수정합니다.")
+	@ApiResponses(value= {
+		@ApiResponse(responseCode = "200", description = "가게 상태 정보 수정 성공"
+			,content = @Content(schema = @Schema(implementation = ResUpdateStoreStatusDto.class)))
+		,@ApiResponse(responseCode = "400", description = "가게 없음 혹은 현재와 동일한 상태로 변경 요청")
+		,@ApiResponse(responseCode = "403", description = "Manager 혹은 Owner 아니면 수정 불가")
+	})
 	public ResUpdateStoreStatusDto updateStoreStatus(@PathVariable UUID storeId, @RequestBody @Valid ReqUpdateStoreStatusDto requestDto, @AuthenticationPrincipal UserDetailsImpl userDetails){
 		return storeService.updateStoreStatus(storeId, requestDto, userDetails.getUser());
 	}
 
-	/**
-	 * 가게 삭제
-	 * @param storeId
-	 * @param requestDto(businessNumber)
-	 * @param userDetails
-	 * @return
-	 */
 	@DeleteMapping("/stores/{storeId}")
+	@Operation(summary = "가게 삭제", description = "가게를 삭제합니다.")
+	@ApiResponses(value= {
+		@ApiResponse(responseCode = "200", description = "가게 삭제 수정 성공"
+			,content = @Content(schema = @Schema(implementation = ResUpdateStoreInfoDto.class)))
+		,@ApiResponse(responseCode = "400", description = "가게 없음")
+		,@ApiResponse(responseCode = "403", description = "Manager 혹은 Owner 아니면 삭제 불가")
+	})
 	public ResDeleteStoreDto deleteStore(@PathVariable UUID storeId, @RequestBody @Valid ReqDeleteStoreDto requestDto, @AuthenticationPrincipal UserDetailsImpl userDetails){
 		return storeService.deleteStore(storeId, requestDto, userDetails.getUser());
 	}

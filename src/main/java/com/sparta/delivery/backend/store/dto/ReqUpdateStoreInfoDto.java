@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.hibernate.validator.constraints.Length;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
@@ -14,38 +15,49 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(name = "ReqUpdateStoreInfoDto", description = "가게 정보 수정 요청 DTO")
 public class ReqUpdateStoreInfoDto {
 
 	//store
 	@NotBlank(message = "가게 이름은 비워둘 수 없습니다.")
+	@Schema(description = "가게 이름", example = "김밥천국 광화문점", required = true)
 	private String storeName;
 
 	@NotBlank(message = "상세주소는 필수입니다.")
+	@Schema(description = "가게 상세주소", example = "광화문로 1길 11", required = true)
 	private String addressDetails;
 
 	@NotBlank(message = "연락처는 필수입니다.")
 	@Length(min = 11, max = 15)
+	@Schema(description = "가게 연락처", example = "02-9874-6521", required = true)
 	private String phoneNumber;
 
 	@NotBlank(message = "주소지 입력은 필수입니다.")
-
 	@Length(min = 3, max = 3)
+	@Schema(description = "법정동 코드", example = "123", required = true)
 	private String regionDong;
 
+	@Schema(description = "가게 카테고리", required = true)
 	@NotEmpty(message = "카테고리 선택은 필수입니다.")
 	private List<UUID> categories;
 
+	@Schema(description = "가게 사진", required = true)
 	@NotEmpty(message = "가게 사진을 첨부해주세요.")
 	private List<ImageDto> images;
 
 	@Getter
+	@NoArgsConstructor
+	@AllArgsConstructor
 	public static class ImageDto {
+		@Schema(description = "이미지 UUID", example = "123e4567-e89b-12d3-a456-426614174000")
 		private UUID imageId;
 
 		@NotBlank
+		@Schema(description = "이미지 URL", example = "image.png", required = true)
 		private String url;
 
 		@NotBlank
+		@Schema(description = "이미지 타입", example = "store", required = true)
 		private String type;
 		// 배민 정책 참고하면 사업자번호 변경은 고객센터 통한 요청 필요 -> 사업자등록증 이미지 변경 불가
 	}
