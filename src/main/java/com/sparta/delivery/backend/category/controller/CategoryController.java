@@ -3,6 +3,7 @@ package com.sparta.delivery.backend.category.controller;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -49,6 +50,7 @@ public class CategoryController {
 		,@ApiResponse(responseCode = "400", description = "카테고리명 중복")
 		,@ApiResponse(responseCode = "403", description = "매니저 권한이 아니면 생성 불가")
 	})
+	@PreAuthorize("hasAnyRole('MASTER', 'MANAGER')")
 	public ResCreateCategoryDto createCategory(@RequestBody ReqCreateCategoryDto reqCreateCategoryDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
 	 	return categoryService.createCategory(reqCreateCategoryDto.getName(), userDetails.getUser());
 	}
@@ -78,7 +80,6 @@ public class CategoryController {
 		){
 		return categoryService.getCategories(userDetails.getUser(), keyword, page, size, sort);
 	}
-
 	@PutMapping("/categories/{categoryId}")
 	@Operation(summary = "카테고리 수정", description = "카테고리 이름 수정")
 	@ApiResponses(value= {
@@ -86,6 +87,7 @@ public class CategoryController {
 			,content = @Content(schema = @Schema(implementation = ResGetCategoryDto.class)))
 		,@ApiResponse(responseCode = "400", description = "카테고리 없음 혹은 카테고리명 중복")
 	})
+	@PreAuthorize("hasAnyRole('MASTER', 'MANAGER')")
 	public ResUpdateCategoryDto updateCategory(@PathVariable UUID categoryId, @RequestBody ReqUpdateCategoryDto reqUpdateCategoryDto, @AuthenticationPrincipal UserDetailsImpl userDetails){
 		return categoryService.updateCategory(categoryId, reqUpdateCategoryDto.getName(), userDetails.getUser());
 	}
@@ -98,6 +100,7 @@ public class CategoryController {
 		,@ApiResponse(responseCode = "400", description = "카테고리 없음 혹은 사용중인 카테고리")
 		,@ApiResponse(responseCode = "403", description = "매니저 권한이 아니면 생성 불가")
 	})
+	@PreAuthorize("hasAnyRole('MASTER', 'MANAGER')")
 	public ResDeleteCategoryDto deleteCategory(@PathVariable UUID categoryId, @AuthenticationPrincipal UserDetailsImpl userDetails){
 		return categoryService.deleteCategory(categoryId, userDetails.getUser());
 	}

@@ -100,7 +100,7 @@ public class DongController {
 			})),
 	})
 	@GetMapping("/sigungus/{sigunguId}/dongs")
-	@PreAuthorize("isAuthenticated() && hasAnyRole('MANAGER', 'OWNER', 'CUSTOMER')")
+	@PreAuthorize("isAuthenticated() && hasAnyRole('MANAGER', 'OWNER', 'CUSTOMER', 'MASTER')")
 	public ResponseEntity<List<ResReadDongDto>> getAllDong(
 		@Parameter(description = "시·군·구 ID", example = "cc1093ef-66c9-419d-a013-9718ae639a6b") @PathVariable UUID sigunguId
 	) {
@@ -137,7 +137,7 @@ public class DongController {
 			}))
 	})
 	@PutMapping("/sigungus/{sigunguId}/dongs/{dongId}")
-	@PreAuthorize("isAuthenticated() && hasRole('MANAGER')")
+	@PreAuthorize("isAuthenticated() && hasAnyRole('MANAGER', 'MASTER')")
 	public ResponseEntity<ResUpdateDongDto> updateDong(
 		@Parameter(description = "시·군·구 ID", example = "cc1093ef-66c9-419d-a013-9718ae639a6b") @PathVariable UUID sigunguId,
 		@Parameter(description = "동 ID", example = "c373ba20-9e15-41fd-acdd-b180aba31b12") @PathVariable UUID dongId,
@@ -163,7 +163,7 @@ public class DongController {
 			}))
 	})
 	@DeleteMapping("/sigungus/{sigunguId}/dongs/{dongId}")
-	@PreAuthorize("isAuthenticated() && hasRole('MANAGER')")
+	@PreAuthorize("isAuthenticated() && hasAnyRole('MANAGER', 'MASTER')")
 	public ResponseEntity<Void> deleteDong(
 		@Parameter(description = "시·군·구 ID", example = "cc1093ef-66c9-419d-a013-9718ae639a6b") @PathVariable UUID sigunguId,
 		@Parameter(description = "동 ID", example = "c373ba20-9e15-41fd-acdd-b180aba31b12") @PathVariable UUID dongId,

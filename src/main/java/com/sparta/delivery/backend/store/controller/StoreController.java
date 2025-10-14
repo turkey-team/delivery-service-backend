@@ -3,6 +3,7 @@ package com.sparta.delivery.backend.store.controller;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -54,6 +55,7 @@ public class StoreController {
 		,@ApiResponse(responseCode = "400", description = "주소지 오류")
 		,@ApiResponse(responseCode = "403", description = "Manager 혹은 Owner 아니면 생성 불가")
 	})
+	@PreAuthorize("hasAnyRole('MASTER', 'MANAGER', 'OWNER')")
 	public ResCreateStoreDto createStore(@RequestBody @Valid ReqCreateStoreDto requestDto, @AuthenticationPrincipal UserDetailsImpl userDetails){
 		return storeService.createStore(requestDto, userDetails.getUser());
 	}
@@ -97,6 +99,7 @@ public class StoreController {
 		,@ApiResponse(responseCode = "400", description = "가게 없음 혹은 주소지, 이미지 없음")
 		,@ApiResponse(responseCode = "403", description = "Manager 혹은 Owner 아니면 수정 불가")
 	})
+	@PreAuthorize("hasAnyRole('MASTER', 'MANAGER', 'OWNER')")
 	public ResUpdateStoreInfoDto updateStoreInfo(@PathVariable UUID storeId, @RequestBody @Valid ReqUpdateStoreInfoDto requestDto, @AuthenticationPrincipal UserDetailsImpl userDetails){
 		return storeService.updateStoreInfo(storeId, requestDto, userDetails.getUser());
 	}
@@ -109,6 +112,7 @@ public class StoreController {
 		,@ApiResponse(responseCode = "400", description = "가게 없음")
 		,@ApiResponse(responseCode = "403", description = "Manager 혹은 Owner 아니면 수정 불가")
 	})
+	@PreAuthorize("hasAnyRole('MASTER', 'MANAGER', 'OWNER')")
 	public ResUpdateStoreDetailsDto updateStoreDetails(@PathVariable UUID storeId, @RequestBody @Valid ReqUpdateStoreDetailsDto requestDto, @AuthenticationPrincipal UserDetailsImpl userDetails){
 		return storeService.updateStoreDetails(storeId, requestDto, userDetails.getUser());
 	}
@@ -121,6 +125,7 @@ public class StoreController {
 		,@ApiResponse(responseCode = "400", description = "가게 없음 혹은 현재와 동일한 상태로 변경 요청")
 		,@ApiResponse(responseCode = "403", description = "Manager 혹은 Owner 아니면 수정 불가")
 	})
+	@PreAuthorize("hasAnyRole('MASTER', 'MANAGER', 'OWNER')")
 	public ResUpdateStoreStatusDto updateStoreStatus(@PathVariable UUID storeId, @RequestBody @Valid ReqUpdateStoreStatusDto requestDto, @AuthenticationPrincipal UserDetailsImpl userDetails){
 		return storeService.updateStoreStatus(storeId, requestDto, userDetails.getUser());
 	}
@@ -133,6 +138,7 @@ public class StoreController {
 		,@ApiResponse(responseCode = "400", description = "가게 없음")
 		,@ApiResponse(responseCode = "403", description = "Manager 혹은 Owner 아니면 삭제 불가")
 	})
+	@PreAuthorize("hasAnyRole('MASTER', 'MANAGER', 'OWNER')")
 	public ResDeleteStoreDto deleteStore(@PathVariable UUID storeId, @RequestBody @Valid ReqDeleteStoreDto requestDto, @AuthenticationPrincipal UserDetailsImpl userDetails){
 		return storeService.deleteStore(storeId, requestDto, userDetails.getUser());
 	}
