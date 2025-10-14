@@ -17,7 +17,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -42,7 +41,6 @@ import com.sparta.delivery.backend.region.entity.Dong;
 import com.sparta.delivery.backend.region.entity.Sido;
 import com.sparta.delivery.backend.region.entity.Sigungu;
 import com.sparta.delivery.backend.store.entity.Store;
-import com.sparta.delivery.backend.store.entity.StoreStatusEnum;
 import com.sparta.delivery.backend.store.menu.dto.ReqCreateStoreMenuDto;
 import com.sparta.delivery.backend.store.menu.entity.StoreMenu;
 import com.sparta.delivery.backend.store.menu.enums.StockStatus;
@@ -209,7 +207,7 @@ class OrderServiceTest {
 
 		@Test
 		@DisplayName("성공 - 기본 주소와 장바구니 기반으로 주문 생성")
-		void create_success() {
+		void create_orderWithDefaultAddressAndCart() {
 			/* given */
 			ReqCreateOrderDto req = new ReqCreateOrderDto();
 			req.setRequestMessage("문앞에 두세요");
@@ -250,6 +248,46 @@ class OrderServiceTest {
 			assertThrows(IllegalStateException.class,
 				() -> orderService.createOrder(customerUser, new ReqCreateOrderDto()));
 		}
+
+		@Test
+		@DisplayName("실패 - 장바구니 주인이 아닌 사용자가 주문 생성")
+		void failure_notCartOwner() {
+			/* given */
+			// 다른 Customer 유저 생성
+			User anotherUser = User.builder()
+				.username("otherCustomer")
+				.password("pass")
+				.role(UserRoleEnum.CUSTOMER)
+				.build();
+			ReflectionTestUtils.setField(anotherUser, "id", 99L);
+			ReflectionTestUtils.setField(anotherUser, "publicId", UUID.randomUUID());
+
+			Customer anotherCustomer = Customer.builder()
+				.user(anotherUser)
+				.nickname("다른고객")
+				.build();
+			ReflectionTestUtils.setField(anotherCustomer, "id", UUID.randomUUID());
+
+			// Cart 가 다른 Customer 것이라면
+			Cart foreignCart = Cart.builder()
+				.customer(anotherCustomer)
+				.menu(storeMenu)
+				.build();
+
+			when(customerRepository.findByUserId(any())).thenReturn(Optional.of(customer));
+			when(addressRepository.findByUserIdAndIsDefaultTrueAndDeletedAtIsNull(any()))
+				.thenReturn(Optional.of(address));
+			when(cartRepository.findAllByCustomerIdAndDeletedAtIsNull(any()))
+				.thenReturn(List.of(foreignCart));
+
+			/* when & then */
+			SecurityException exception = assertThrows(
+				SecurityException.class,
+				() -> orderService.createOrder(customerUser, new ReqCreateOrderDto())
+			);
+
+			assertEquals("본인 장바구니가 아닙니다.", exception.getMessage());
+		}
 	}
 
 	@Nested
@@ -257,7 +295,7 @@ class OrderServiceTest {
 	class GetOrderListTest {
 
 		@Test
-		@DisplayName("성공 - CUSTOMER의 주문 조회")
+		@DisplayName("성공 - Customer의 주문 조회")
 		void getOrders_customer_success() {
 			/* given */
 			Page<Order> mockPage = new PageImpl<>(List.of(order));
@@ -273,7 +311,7 @@ class OrderServiceTest {
 		}
 
 		@Test
-		@DisplayName("성공 - OWNER의 주문 조회")
+		@DisplayName("성공 - Owner의 주문 조회")
 		void getOrders_owner_success() {
 			/* given */
 			Page<Order> mockPage = new PageImpl<>(List.of(order));
@@ -294,7 +332,7 @@ class OrderServiceTest {
 	class UpdateOrderStatusTest {
 
 		@Test
-		@DisplayName("성공 - 점주가 상태 변경")
+		@DisplayName("성공 - 해당 가게의 Owner가 주문 상태 변경")
 		void updateStatus_success() {
 			/* given */
 			when(orderRepository.findById(any())).thenReturn(Optional.of(order));
@@ -312,7 +350,7 @@ class OrderServiceTest {
 		}
 
 		@Test
-		@DisplayName("실패 - 고객이 상태 변경 시도")
+		@DisplayName("실패 - Customer가 상태 변경 시도")
 		void updateStatus_noPermission() {
 			/* given */
 			when(orderRepository.findById(any())).thenReturn(Optional.of(order));
@@ -324,6 +362,26 @@ class OrderServiceTest {
 			assertThrows(IllegalStateException.class,
 				() -> orderService.updateOrderStatus(customerUser, order.getId(), req));
 		}
+
+		@Test
+		@DisplayName("실패 - 주문이 존재하지 않음")
+		void updateStatus_orderNotExists() {
+			/* given */
+			UUID notExistsOrderId = UUID.randomUUID();
+			when(orderRepository.findById(notExistsOrderId)).thenReturn(Optional.empty());
+
+			ReqUpdateOrderStatusDto req = new ReqUpdateOrderStatusDto();
+			req.setOrderStatus(OrderStatus.ACCEPTED);
+
+			/* when & then */
+			IllegalArgumentException exception = assertThrows(
+				IllegalArgumentException.class,
+				() -> orderService.updateOrderStatus(ownerUser, notExistsOrderId, req)
+			);
+
+			assertEquals("주문이 존재하지 않습니다.", exception.getMessage());
+			verify(orderRepository, times(1)).findById(notExistsOrderId);
+		}
 	}
 
 	@Nested
@@ -331,7 +389,7 @@ class OrderServiceTest {
 	class DeleteOrderTest {
 
 		@Test
-		@DisplayName("성공 - 본인 주문 삭제")
+		@DisplayName("성공 - Owner가 본인 주문 내역 삭제")
 		void delete_success() {
 			/* given */
 			when(orderRepository.findById(any())).thenReturn(Optional.of(order));
