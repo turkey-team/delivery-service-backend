@@ -124,12 +124,16 @@ public class ReviewService {
 			.rate(registerDto.getRate())
 			.build();
 
+		if (registerDto.getRate() < 1 || registerDto.getRate() > 5) {
+			throw new IllegalStateException("리뷰 평점은 1~5 사이여야 합니다.");
+		}
+
 		reviewRepository.save(review);
 
 		store.addReview(review.getRate());
 		em.flush();
 		em.clear();
-		
+
 		evictReviewCache(storeId);
 
 		Owner owner = store.getOwner();
