@@ -39,7 +39,7 @@ public class StoreRepositoryImpl implements StoreRepositoryCustom {
 		QCategory category = QCategory.category;
 
 		BooleanBuilder condition = new BooleanBuilder();
-
+		condition.and(store.deletedAt.isNull());
 		condition.and(category.deletedAt.isNull());
 
 		boolean hasKeyword = keyword != null && !keyword.isBlank();

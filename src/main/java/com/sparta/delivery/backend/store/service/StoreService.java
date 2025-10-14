@@ -73,10 +73,7 @@ public class StoreService {
 	@Transactional
 	public ResCreateStoreDto createStore(ReqCreateStoreDto requestDto , User user) {
 
-		// 1. Owner 검증
-		if (user.getRole() != UserRoleEnum.OWNER && user.getRole() != UserRoleEnum.MANAGER){
-			throw new AccessDeniedException("가게 생성 권한이 없습니다");
-		}
+		checkUserIsActive(user);
 
 		//Owner 조회
 		Owner owner = ownerRepository.findByUserIdAndDeletedAtIsNull(user.getId()).orElse(null);
@@ -110,8 +107,10 @@ public class StoreService {
 			.collect(Collectors.toList());
 
 		// 2-1.image table insert
-		List<Image> storeImages = saveImages(storeImageUrls);
-		List<Image> businessImage = saveImages(businessImageUrls);
+		try {
+			List<Image> storeImages = saveImages(storeImageUrls);
+			List<Image> businessImage = saveImages(businessImageUrls);
+
 
 		// 3. store insert
 
@@ -152,6 +151,10 @@ public class StoreService {
 
 
 		return new ResCreateStoreDto(store.getId(), store.getName());
+
+		}catch (DataIntegrityViolationException e){
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "이미 사용중인 이미지 URL이 포함되어있습니다.");
+		}
 	}
 
 	public ResGetStoreDto getStore(UUID storeId) {
@@ -189,11 +192,17 @@ public class StoreService {
 	@Transactional
 	public ResUpdateStoreInfoDto updateStoreInfo(UUID storeId, ReqUpdateStoreInfoDto requestDto, User user) {
 
+		// 탈퇴회원 검증
+		checkUserIsActive(user);
+
 		// Store 검증
 		Store store = storeRepository.findById(storeId).orElseThrow(()-> new ResponseStatusException(HttpStatus.BAD_REQUEST,"존재하지 않는 가게입니다."));
 		StoreDetails storeDetails = storeDetailsRepository.findByStoreId(storeId).orElseThrow(()-> new ResponseStatusException(HttpStatus.BAD_REQUEST,"존재하지 않는 가게입니다."));
 
-		checkUserRole(user,store);
+		// 소유주 검증
+		if (user.getRole().equals(UserRoleEnum.OWNER)){
+			checkUserIsStoreOwner(user,store);
+		}
 
 		Dong dong = dongRepository.findByCode(requestDto.getRegionDong()).orElseThrow(()->new ResponseStatusException(HttpStatus.BAD_REQUEST,"존재하지 않는 주소지입니다."));
 
@@ -360,12 +369,16 @@ public class StoreService {
 	@Transactional
 	public ResUpdateStoreDetailsDto updateStoreDetails(UUID storeId, @Valid ReqUpdateStoreDetailsDto requestDto, User user) {
 
+		checkUserIsActive(user);
+
 		// Store 검증
 		Store store = storeRepository.findById(storeId).orElseThrow(()-> new ResponseStatusException(HttpStatus.BAD_REQUEST,"존재하지 않는 가게입니다."));
 		StoreDetails storeDetails = storeDetailsRepository.findByStoreId(storeId).orElseThrow(()-> new ResponseStatusException(HttpStatus.BAD_REQUEST,"존재하지 않는 가게입니다."));
 
-		// Role 검증
-		checkUserRole(user,store);
+		// 소유주 검증
+		if (user.getRole().equals(UserRoleEnum.OWNER)){
+			checkUserIsStoreOwner(user,store);
+		}
 
 		// 검증 완료
 
@@ -430,11 +443,15 @@ public class StoreService {
 	@Transactional
 	public ResUpdateStoreStatusDto updateStoreStatus(UUID storeId, @Valid ReqUpdateStoreStatusDto requestDto, User user) {
 
+		checkUserIsActive(user);
+
 		// Store 검증
 		Store store = storeRepository.findById(storeId).orElseThrow(()-> new ResponseStatusException(HttpStatus.BAD_REQUEST,"존재하지 않는 가게입니다."));
 
-		// Role 검증
-		checkUserRole(user,store);
+		// 소유주 검증
+		if (user.getRole().equals(UserRoleEnum.OWNER)){
+			checkUserIsStoreOwner(user,store);
+		}
 
 		// 현재 Status와 비교
 		StoreStatusEnum currentStatus = store.getStatus();
@@ -461,11 +478,15 @@ public class StoreService {
 	@Transactional
 	public ResDeleteStoreDto deleteStore(UUID storeId, @Valid ReqDeleteStoreDto requestDto, User user) {
 
+		checkUserIsActive(user);
+
 		Store store = storeRepository.findById(storeId).orElseThrow(()-> new ResponseStatusException(HttpStatus.BAD_REQUEST,"존재하지 않는 가게입니다."));
 		StoreDetails storeDetails = storeDetailsRepository.findByStoreId(storeId).orElseThrow(()-> new ResponseStatusException(HttpStatus.BAD_REQUEST,"존재하지 않는 가게입니다."));
 
-		// Role 검증
-		checkUserRole(user,store);
+		// 소유주 검증
+		if (user.getRole().equals(UserRoleEnum.OWNER)){
+			checkUserIsStoreOwner(user,store);
+		}
 
 		// 사업자번호 동일한지 검증
 		boolean isRightBN = requestDto.getBusinessNumber().equals(storeDetails.getBusinessNumber());
@@ -547,24 +568,23 @@ public class StoreService {
 		storeCategoryRepository.saveAll(storeCategories);
 	}
 
-	/**
-	 * Owner || Manager 검증
-	 * @param user 로그인한 유저
-	 * @param store 가게정보
-	 */
-	public void checkUserRole(User user, Store store) {
 
-		boolean IsManger = (user.getRole() == UserRoleEnum.MANAGER)?true:false;
-		boolean IsOwner = store.getOwner().getUser().getId().equals(user.getId());
+	public void checkUserIsActive(User user) {
 
 		if (user.getDeletedAt() != null){
-			throw new AccessDeniedException("탈퇴 회원은 가게를 생성할 수 없습니다.");
+			throw new AccessDeniedException("탈퇴한 회원입니다.");
 		}
 
-		// 가게 Owner || Manager가 아니면 수정 불가
-		if (!(IsManger || IsOwner)) {
-			throw new AccessDeniedException("수정 권한이 없습니다.");
+	}
+
+	public void checkUserIsStoreOwner(User user, Store store) {
+
+		boolean isStoreOwner = store.getOwner().getUser().getId().equals(user.getId());
+
+		if (!isStoreOwner){
+			throw new AccessDeniedException("가게의 소유주가 아닙니다.");
 		}
+
 	}
 
 }
