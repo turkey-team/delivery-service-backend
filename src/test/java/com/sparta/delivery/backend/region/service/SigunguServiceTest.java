@@ -46,6 +46,7 @@ public class SigunguServiceTest {
 		@Test
 		@DisplayName("성공")
 		void success() {
+			// given
 			Sido sido = Sido.builder().name("서울특별시").code("11").build();
 			List<ReqCreateSigunguDto> requestDtoList = List.of(
 				new ReqCreateSigunguDto("강남구", "680")
@@ -57,8 +58,10 @@ public class SigunguServiceTest {
 			given(sigunguRepository.existsByCodeInCustom(anyList())).willReturn(false);
 			given(sigunguRepository.saveAll(anyList())).willReturn(sigunguList);
 
+			// when
 			List<ResCreateSigunguDto> responseDto = sigunguService.createSigungus(sido.getId(), requestDtoList);
 
+			// then
 			assertThat(responseDto).hasSize(1);
 			then(sidoRepository).should(times(1)).findByIdCustom(any());
 			then(sigunguRepository).should(times(1)).existsByNameInAndSidoCustom(anyList(), any());
@@ -69,12 +72,14 @@ public class SigunguServiceTest {
 		@Test
 		@DisplayName("실패 - DB에 존재하지 않는 시·도")
 		void failure_notFoundSido() {
+			// given
 			List<ReqCreateSigunguDto> requestDtoList = List.of(
 				new ReqCreateSigunguDto("강남구", "680")
 			);
 
 			given(sidoRepository.findByIdCustom(any())).willReturn(Optional.empty());
 
+			// when & then
 			assertThatThrownBy(() -> sigunguService.createSigungus(any(), requestDtoList))
 				.isInstanceOf(RegionNotFoundException.class)
 				.hasMessage("존재하지 않는 시/도입니다.");
@@ -84,6 +89,7 @@ public class SigunguServiceTest {
 		@Test
 		@DisplayName("실패 - Request에 중복된 이름 포함")
 		void failure_duplicatedSigunguNameInRequest() {
+			// given
 			Sido sido = Sido.builder().name("서울특별시").code("11").build();
 			List<ReqCreateSigunguDto> requestDtoList = List.of(
 				new ReqCreateSigunguDto("강남구", "680"),
@@ -92,6 +98,7 @@ public class SigunguServiceTest {
 
 			given(sidoRepository.findByIdCustom(any())).willReturn(Optional.of(sido));
 
+			// when & then
 			assertThatThrownBy(() -> sigunguService.createSigungus(sido.getId(), requestDtoList))
 				.isInstanceOf(RegionDuplicateRequestException.class)
 				.hasMessage("요청에 중복된 시/군/구 이름이 포함되어 있습니다.");
@@ -101,6 +108,7 @@ public class SigunguServiceTest {
 		@Test
 		@DisplayName("실패 - DB에 중복된 이름 포함")
 		void failure_duplicatedSigunguNameInDB() {
+			// given
 			Sido sido = Sido.builder().name("서울특별시").code("11").build();
 			List<ReqCreateSigunguDto> requestDtoList = List.of(
 				new ReqCreateSigunguDto("강남구", "680")
@@ -109,6 +117,7 @@ public class SigunguServiceTest {
 			given(sidoRepository.findByIdCustom(any())).willReturn(Optional.of(sido));
 			given(sigunguRepository.existsByNameInAndSidoCustom(anyList(), any())).willReturn(true);
 
+			// when & then
 			assertThatThrownBy(() -> sigunguService.createSigungus(sido.getId(), requestDtoList))
 				.isInstanceOf(RegionAlreadyExistsException.class)
 				.hasMessage("이미 존재하는 시/군/구 이름이 포함되어 있습니다.");
@@ -118,6 +127,7 @@ public class SigunguServiceTest {
 		@Test
 		@DisplayName("실패 - Request에 중복된 코드 포함")
 		void failure_duplicatedSigunguCodeInRequest() {
+			// given
 			Sido sido = Sido.builder().name("서울특별시").code("11").build();
 			List<ReqCreateSigunguDto> requestDtoList = List.of(
 				new ReqCreateSigunguDto("강남구", "680"),
@@ -127,6 +137,7 @@ public class SigunguServiceTest {
 			given(sidoRepository.findByIdCustom(any())).willReturn(Optional.of(sido));
 			given(sigunguRepository.existsByNameInAndSidoCustom(anyList(), any())).willReturn(false);
 
+			// when & then
 			assertThatThrownBy(() -> sigunguService.createSigungus(sido.getId(), requestDtoList))
 				.isInstanceOf(RegionDuplicateRequestException.class)
 				.hasMessage("요청에 중복된 시/군/구 코드가 포함되어 있습니다.");
@@ -136,6 +147,7 @@ public class SigunguServiceTest {
 		@Test
 		@DisplayName("실패 - DB에 중복된 코드 포함")
 		void failure_duplicatedSigunguCodeInDB() {
+			// given
 			Sido sido = Sido.builder().name("서울특별시").code("11").build();
 			List<ReqCreateSigunguDto> requestDtoList = List.of(
 				new ReqCreateSigunguDto("강남구", "680")
@@ -145,6 +157,7 @@ public class SigunguServiceTest {
 			given(sigunguRepository.existsByNameInAndSidoCustom(anyList(), any())).willReturn(false);
 			given(sigunguRepository.existsByCodeInCustom(anyList())).willReturn(true);
 
+			// when & then
 			assertThatThrownBy(() -> sigunguService.createSigungus(sido.getId(), requestDtoList))
 				.isInstanceOf(RegionAlreadyExistsException.class)
 				.hasMessage("이미 존재하는 시/군/구 코드가 포함되어 있습니다.");
@@ -160,6 +173,7 @@ public class SigunguServiceTest {
 		@Test
 		@DisplayName("성공")
 		void success() {
+			// given
 			Sido sido = Sido.builder().name("서울특별시").code("11").build();
 			List<Sigungu> sigunguList = List.of(
 				Sigungu.builder().sido(sido).name("강남구").code("680").build(),
@@ -169,8 +183,10 @@ public class SigunguServiceTest {
 			given(sidoRepository.findByIdCustom(any())).willReturn(Optional.of(sido));
 			given(sigunguRepository.findAllBySidoCustom(sido)).willReturn(sigunguList);
 
+			// when
 			List<ResReadSigunguDto> responseDtoList = sigunguService.getAllSigungu(sido.getId());
 
+			// then
 			assertThat(responseDtoList).hasSize(2);
 			assertThat(responseDtoList.get(0).getName()).isEqualTo("강남구");
 			assertThat(responseDtoList.get(0).getCode()).isEqualTo("680");
@@ -182,8 +198,10 @@ public class SigunguServiceTest {
 		@Test
 		@DisplayName("실패 - DB에 존재하지 않는 시·도")
 		void failure_notFoundSido() {
+			// given
 			given(sidoRepository.findByIdCustom(any())).willReturn(Optional.empty());
 
+			// when & then
 			assertThatThrownBy(() -> sigunguService.getAllSigungu(any()))
 				.isInstanceOf(RegionNotFoundException.class)
 				.hasMessage("존재하지 않는 시/도입니다.");
@@ -199,6 +217,7 @@ public class SigunguServiceTest {
 		@Test
 		@DisplayName("성공")
 		void success() {
+			// given
 			Sido sido = Sido.builder().name("서울특별시").code("11").build();
 			Sigungu sigungu = Sigungu.builder().sido(sido).name("강남구").code("680").build();
 			ReqUpdateSigunguDto requestDto = new ReqUpdateSigunguDto("강동구", "740");
@@ -208,8 +227,10 @@ public class SigunguServiceTest {
 			given(sigunguRepository.existsByNameAndSidoAndIdNotCustom(any(), any(), any())).willReturn(false);
 			given(sigunguRepository.existsByCodeAndIdNotCustom(any(), any())).willReturn(false);
 
+			// when
 			ResUpdateSigunguDto responseDto = sigunguService.updateSigungu(sido.getId(), sigungu.getId(), requestDto);
 
+			// then
 			assertThat(responseDto.getName()).isEqualTo("강동구");
 			assertThat(responseDto.getCode()).isEqualTo("740");
 			then(sidoRepository).should(times(1)).findByIdCustom(any());
@@ -220,12 +241,14 @@ public class SigunguServiceTest {
 		@Test
 		@DisplayName("실패 - DB에 존재하지 않는 시·도")
 		void failure_notFoundSido() {
+			// given
 			Sido sido = Sido.builder().name("서울특별시").code("11").build();
 			Sigungu sigungu = Sigungu.builder().sido(sido).name("강남구").code("680").build();
 			ReqUpdateSigunguDto requestDto = new ReqUpdateSigunguDto("강동구", "740");
 
 			given(sidoRepository.findByIdCustom(any())).willReturn(Optional.empty());
 
+			// when & then
 			assertThatThrownBy(() -> sigunguService.updateSigungu(sido.getId(), sigungu.getId(), requestDto))
 				.isInstanceOf(RegionNotFoundException.class)
 				.hasMessage("존재하지 않는 시/도입니다.");
@@ -235,6 +258,7 @@ public class SigunguServiceTest {
 		@Test
 		@DisplayName("실패 - DB에 존재하지 않는 시·군·구")
 		void failure_notFoundSigungu() {
+			// given
 			Sido sido = Sido.builder().name("서울특별시").code("11").build();
 			Sigungu sigungu = Sigungu.builder().sido(sido).name("강남구").code("680").build();
 			ReqUpdateSigunguDto requestDto = new ReqUpdateSigunguDto("강동구", "740");
@@ -242,6 +266,7 @@ public class SigunguServiceTest {
 			given(sidoRepository.findByIdCustom(any())).willReturn(Optional.of(sido));
 			given(sigunguRepository.findByIdAndSidoCustom(any(), any())).willReturn(Optional.empty());
 
+			// when & then
 			assertThatThrownBy(() -> sigunguService.updateSigungu(sido.getId(), sigungu.getId(), requestDto))
 				.isInstanceOf(RegionNotFoundException.class)
 				.hasMessage("존재하지 않는 시/군/구입니다.");
@@ -251,6 +276,7 @@ public class SigunguServiceTest {
 		@Test
 		@DisplayName("실패 - DB에 중복된 이름 포함")
 		void failure_duplicatedSigunguNameInDB() {
+			// given
 			Sido sido = Sido.builder().name("서울특별시").code("11").build();
 			Sigungu sigungu = Sigungu.builder().sido(sido).name("강남구").code("680").build();
 			ReqUpdateSigunguDto requestDto = new ReqUpdateSigunguDto("강동구", "740");
@@ -259,6 +285,7 @@ public class SigunguServiceTest {
 			given(sigunguRepository.findByIdAndSidoCustom(any(), any())).willReturn(Optional.of(sigungu));
 			given(sigunguRepository.existsByNameAndSidoAndIdNotCustom(any(), any(), any())).willReturn(true);
 
+			// when & then
 			assertThatThrownBy(() -> sigunguService.updateSigungu(sido.getId(), sigungu.getId(), requestDto))
 				.isInstanceOf(RegionAlreadyExistsException.class)
 				.hasMessage("이미 존재하는 시/군/구 이름입니다.");
@@ -268,6 +295,7 @@ public class SigunguServiceTest {
 		@Test
 		@DisplayName("실패 - DB에 중복된 코드 포함")
 		void failure_duplicatedSigunguCodeInDB() {
+			// given
 			Sido sido = Sido.builder().name("서울특별시").code("11").build();
 			Sigungu sigungu = Sigungu.builder().sido(sido).name("강남구").code("680").build();
 			ReqUpdateSigunguDto requestDto = new ReqUpdateSigunguDto("강동구", "740");
@@ -277,6 +305,7 @@ public class SigunguServiceTest {
 			given(sigunguRepository.existsByNameAndSidoAndIdNotCustom(any(), any(), any())).willReturn(false);
 			given(sigunguRepository.existsByCodeAndIdNotCustom(any(), any())).willReturn(true);
 
+			// when & then
 			assertThatThrownBy(() -> sigunguService.updateSigungu(sido.getId(), sigungu.getId(), requestDto))
 				.isInstanceOf(RegionAlreadyExistsException.class)
 				.hasMessage("이미 존재하는 시/군/구 코드입니다.");
@@ -292,6 +321,7 @@ public class SigunguServiceTest {
 		@Test
 		@DisplayName("성공")
 		void success() {
+			// given
 			Sido sido = Sido.builder().name("서울특별시").code("11").build();
 			Sigungu sigungu = Sigungu.builder().sido(sido).name("강남구").code("680").build();
 			Long userId = 1L;
@@ -299,8 +329,10 @@ public class SigunguServiceTest {
 			given(sidoRepository.findByIdCustom(any())).willReturn(Optional.of(sido));
 			given(sigunguRepository.findByIdAndSidoCustom(any(), any())).willReturn(Optional.of(sigungu));
 
+			// when
 			sigunguService.deleteSigungu(sido.getId(), sigungu.getId(), userId);
 
+			// then
 			assertThat(sigungu.isDeleted()).isTrue();
 			assertThat(sigungu.getDeletedAt()).isNotNull();
 			assertThat(sigungu.getDeletedBy()).isEqualTo(userId);
@@ -311,12 +343,14 @@ public class SigunguServiceTest {
 		@Test
 		@DisplayName("실패 - DB에 존재하지 않는 시·도")
 		void failure_notFoundSido() {
+			// given
 			Sido sido = Sido.builder().name("서울특별시").code("11").build();
 			Sigungu sigungu = Sigungu.builder().sido(sido).name("강남구").code("680").build();
 			Long userId = 1L;
 
 			given(sidoRepository.findByIdCustom(any())).willReturn(Optional.empty());
 
+			// when & then
 			assertThatThrownBy(() -> sigunguService.deleteSigungu(sido.getId(), sigungu.getId(), userId))
 				.isInstanceOf(RegionNotFoundException.class)
 				.hasMessage("존재하지 않는 시/도입니다.");
@@ -327,6 +361,7 @@ public class SigunguServiceTest {
 		@Test
 		@DisplayName("실패 - DB에 존재하지 않는 시·군·구")
 		void failure_notFoundSigungu() {
+			// given
 			Sido sido = Sido.builder().name("서울특별시").code("11").build();
 			Sigungu sigungu = Sigungu.builder().sido(sido).name("강남구").code("680").build();
 			Long userId = 1L;
@@ -334,6 +369,7 @@ public class SigunguServiceTest {
 			given(sidoRepository.findByIdCustom(any())).willReturn(Optional.of(sido));
 			given(sigunguRepository.findByIdAndSidoCustom(any(), any())).willReturn(Optional.empty());
 
+			// when & then
 			assertThatThrownBy(() -> sigunguService.deleteSigungu(sido.getId(), sigungu.getId(), userId))
 				.isInstanceOf(RegionNotFoundException.class)
 				.hasMessage("존재하지 않는 시/군/구입니다.");
