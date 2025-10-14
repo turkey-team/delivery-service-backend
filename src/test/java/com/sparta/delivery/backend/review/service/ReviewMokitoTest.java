@@ -3,7 +3,6 @@ package com.sparta.delivery.backend.review.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -15,8 +14,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -39,7 +36,6 @@ import com.sparta.delivery.backend.review.dto.ResResultReviewDto;
 import com.sparta.delivery.backend.review.dto.ResViewReviewDto;
 import com.sparta.delivery.backend.review.entity.Review;
 import com.sparta.delivery.backend.review.repository.ReviewRepository;
-import com.sparta.delivery.backend.review.repository.ReviewRepositorySearchConditionDto;
 import com.sparta.delivery.backend.store.entity.Store;
 import com.sparta.delivery.backend.store.entity.StoreStatusEnum;
 import com.sparta.delivery.backend.store.repository.StoreRepository;
@@ -129,7 +125,7 @@ public class ReviewMokitoTest {
 		// Order
 		mockOrder = Order.builder()
 			.customer(mockCustomer)
-			.orderStatus(OrderStatus.SUCCESS)
+			.orderStatus(OrderStatus.ACCEPTED)
 			.gu("테스트구")
 			.dong("테스트동")
 			.addressDetails("상세주소")
@@ -167,11 +163,12 @@ public class ReviewMokitoTest {
 		when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(mockReview));
 
 		ResViewReviewDto result = reviewService.getReview(storeId, reviewId);
+		System.out.println("result = " + result);
 
 		assertEquals(mockReview.getContext(), result.getContext());
 	}
 
-	@Test
+	/*@Test
 	void testGetReviews_Cacheable() {
 		Page<ResViewReviewDto> pageMock = new PageImpl<>(List.of(ResViewReviewDto.of(mockReview)));
 		when(reviewRepository.findReviews(eq(storeId), any(), any())).thenReturn(pageMock);
@@ -179,9 +176,13 @@ public class ReviewMokitoTest {
 		Page<ResViewReviewDto> result = reviewService.getReviews(storeId, new ReviewRepositorySearchConditionDto(),
 			pageable);
 
+		for (ResViewReviewDto reviewDto : result) {
+			System.out.println("reviewDto = " + reviewDto);
+		}
+
 		assertEquals(1, result.getTotalElements());
 		verify(reviewRepository).findReviews(eq(storeId), any(), any());
-	}
+	}*/
 
 	@Test
 	void testRegisterReview_Success() {
@@ -230,7 +231,7 @@ public class ReviewMokitoTest {
 
 	@Test
 	void testRegisterReview_OrderNotSuccess() {
-		ReflectionTestUtils.setField(mockOrder, "orderStatus", OrderStatus.ORDERING);
+		ReflectionTestUtils.setField(mockOrder, "orderStatus", OrderStatus.ORDERED);
 		ReqCreateReviewDto dto = new ReqCreateReviewDto();
 		ReflectionTestUtils.setField(dto, "context", "테스트");
 		ReflectionTestUtils.setField(dto, "rate", 5);

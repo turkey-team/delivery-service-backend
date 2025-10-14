@@ -1,5 +1,6 @@
 package com.sparta.delivery.backend.review.controller;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -51,7 +52,7 @@ public class ReviewController {
 		@ApiResponse(responseCode = "404", description = "리뷰 또는 매장 없음")
 	})
 	@GetMapping("/stores/{storeId}/reviews")
-	public Page<ResViewReviewDto> getReviews(
+	public List<ResViewReviewDto> getReviews(
 		@Parameter(description = "리뷰를 조회할 매장의 UUID") @PathVariable UUID storeId,
 		@Parameter(description = "검색 조건 DTO") ReviewRepositorySearchConditionDto condition,
 		@Parameter(description = "페이지네이션 정보") Pageable pageable) {

@@ -1,5 +1,6 @@
 package com.sparta.delivery.backend.review.service;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
@@ -69,9 +70,11 @@ public class ReviewService {
 		cacheManager = "reviewCacheManager",
 		condition = "#pageable.pageNumber == 0")
 	@Transactional(readOnly = true)
-	public Page<ResViewReviewDto> getReviews(UUID storeId, ReviewRepositorySearchConditionDto condition,
+	public List<ResViewReviewDto> getReviews(UUID storeId, ReviewRepositorySearchConditionDto condition,
 		Pageable pageable) {
-		return reviewRepository.findReviews(storeId, condition, pageable);
+		Page<ResViewReviewDto> reviews = reviewRepository.findReviews(storeId, condition, pageable);
+
+		return reviews.getContent();
 	}
 
 	// 내가 작성한 reviews list 조회
