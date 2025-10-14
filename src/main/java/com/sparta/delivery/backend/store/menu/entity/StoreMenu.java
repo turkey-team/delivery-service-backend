@@ -49,7 +49,7 @@ public class StoreMenu extends BaseEntity {
 	@Column(nullable = false, length = 100, unique = true) // 메뉴 이름은 중복 불가
 	private String name;
 
-	@Column(nullable = false)
+	@Column(length = 50)
 	private int price;
 
 	@Column(length = 500)
