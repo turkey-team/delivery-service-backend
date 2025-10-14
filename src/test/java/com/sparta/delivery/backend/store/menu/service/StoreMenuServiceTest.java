@@ -75,7 +75,6 @@ class StoreMenuServiceTest {
                 .nickname("Owner1234")
                 .email("testOwner1@naver.com")
                 .phoneNumber("010-2222-3333")
-                .businessNumber("031-123-1234")
                 .user(user)
                 .build();
 

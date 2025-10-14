@@ -1,8 +1,14 @@
 package com.sparta.delivery.backend.store.menu.service;
 
-import java.util.List;
-import java.util.UUID;
-
+import com.sparta.delivery.backend.common.LoginUserAuditorAware;
+import com.sparta.delivery.backend.image.entity.Image;
+import com.sparta.delivery.backend.image.repository.ImageRepository;
+import com.sparta.delivery.backend.store.entity.Store;
+import com.sparta.delivery.backend.store.menu.dto.*;
+import com.sparta.delivery.backend.store.menu.entity.StoreMenu;
+import com.sparta.delivery.backend.store.menu.repository.StoreMenuRepository;
+import com.sparta.delivery.backend.store.repository.StoreRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -10,21 +16,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.sparta.delivery.backend.common.LoginUserAuditorAware;
-import com.sparta.delivery.backend.image.entity.Image;
-import com.sparta.delivery.backend.image.repository.ImageRepository;
-import com.sparta.delivery.backend.store.entity.Store;
-import com.sparta.delivery.backend.store.menu.dto.ReqCreateStoreMenuDto;
-import com.sparta.delivery.backend.store.menu.dto.ReqUpdateSortOrderDto;
-import com.sparta.delivery.backend.store.menu.dto.ReqUpdateStoreMenuDto;
-import com.sparta.delivery.backend.store.menu.dto.ReqUpdateVisibilityDto;
-import com.sparta.delivery.backend.store.menu.dto.ResGetListStoreMenuDto;
-import com.sparta.delivery.backend.store.menu.dto.ResGetStoreMenuDto;
-import com.sparta.delivery.backend.store.menu.entity.StoreMenu;
-import com.sparta.delivery.backend.store.menu.repository.StoreMenuRepository;
-import com.sparta.delivery.backend.store.repository.StoreRepository;
-
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -194,7 +187,7 @@ public class StoreMenuService {
 
 	// 가게 메뉴 검색 (삭제된 메뉴 제외)
 	private StoreMenu findStoreMenu(UUID storeId, UUID menuId) {
-		return storeMenuRepository.findByStoreIdAndDeletedAtIsNull(storeId, menuId, null)
+		return storeMenuRepository.findByStoreIdAndIdAndDeletedAtIsNull(storeId, menuId, null)
 			.orElseThrow(() -> new IllegalArgumentException("StoreMenu not found"));
 	}
 

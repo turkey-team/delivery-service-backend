@@ -1,13 +1,13 @@
 package com.sparta.delivery.backend.store.menu.repository;
 
-import java.util.UUID;
-
+import com.sparta.delivery.backend.store.menu.entity.StoreMenu;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.sparta.delivery.backend.store.menu.entity.StoreMenu;
+import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public interface StoreMenuRepository extends JpaRepository<StoreMenu, UUID>, StoreMenuRepositoryCustom {
@@ -24,4 +24,6 @@ public interface StoreMenuRepository extends JpaRepository<StoreMenu, UUID>, Sto
 
 	// Owner: 삭제한 StoreMenu 들은 조회할 필요 없음
 	Page<StoreMenu> findAllByStoreIdAndDeletedAtIsNull(UUID storeId, Pageable pageable);
+
+	Optional<StoreMenu> findByStoreIdAndName(UUID storeId, String name);
 }
