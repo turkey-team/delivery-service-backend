@@ -37,8 +37,6 @@ public class CategoryService {
 	@Transactional
 	public ResCreateCategoryDto createCategory(String name, User user) {
 
-		//권한확인
-		checkUserRole(user);
 
 		boolean flag = checkExistCategory(name);
 
@@ -57,8 +55,6 @@ public class CategoryService {
 	@Transactional
 	public ResUpdateCategoryDto updateCategory(UUID id, String name, User user) {
 
-		//권한확인
-		checkUserRole(user);
 
 		Category category = categoryRepository.findById(id).orElseThrow(()-> new ResponseStatusException(HttpStatus.BAD_REQUEST,"해당 카테고리가 존재하지 않습니다."));
 
@@ -114,8 +110,6 @@ public class CategoryService {
 	@Transactional
 	public ResDeleteCategoryDto deleteCategory(UUID categoryId, User user) {
 
-		//권한확인
-		checkUserRole(user);
 
 		Category category = categoryRepository.findById(categoryId).orElseThrow(()->new ResponseStatusException(HttpStatus.BAD_REQUEST,"해당 카테고리가 존재하지 않습니다"));
 
@@ -158,15 +152,5 @@ public class CategoryService {
 		return categoryRepository.existsByName(categoryName);
 	}
 
-	public void checkUserRole(User user) {
-
-		boolean IsManger = (user.getRole() == UserRoleEnum.MANAGER)?true:false;
-		//boolean IsMaster = (user.getRole() == UserRoleEnum.MASTER)?true:false;
-
-		// Master, Manager가 아니면 권한없음
-		if (!(IsManger /*|| IsMaster*/)) {
-			throw new AccessDeniedException("권한이 없습니다.");
-		}
-	}
 
 }

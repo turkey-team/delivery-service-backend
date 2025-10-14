@@ -37,11 +37,17 @@ public class ReqUpdateStoreInfoDto {
 	@Schema(description = "법정동 코드", example = "123", required = true)
 	private String regionDong;
 
-	@Schema(description = "가게 카테고리", required = true)
 	@NotEmpty(message = "카테고리 선택은 필수입니다.")
+	@Schema(description = "가게 카테고리 UUID 리스트",
+		example = "[\"123e4567-e89b-12d3-a456-426614174000\", \"223e4567-e89b-12d3-a456-426614174001\"]",
+		required = true)
 	private List<UUID> categories;
 
-	@Schema(description = "가게 사진", required = true)
+	@Schema(description = "가게 사진 리스트, 이미지", required = true,
+		example = "[{\"imageId\": \"123e4567-e89b-12d3-a456-426614174000\""
+			+ ", \"url\": \"xxx.png\", \"type\": \"store\"}"
+			+ ", {\"imageId\": \"223e4567-e89b-12d3-a456-426614174001\""
+			+ ", \"url\": \"yyy.png\", \"type\": \"store\"}]")
 	@NotEmpty(message = "가게 사진을 첨부해주세요.")
 	private List<ImageDto> images;
 

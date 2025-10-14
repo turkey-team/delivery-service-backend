@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@Schema(name = "ResCreateCartDto", description = "장바구니 생성 요청 DTO")
+@Schema(name = "ReqCreateCartDto", description = "장바구니 생성 요청 DTO")
 public class ReqCreateCartDto {
 
 	@NotNull

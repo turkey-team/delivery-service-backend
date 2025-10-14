@@ -2,6 +2,7 @@ package com.sparta.delivery.backend.cart.controller;
 
 import java.util.UUID;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -44,6 +45,7 @@ public class CartController {
 		,@ApiResponse(responseCode = "400", description = "잘못된 요청")
 		,@ApiResponse(responseCode = "403", description = "로그인한 유저와 장바구니 유저가 동일하지 않음")
 	})
+	@PreAuthorize("isAuthenticated() && hasAnyRole('CUSTOMER')")
 	public ResCreateCartDto createCart(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestBody ReqCreateCartDto requestDto){
 		return cartService.createCart(userDetails.getUser(), requestDto);
 	}
@@ -56,6 +58,7 @@ public class CartController {
 			,content = @Content(schema = @Schema(implementation = ResGetCartDto.class)))
 		,@ApiResponse(responseCode = "403", description = "로그인한 유저와 장바구니 유저가 동일하지 않음")
 	})
+	@PreAuthorize("isAuthenticated() && hasAnyRole('CUSTOMER')")
 	public ResGetCartDto getCarts(@AuthenticationPrincipal UserDetailsImpl userDetails){
 		return cartService.getCarts(userDetails.getUser());
 	}
@@ -67,6 +70,7 @@ public class CartController {
 			,content = @Content(schema = @Schema(implementation = ResDeleteCartItemDto.class)))
 		,@ApiResponse(responseCode = "403", description = "로그인한 유저와 장바구니 유저가 동일하지 않음")
 	})
+	@PreAuthorize("isAuthenticated() && hasAnyRole('CUSTOMER')")
 	public ResDeleteCartItemDto deleteCartItem(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable UUID cartId){
 		return cartService.deleteCartItem(userDetails.getUser(), cartId);
 	}
@@ -78,6 +82,7 @@ public class CartController {
 			,content = @Content(schema = @Schema(implementation = ResDeleteCartsDto.class)))
 		,@ApiResponse(responseCode = "403", description = "로그인한 유저와 장바구니 유저가 동일하지 않음")
 	})
+	@PreAuthorize("isAuthenticated() && hasAnyRole('CUSTOMER')")
 	public ResDeleteCartsDto deleteCarts(@AuthenticationPrincipal UserDetailsImpl userDetails){
 		return cartService.deleteCarts(userDetails.getUser());
 	}

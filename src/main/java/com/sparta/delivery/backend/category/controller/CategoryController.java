@@ -3,6 +3,7 @@ package com.sparta.delivery.backend.category.controller;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -49,6 +50,7 @@ public class CategoryController {
 		,@ApiResponse(responseCode = "400", description = "카테고리명 중복")
 		,@ApiResponse(responseCode = "403", description = "매니저 권한이 아니면 생성 불가")
 	})
+	@PreAuthorize("isAuthenticated() && hasAnyRole('MANAGER')")
 	public ResCreateCategoryDto createCategory(@RequestBody ReqCreateCategoryDto reqCreateCategoryDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
 	 	return categoryService.createCategory(reqCreateCategoryDto.getName(), userDetails.getUser());
 	}
@@ -60,6 +62,7 @@ public class CategoryController {
 			,content = @Content(schema = @Schema(implementation = ResGetCategoryDto.class)))
 		,@ApiResponse(responseCode = "400", description = "카테고리 없음")
 	})
+	@PreAuthorize("isAuthenticated() && hasAnyRole('MANAGER')")
 	public ResGetCategoryDto getCategory(@PathVariable UUID categoryId){
 		return categoryService.getCategory(categoryId);
 	}
@@ -70,6 +73,7 @@ public class CategoryController {
 		@ApiResponse(responseCode = "200", description = "카테고리 목록 조회 성공"
 			,content = @Content(schema = @Schema(implementation = ResGetListCategoryDto.class)))
 	})
+	@PreAuthorize("isAuthenticated() && hasAnyRole('MANAGER')")
 	public Page<ResGetListCategoryDto> getCategories(@AuthenticationPrincipal UserDetailsImpl userDetails,
 														@RequestParam(required = false, defaultValue = "") String keyword,
 														@RequestParam(defaultValue = "10") int size,
@@ -86,6 +90,7 @@ public class CategoryController {
 			,content = @Content(schema = @Schema(implementation = ResGetCategoryDto.class)))
 		,@ApiResponse(responseCode = "400", description = "카테고리 없음 혹은 카테고리명 중복")
 	})
+	@PreAuthorize("isAuthenticated() && hasAnyRole('MANAGER')")
 	public ResUpdateCategoryDto updateCategory(@PathVariable UUID categoryId, @RequestBody ReqUpdateCategoryDto reqUpdateCategoryDto, @AuthenticationPrincipal UserDetailsImpl userDetails){
 		return categoryService.updateCategory(categoryId, reqUpdateCategoryDto.getName(), userDetails.getUser());
 	}
@@ -98,6 +103,7 @@ public class CategoryController {
 		,@ApiResponse(responseCode = "400", description = "카테고리 없음 혹은 사용중인 카테고리")
 		,@ApiResponse(responseCode = "403", description = "매니저 권한이 아니면 생성 불가")
 	})
+	@PreAuthorize("isAuthenticated() && hasAnyRole('MANAGER')")
 	public ResDeleteCategoryDto deleteCategory(@PathVariable UUID categoryId, @AuthenticationPrincipal UserDetailsImpl userDetails){
 		return categoryService.deleteCategory(categoryId, userDetails.getUser());
 	}
