@@ -23,9 +23,9 @@ public interface DongRepository extends JpaRepository<Dong, UUID> {
 	@Query("""
 		SELECT CASE WHEN COUNT(d) > 0 THEN TRUE ELSE FALSE END
 		FROM Dong d
-		WHERE d.code IN :codes AND d.deletedAt IS NULL
+		WHERE d.code IN :codes AND d.sigungu = :sigungu AND d.deletedAt IS NULL
 		""")
-	boolean existsByCodeInCustom(@Param("codes") List<String> codes);
+	boolean existsByCodeInAndSigunguCustom(@Param("codes") List<String> codes, @Param("sigungu") Sigungu sigungu);
 
 	@Query("""
 		SELECT d
@@ -45,9 +45,10 @@ public interface DongRepository extends JpaRepository<Dong, UUID> {
 	@Query("""
 		SELECT CASE WHEN COUNT(d) > 0 THEN TRUE ELSE FALSE END
 		FROM Dong d
-		WHERE d.code = :code AND d.id != :dongId AND d.deletedAt IS NULL
+		WHERE d.code = :code AND d.sigungu = :sigungu AND d.id != :dongId AND d.deletedAt IS NULL
 		""")
-	boolean existsByCodeAndIdNotCustom(@Param("code") String code, @Param("dongId") UUID dongId);
+	boolean existsByCodeAndSigunguAndIdNotCustom(@Param("code") String code,
+		@Param("sigungu") Sigungu sigungu, @Param("dongId") UUID dongId);
 
 	@Query("""
 		SELECT d

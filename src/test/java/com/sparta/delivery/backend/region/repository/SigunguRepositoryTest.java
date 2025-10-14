@@ -111,26 +111,26 @@ public class SigunguRepositoryTest {
 	}
 
 	@Nested
-	@DisplayName("existsByCodeInCustom 메서드는")
+	@DisplayName("existsByCodeInAndSidoCustom 메서드는")
 	class ExistsByCodeInCustomTest {
 
 		@Test
-		@DisplayName("전체 시/도에 코드가 같은 시/군/구가 하나라도 존재하면, true를 반환한다.")
-		void returnTrueWhenCodeExists() {
+		@DisplayName("해당 시/도에 코드가 같은 시/군/구가 하나라도 존재하면, true를 반환한다.")
+		void returnTrueWhenCodeExistsInSido() {
 			createSigungus();
 
 			List<String> codes = List.of("500", "680");
-			boolean exists = sigunguRepository.existsByCodeInCustom(codes);
+			boolean exists = sigunguRepository.existsByCodeInAndSidoCustom(codes, seoul);
 			assertThat(exists).isTrue();
 		}
 
 		@Test
-		@DisplayName("전체 시/도에 코드가 같은 시/군/구가 존재하지 않으면, false를 반환한다.")
-		void returnTrueWhenCodeNotExists() {
+		@DisplayName("해당 시/도에 코드가 같은 시/군/구가 존재하지 않으면, false를 반환한다.")
+		void returnTrueWhenCodeNotExistsInSido() {
 			createSigungus();
 
 			List<String> codes = List.of("500", "230");
-			boolean exists = sigunguRepository.existsByCodeInCustom(codes);
+			boolean exists = sigunguRepository.existsByCodeInAndSidoCustom(codes, seoul);
 			assertThat(exists).isFalse();
 		}
 
@@ -144,7 +144,7 @@ public class SigunguRepositoryTest {
 			assertThat(persistedGangnam.isDeleted()).isTrue();
 
 			List<String> codes = List.of("500", "680");
-			boolean exists = sigunguRepository.existsByCodeInCustom(codes);
+			boolean exists = sigunguRepository.existsByCodeInAndSidoCustom(codes, seoul);
 			assertThat(exists).isFalse();
 		}
 
@@ -261,24 +261,24 @@ public class SigunguRepositoryTest {
 	}
 
 	@Nested
-	@DisplayName("existsByCodeAndIdNotCustom 메서드는")
+	@DisplayName("existsByCodeAndSidoAndIdNotCustom 메서드는")
 	class ExistsByCodeAndIdNotCustomTest {
 
 		@Test
-		@DisplayName("전체 시/도에 코드가 일치하고 Id가 자신이 아닌 시/군/구가 존재하면, true를 반환한다.")
-		void returnTrueWhenCodeExistsAndIdIsNotSame() {
+		@DisplayName("해당 시/도에 코드가 일치하고 Id가 자신이 아닌 시/군/구가 존재하면, true를 반환한다.")
+		void returnTrueWhenCodeExistsAndIdIsNotSameInSido() {
 			createSigungus();
 
-			boolean exists = sigunguRepository.existsByCodeAndIdNotCustom("680", UUID.randomUUID());
+			boolean exists = sigunguRepository.existsByCodeAndSidoAndIdNotCustom("680", seoul, UUID.randomUUID());
 			assertThat(exists).isTrue();
 		}
 
 		@Test
-		@DisplayName("전체 시/도에 코드가 일치하고 Id가 자신인 시/군/구가 존재하면, false를 반환한다.")
-		void returnFalseWhenCodeExistsAndIdIsSame() {
+		@DisplayName("해당 시/도에 코드가 일치하고 Id가 자신인 시/군/구가 존재하면, false를 반환한다.")
+		void returnFalseWhenCodeExistsAndIdIsSameInSido() {
 			createSigungus();
 
-			boolean exists = sigunguRepository.existsByCodeAndIdNotCustom("강남구", gangnam.getId());
+			boolean exists = sigunguRepository.existsByCodeAndSidoAndIdNotCustom("강남구", seoul, gangnam.getId());
 			assertThat(exists).isFalse();
 		}
 
@@ -291,7 +291,7 @@ public class SigunguRepositoryTest {
 			persistedGangnam.softDelete(user.getId());
 			assertThat(persistedGangnam.isDeleted()).isTrue();
 
-			boolean exists = sigunguRepository.existsByCodeAndIdNotCustom("강남구", UUID.randomUUID());
+			boolean exists = sigunguRepository.existsByCodeAndSidoAndIdNotCustom("강남구", seoul, UUID.randomUUID());
 			assertThat(exists).isFalse();
 		}
 

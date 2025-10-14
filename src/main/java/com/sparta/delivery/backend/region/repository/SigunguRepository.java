@@ -23,9 +23,9 @@ public interface SigunguRepository extends JpaRepository<Sigungu, UUID> {
 	@Query("""
 		SELECT CASE WHEN COUNT(s) > 0 THEN TRUE ELSE FALSE END
 		FROM Sigungu s
-		WHERE s.code IN :codes AND s.deletedAt IS NULL
+		WHERE s.code IN :codes AND s.sido = :sido AND s.deletedAt IS NULL
 		""")
-	boolean existsByCodeInCustom(@Param("codes") List<String> codes);
+	boolean existsByCodeInAndSidoCustom(@Param("codes") List<String> codes, @Param("sido") Sido sido);
 
 	@Query("""
 		SELECT s
@@ -52,9 +52,10 @@ public interface SigunguRepository extends JpaRepository<Sigungu, UUID> {
 	@Query("""
 		SELECT CASE WHEN COUNT(s) > 0 THEN TRUE ELSE FALSE END
 		FROM Sigungu s
-		WHERE s.code = :code AND s.id != :sigunguId AND s.deletedAt IS NULL
+		WHERE s.code = :code AND s.sido = :sido AND s.id != :sigunguId AND s.deletedAt IS NULL
 		""")
-	boolean existsByCodeAndIdNotCustom(@Param("code") String code, @Param("sigunguId") UUID sigunguId);
+	boolean existsByCodeAndSidoAndIdNotCustom(@Param("code") String code, @Param("sido") Sido sido,
+		@Param("sigunguId") UUID sigunguId);
 
 	@Query("""
 		SELECT s
