@@ -56,7 +56,7 @@ public class AiPromptController {
 			}))
 	})
 	@PostMapping
-	@PreAuthorize("isAuthenticated() && hasAnyRole('MANAGER', 'OWNER')")
+	@PreAuthorize("isAuthenticated() && hasAnyRole('MASTER', 'MANAGER', 'OWNER')")
 	public ResponseEntity<ResCreateAiPromptDto> createAiPrompt(@Valid @RequestBody ReqCreateAiPromptDto requestDto) {
 		ResCreateAiPromptDto responseDto = aiPromptService.createAiPrompt(requestDto);
 
@@ -77,7 +77,7 @@ public class AiPromptController {
 	})
 	@PageableAsQueryParam
 	@GetMapping
-	@PreAuthorize("isAuthenticated() && hasRole('MANAGER')")
+	@PreAuthorize("isAuthenticated() && hasAnyRole('MASTER', 'MANAGER')")
 	public ResponseEntity<Page<ResReadAiPromptDto>> getAllAiPrompt(
 		@ParameterObject @PageableDefault Pageable pageable) {
 		Page<ResReadAiPromptDto> responseDtoList = aiPromptService.getAllAiPrompts(pageable);
