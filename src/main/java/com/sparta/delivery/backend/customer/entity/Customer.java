@@ -7,8 +7,6 @@ import lombok.*;
 
 import java.util.UUID;
 
-import org.hibernate.annotations.UuidGenerator;
-
 @Entity
 @Table(name = "p_customer")
 @Getter
@@ -21,7 +19,7 @@ public class Customer extends BaseEntity {
     @Column(name = "nickname", length = 50, nullable = false)
     private String nickname;
 
-    @Column(name = "email", length = 320, unique = true)
+    @Column(name = "email", length = 512, unique = true)
     private String email;
 
     @Column(name = "phone_number", length = 20)
@@ -45,5 +43,11 @@ public class Customer extends BaseEntity {
 
 	public void updateNickname(String nickname) {
 		this.nickname = nickname;
+	}
+
+	public void delete(Long userId) {
+		this.email = email + "_deleted_" + getId();
+		this.softDelete(userId);
+		user.softDelete(userId);
 	}
 }

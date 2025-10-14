@@ -171,10 +171,25 @@ public class CustomerService {
 		redisTemplate.delete(key);
 	}
 
+	@Transactional
+	public void deleteCurrentCustomer(UserDetailsImpl userDetails) {
+		Customer customer = getCustomerByUserId(userDetails);
+		customer.delete(userDetails.getId());
+	}
+
+	@Transactional
+	public void deleteCustomerByManager(UserDetailsImpl userDetails, UUID customerUserPublicId) {
+		Customer customer = customerRepository.findByUserPublicIdAndDeletedAtNull(customerUserPublicId)
+			.orElseThrow(() -> new IllegalArgumentException("잘못된 유저 아이디 입니다."));
+
+		customer.delete(userDetails.getId());
+	}
+
 	private Customer getCustomerByUserId(UserDetailsImpl userDetails) {
 		Customer customer = customerRepository.findByUserIdAndDeletedAtIsNull(userDetails.getId())
 			.orElseThrow(() -> new IllegalArgumentException("잘못된 유저 아이디 입니다."));
 
 		return customer;
 	}
+
 }
