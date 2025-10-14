@@ -1,5 +1,6 @@
 package com.sparta.delivery.backend.store.menu.controller;
 
+import com.sparta.delivery.backend.security.UserDetailsImpl;
 import com.sparta.delivery.backend.store.menu.dto.*;
 import com.sparta.delivery.backend.store.menu.service.StoreMenuService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -32,10 +34,11 @@ public class StoreMenuController {
 			@ApiResponse(responseCode = "403", description = "권한 없음")
 	})
 	public ResponseEntity<Void> createStoreMenu(
+		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable UUID storeId,
 		@RequestBody ReqCreateStoreMenuDto reqCreateStoreMenuDto
 	) {
-		storeMenuService.createStoreMenu(storeId, reqCreateStoreMenuDto);
+		storeMenuService.createStoreMenu(userDetails.getUser(), storeId, reqCreateStoreMenuDto);
 		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
 
@@ -77,11 +80,12 @@ public class StoreMenuController {
 			@ApiResponse(responseCode = "403", description = "권한 없음")
 	})
 	public ResponseEntity<Void> updateStoreMenu(
+		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable UUID storeId,
 		@PathVariable UUID menuId,
 		@RequestBody ReqUpdateStoreMenuDto reqUpdateStoreMenuDto
 	) {
-		storeMenuService.updateStoreMenu(storeId, menuId, reqUpdateStoreMenuDto);
+		storeMenuService.updateStoreMenu(userDetails.getUser(), storeId, menuId, reqUpdateStoreMenuDto);
 		return ResponseEntity.ok().build();
 	}
 
@@ -94,11 +98,12 @@ public class StoreMenuController {
 			@ApiResponse(responseCode = "403", description = "권한 없음")
 	})
 	public ResponseEntity<Void> updateSortOrder(
+		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable UUID storeId,
 		@PathVariable UUID menuId,
 		@RequestBody ReqUpdateSortOrderDto reqUpdateSortOrderDto
 	) {
-		storeMenuService.updateSortOrder(storeId, menuId, reqUpdateSortOrderDto);
+		storeMenuService.updateSortOrder(userDetails.getUser(), storeId, menuId, reqUpdateSortOrderDto);
 		return ResponseEntity.ok().build();
 	}
 
@@ -111,11 +116,12 @@ public class StoreMenuController {
 			@ApiResponse(responseCode = "403", description = "권한 없음")
 	})
 	public ResponseEntity<Void> updateVisibility(
+		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable UUID storeId,
 		@PathVariable UUID menuId,
 		@RequestBody ReqUpdateVisibilityDto reqUpdateVisibilityDto
 	) {
-		storeMenuService.updateVisibility(storeId, menuId, reqUpdateVisibilityDto);
+		storeMenuService.updateVisibility(userDetails.getUser(), storeId, menuId, reqUpdateVisibilityDto);
 		return ResponseEntity.ok().build();
 	}
 
@@ -127,10 +133,11 @@ public class StoreMenuController {
 			@ApiResponse(responseCode = "403", description = "권한 없음")
 	})
 	public ResponseEntity<Void> deleteStoreMenu(
+		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable UUID storeId,
 		@PathVariable UUID menuId
 	) {
-		storeMenuService.deleteStoreMenu(storeId, menuId);
+		storeMenuService.deleteStoreMenu(userDetails.getUser(), storeId, menuId);
 		return ResponseEntity.noContent().build();
 	}
 }

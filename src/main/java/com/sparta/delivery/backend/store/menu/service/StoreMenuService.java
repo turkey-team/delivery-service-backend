@@ -42,10 +42,9 @@ public class StoreMenuService {
 		UUID storeId,
 		ReqCreateStoreMenuDto reqCreateStoreMenuDto
 	) {
-		Store store = storeRepository.findById(storeId)
-			.orElseThrow(() -> new IllegalArgumentException("Store not found"));
 
-		validatePermission(user, storeId);
+
+		Store store = validatePermission(user, storeId);
 		validateDuplicateMenuName(storeId, reqCreateStoreMenuDto.getName());
 
 		Image image = saveImage(reqCreateStoreMenuDto.getImageUrl());
@@ -72,7 +71,9 @@ public class StoreMenuService {
 		UUID storeId,
 		UUID menuId
 	) {
-		validateStore(storeId);
+		storeRepository.findById(storeId)
+			.orElseThrow(() -> new IllegalArgumentException("Store not found"));
+
 		StoreMenu storeMenu = findStoreMenu(storeId, menuId);
 		return new ResGetStoreMenuDto(storeMenu);
 	}
@@ -84,7 +85,8 @@ public class StoreMenuService {
 		int page,
 		int size
 	) {
-		validateStore(storeId);
+		storeRepository.findById(storeId)
+			.orElseThrow(() -> new IllegalArgumentException("Store not found"));
 
 		Pageable pageable = PageRequest.of(page, size, Sort.by("sortOrder").ascending());
 
@@ -107,7 +109,6 @@ public class StoreMenuService {
 		UUID menuId,
 		ReqUpdateStoreMenuDto reqUpdateStoreMenuDto
 	) {
-		validateStore(storeId);
 		validatePermission(user, storeId);
 		validateDuplicateMenuName(storeId, reqUpdateStoreMenuDto.getName());
 
@@ -125,7 +126,6 @@ public class StoreMenuService {
 		UUID menuId,
 		ReqUpdateSortOrderDto reqUpdateSortOrderDto
 	) {
-		validateStore(storeId);
 		validatePermission(user, storeId);
 
 		// 이동 대상 메뉴
@@ -168,7 +168,6 @@ public class StoreMenuService {
 		UUID menuId,
 		ReqUpdateVisibilityDto reqUpdateVisibilityDto
 	) {
-		validateStore(storeId);
 		validatePermission(user, storeId);
 		StoreMenu storeMenu = findStoreMenu(storeId, menuId);
 
@@ -178,8 +177,9 @@ public class StoreMenuService {
 	/** 삭제 **/
 	@Transactional
 	public void deleteStoreMenu(User user, UUID storeId, UUID menuId) {
-		StoreMenu storeMenu = findStoreMenu(storeId, menuId);
 		validatePermission(user, storeId);
+
+		StoreMenu storeMenu = findStoreMenu(storeId, menuId);
 
 		// 현재 로그인 중인 userId
 		UUID userId = user.getPublicId();
@@ -212,12 +212,6 @@ public class StoreMenuService {
 	}
 
 	/** --------------------- Helper --------------------- **/
-	// 가게 검증
-	private void validateStore(UUID storeId) {
-		storeRepository.findById(storeId)
-			.orElseThrow(() -> new IllegalArgumentException("Store not found"));
-	}
-
 	// 메뉴명 중복 검사
 	private void validateDuplicateMenuName(UUID storeId, String menuName) {
 		if (storeMenuRepository.findByStoreIdAndName(storeId, menuName).isPresent()) {
@@ -226,16 +220,16 @@ public class StoreMenuService {
 	}
 
 	// 권한 검증
-	private void validatePermission(User user, UUID storeId) {
+	private Store validatePermission(User user, UUID storeId) {
+		// 가게 유효성 검증
 		Store store = storeRepository.findById(storeId)
 			.orElseThrow(() -> new IllegalArgumentException("Store not found"));
 
 		// Store의 Owner 인 경우
-		if (store.getOwner().getUser().getPublicId().equals(user.getPublicId())) return;
+		if (store.getOwner().getUser().getPublicId().equals(user.getPublicId())) return store;
 
-		// TODO: Manager 인데, 해당 Store의 Manager 일 경우에만 가능하게
 		// Manager or Master 권한 허용
-		if (user.getRole() == UserRoleEnum.MANAGER || user.getRole() == UserRoleEnum.MASTER) return;
+		if (user.getRole() == UserRoleEnum.MANAGER || user.getRole() == UserRoleEnum.MASTER) return store;
 
 		throw new SecurityException("You do not have permission");
 	}
