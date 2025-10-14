@@ -657,6 +657,73 @@ class StoreMenuServiceTest {
 			assertEquals("Menu name already exists", exception.getMessage());
 			verify(storeMenuRepository, times(1)).findByStoreIdAndName(storeId, "치즈버거");
 		}
+
+		@Test
+		@DisplayName("실패 - 권한이 없는 사용자(Customer)가 수정")
+		void failure_customerNoPermission() {
+			/* given */
+			UUID storeId = store.getId();
+			UUID menuId = menu1.getId();
+
+			// Customer 역할의 사용자
+			user = User.builder()
+				.username("customerUser")
+				.password("pass")
+				.role(UserRoleEnum.CUSTOMER)
+				.build();
+			ReflectionTestUtils.setField(user, "publicId", UUID.randomUUID());
+
+			ReqUpdateStoreMenuDto reqUpdateStoreMenuDto = new ReqUpdateStoreMenuDto();
+			reqUpdateStoreMenuDto.setName("수정불가버거");
+			reqUpdateStoreMenuDto.setPrice(5000);
+			reqUpdateStoreMenuDto.setDescription("Customer는 수정 불가");
+			reqUpdateStoreMenuDto.setPrepTime("10분");
+			reqUpdateStoreMenuDto.setStockStatus(StockStatus.ON_SALE);
+			reqUpdateStoreMenuDto.setImageUrl("http://image.url/customer_fail.png");
+
+			when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+
+			/* when & then */
+			SecurityException exception = assertThrows(
+				SecurityException.class,
+				() -> storeMenuService.updateStoreMenu(user, storeId, menuId, reqUpdateStoreMenuDto)
+			);
+
+			assertEquals("You do not have permission", exception.getMessage());
+			verify(storeRepository, times(1)).findById(storeId);
+		}
+
+		@Test
+		@DisplayName("실패 - 다른 Owner가 수정 시도")
+		void failure_differentOwnerNoPermission() {
+			UUID storeId = store.getId();
+			UUID menuId = menu1.getId();
+
+			user = User.builder()
+				.username("anotherOwner")
+				.password("pass")
+				.role(UserRoleEnum.OWNER)
+				.build();
+			ReflectionTestUtils.setField(user, "publicId", UUID.randomUUID());
+
+			ReqUpdateStoreMenuDto reqUpdateStoreMenuDto = new ReqUpdateStoreMenuDto();
+			reqUpdateStoreMenuDto.setName("수정불가버거");
+			reqUpdateStoreMenuDto.setPrice(5000);
+			reqUpdateStoreMenuDto.setDescription("다른 Owner는 수정 불가");
+			reqUpdateStoreMenuDto.setPrepTime("10분");
+			reqUpdateStoreMenuDto.setStockStatus(StockStatus.ON_SALE);
+			reqUpdateStoreMenuDto.setImageUrl("http://image.url/owner_fail.png");
+
+			when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+
+			SecurityException exception = assertThrows(
+				SecurityException.class,
+				() -> storeMenuService.updateStoreMenu(user, storeId, menuId, reqUpdateStoreMenuDto)
+			);
+
+			assertEquals("You do not have permission", exception.getMessage());
+			verify(storeRepository, times(1)).findById(storeId);
+		}
 	}
 
 	// Sort_order
@@ -921,6 +988,64 @@ class StoreMenuServiceTest {
 			   );
 
 			   assertEquals("StoreMenu not found", exception.getMessage());
+		   }
+
+		   @Test
+		   @DisplayName("실패 - 숨기기 상태에서 다시 숨기기 요청")
+		   void failure_alreadyHidden() {
+			   /* given */
+			   UUID storeId = store.getId();
+			   UUID menuId = menu1.getId();
+
+			   // 이미 숨겨진 상태
+			   menu1.setHiddenAt(true);
+
+			   ReqUpdateVisibilityDto reqUpdateVisibilityDto = new ReqUpdateVisibilityDto();
+			   reqUpdateVisibilityDto.setHidden(true); // 또 숨기기 요청
+
+			   when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+			   when(storeMenuRepository.findByStoreIdAndIdAndDeletedAtIsNull(storeId, menuId, null))
+				   .thenReturn(Optional.of(menu1));
+
+			   /* when & then */
+			   IllegalStateException exception = assertThrows(
+				   IllegalStateException.class,
+				   () -> storeMenuService.updateVisibility(user, storeId, menuId, reqUpdateVisibilityDto)
+			   );
+
+			   assertEquals("이미 숨김 상태입니다.", exception.getMessage());
+			   verify(storeRepository, times(1)).findById(storeId);
+			   verify(storeMenuRepository, times(1))
+				   .findByStoreIdAndIdAndDeletedAtIsNull(storeId, menuId, null);
+		   }
+
+		   @Test
+		   @DisplayName("실패 - 이미 숨김 해제 상태에서 다시 숨김 해제 요청")
+		   void failure_alreadyVisible() {
+			   /* given */
+			   UUID storeId = store.getId();
+			   UUID menuId = menu1.getId();
+
+			   // 이미 표시 중 (숨김 해제 상태)
+			   menu1.setHiddenAt(false);
+
+			   ReqUpdateVisibilityDto reqUpdateVisibilityDto = new ReqUpdateVisibilityDto();
+			   reqUpdateVisibilityDto.setHidden(false); // 다시 보이기 요청
+
+			   when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+			   when(storeMenuRepository.findByStoreIdAndIdAndDeletedAtIsNull(storeId, menuId, null))
+				   .thenReturn(Optional.of(menu1));
+
+			   /* when & then */
+			   IllegalStateException exception = assertThrows(
+				   IllegalStateException.class,
+				   () -> storeMenuService.updateVisibility(user, storeId, menuId, reqUpdateVisibilityDto)
+			   );
+
+			   assertEquals("이미 표시 상태입니다.", exception.getMessage());
+			   verify(storeRepository, times(1)).findById(storeId);
+			   verify(storeMenuRepository, times(1))
+				   .findByStoreIdAndIdAndDeletedAtIsNull(storeId, menuId, null);
 		   }
 	   }
 

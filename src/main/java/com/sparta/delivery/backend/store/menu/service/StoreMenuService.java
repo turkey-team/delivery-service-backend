@@ -171,6 +171,17 @@ public class StoreMenuService {
 		validatePermission(user, storeId);
 		StoreMenu storeMenu = findStoreMenu(storeId, menuId);
 
+		// 중복 상태 요청
+		boolean currentlyHidden = storeMenu.getHiddenAt() != null;
+		boolean wantHidden = reqUpdateVisibilityDto.isHidden();
+
+		if (currentlyHidden && wantHidden) {
+			throw new IllegalStateException("이미 숨김 상태입니다.");
+		}
+		if (!currentlyHidden && !wantHidden) {
+			throw new IllegalStateException("이미 표시 상태입니다.");
+		}
+
 		storeMenu.setHiddenAt(reqUpdateVisibilityDto.isHidden());
 	}
 
