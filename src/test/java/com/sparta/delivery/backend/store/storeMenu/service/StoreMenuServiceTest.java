@@ -6,7 +6,7 @@ import com.sparta.delivery.backend.image.repository.ImageRepository;
 import com.sparta.delivery.backend.owner.entity.Owner;
 import com.sparta.delivery.backend.store.entity.Store;
 import com.sparta.delivery.backend.store.entity.StoreStatusEnum;
-import com.sparta.delivery.backend.store.menu.dto.ReqCreateStoreMenuDto;
+import com.sparta.delivery.backend.store.menu.dto.*;
 import com.sparta.delivery.backend.store.menu.entity.StoreMenu;
 import com.sparta.delivery.backend.store.menu.enums.StockStatus;
 import com.sparta.delivery.backend.store.menu.repository.StoreMenuRepository;
@@ -23,8 +23,13 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -52,7 +57,8 @@ class StoreMenuServiceTest {
     private User user;
     private Owner owner;
     private Store store;
-    private StoreMenu menu;
+    private StoreMenu menu1;
+    private StoreMenu menu2;
     private StoreMenu targetMenu;
     private Image image;
     private ReqCreateStoreMenuDto reqCreateStoreMenuDto;
@@ -102,19 +108,12 @@ class StoreMenuServiceTest {
         reqCreateStoreMenuDto.setIsHidden(false);
 
         // 테스트 가게 메뉴
-        menu = StoreMenu.builder()
+        menu1 = StoreMenu.builder()
                 .reqCreateStoreMenuDto(reqCreateStoreMenuDto)
                 .store(store)
                 .image(image)
                 .build();
-        ReflectionTestUtils.setField(menu, "id", UUID.randomUUID()); // Test UUID 주입
-
-//        targetMenu = StoreMenu.builder()
-//                .reqCreateStoreMenuDto(reqCreateStoreMenuDto)
-//                .store(store)
-//                .image(image)
-//                .build();
-//        ReflectionTestUtils.setField(targetMenu, "id", UUID.randomUUID());
+        ReflectionTestUtils.setField(menu1, "id", UUID.randomUUID()); // Test UUID 주입
     }
 
     // Create
@@ -169,7 +168,7 @@ class StoreMenuServiceTest {
         @DisplayName("실패 - Store 가 존재하지 않는 경우")
         void failure_storeNull() {
             /* given */
-            UUID storeId = UUID.randomUUID();
+            UUID storeId = store.getId();
             reqCreateStoreMenuDto = new ReqCreateStoreMenuDto();
             reqCreateStoreMenuDto.setName("불고기버거");
             reqCreateStoreMenuDto.setPrice(4000);
@@ -198,7 +197,7 @@ class StoreMenuServiceTest {
 
             when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
             when(storeMenuRepository.findByStoreIdAndName(storeId, "치즈버거"))
-                    .thenReturn(Optional.of(menu)); // 중복 메뉴 존재
+                    .thenReturn(Optional.of(menu1)); // 중복 메뉴 존재
             IllegalArgumentException exception = assertThrows(
                     IllegalArgumentException.class,
                     () -> storeMenuService.createStoreMenu(storeId, reqCreateStoreMenuDto)
@@ -223,91 +222,279 @@ class StoreMenuServiceTest {
             assertEquals("Price must exists", exception.getMessage());
         }
     }
-//
-//    // Get
-//    @Nested
-//    @DisplayName("가게 메뉴 조회 테스트")
-//    class GetStoreMenuTest {
-//
-//        @Test
-//        @DisplayName("성공")
-//        void success() {
-//            /* given */
-//
-//            /* when */
-//
-//            /* then */
-//
-//        }
-//
-//        @Test
-//        @DisplayName("실패")
-//        void failure() {
-//            /* given */
-//
-//            /* when */
-//
-//            /* then */
-//
-//        }
-//    }
-//
-//    // Put
-//    @Nested
-//    @DisplayName("가게 메뉴 수정 테스트")
-//    class PutStoreMenuTest {
-//
-//        @Test
-//        @DisplayName("성공")
-//        void success() {
-//            /* given */
-//
-//            /* when */
-//
-//            /* then */
-//
-//        }
-//
-//        @Test
-//        @DisplayName("실패")
-//        void failure() {
-//            /* given */
-//
-//            /* when */
-//
-//            /* then */
-//
-//        }
-//    }
-//
-//    // Sort_order
-//    @Nested
-//    @DisplayName("가게 메뉴 순서 변경 테스트")
-//    class PatchStoreMenuSortOrderTest {
-//
-//        @Test
-//        @DisplayName("성공")
-//        void success() {
-//            /* given */
-//
-//            /* when */
-//
-//            /* then */
-//
-//        }
-//
-//        @Test
-//        @DisplayName("실패")
-//        void failure() {
-//            /* given */
-//
-//            /* when */
-//
-//            /* then */
-//
-//        }
-//    }
-//
+
+    // Get
+    @Nested
+    @DisplayName("가게 메뉴 단일 조회 테스트")
+    class GetStoreMenuTest {
+
+        @Test
+        @DisplayName("성공")
+        void get_success() {
+            /* given */
+            UUID storeId = store.getId();
+            UUID menuId = menu1.getId();
+
+            // Mock 설정
+            when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+            when(storeMenuRepository.findByStoreIdAndIdAndDeletedAtIsNull(eq(storeId), eq(menuId), isNull()))
+                    .thenReturn(Optional.of(menu1));
+
+            /* when */
+            ResGetStoreMenuDto resGetStoreMenuDto = storeMenuService.getStoreMenuByStoreMenuId(storeId, menuId);
+
+            /* then */
+            assertNotNull(resGetStoreMenuDto);
+            assertEquals(menu1.getId(), resGetStoreMenuDto.getId());
+            assertEquals(menu1.getName(), resGetStoreMenuDto.getName());
+            assertEquals(menu1.getPrice(), resGetStoreMenuDto.getPrice());
+            verify(storeMenuRepository, times(1))
+                    .findByStoreIdAndIdAndDeletedAtIsNull(storeId, menuId, null);
+        }
+
+
+        @Test
+        @DisplayName("실패 - 가게가 존재하지 않은 경우")
+        void failure_storeNull() {
+            /* given */
+            UUID storeId = store.getId();
+            UUID menuId = menu1.getId();
+
+            /* when */
+            when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+
+            /* then */
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () -> storeMenuService.getStoreMenuByStoreMenuId(storeId, menuId)
+            );
+        }
+
+        @Test
+        @DisplayName("실패 - 메뉴가 존재하지 않은 경우")
+        void failure_menuNull() {
+            /* given */
+            UUID storeId = store.getId();
+            UUID menuId = menu1.getId();
+
+            /* when */
+            when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+            when(storeMenuRepository.findByStoreIdAndIdAndDeletedAtIsNull(eq(storeId), eq(menuId), isNull()))
+                    .thenReturn(Optional.empty());
+
+            /* then */
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () -> storeMenuService.getStoreMenuByStoreMenuId(storeId, menuId)
+            );
+        }
+    }
+
+    @Nested
+    @DisplayName("가게 메뉴 목록 조회 테스트")
+    class GetListStoreMenuTest {
+
+        @Test
+        @DisplayName("성공")
+        void getList_success() {
+            /* given */
+            UUID storeId = store.getId();
+            int page = 0;
+            int size = 10;
+            Pageable pageable = PageRequest.of(page, size, Sort.by("sortOrder").ascending());
+
+            reqCreateStoreMenuDto = new ReqCreateStoreMenuDto();
+            reqCreateStoreMenuDto.setName("새우버거");
+            reqCreateStoreMenuDto.setImageUrl(image.getImageUrl());
+            reqCreateStoreMenuDto.setPrice(3000);
+            reqCreateStoreMenuDto.setDescription("새우, 마요네즈가 들어있습니다.");
+            reqCreateStoreMenuDto.setPrepTime("10분");
+            reqCreateStoreMenuDto.setStockStatus(StockStatus.LOW_STOCK);
+            reqCreateStoreMenuDto.setIsHidden(false);
+
+            // 테스트 가게 메뉴
+            menu2 = StoreMenu.builder()
+                    .reqCreateStoreMenuDto(reqCreateStoreMenuDto)
+                    .store(store)
+                    .image(image)
+                    .build();
+            ReflectionTestUtils.setField(menu2, "id", UUID.randomUUID()); // Test UUID 주입
+
+            List<StoreMenu> menuList = List.of(menu1, menu2);
+            Page<StoreMenu> pageResult = new org.springframework.data.domain.PageImpl<>(menuList, pageable, menuList.size());
+
+            when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+            when(storeMenuRepository.findAllByStoreIdAndDeletedAtIsNull(storeId, pageable))
+                    .thenReturn(pageResult);
+
+            /* when */
+            Page<ResGetListStoreMenuDto> resGetListStoreMenuDto = storeMenuService.getStoreMenusByStoreId(storeId, 0, 10);
+
+            /* then */
+            assertNotNull(resGetListStoreMenuDto);
+            assertEquals(2, resGetListStoreMenuDto.getContent().size());
+            assertEquals(menu1.getName(), resGetListStoreMenuDto.getContent().get(0).getName());
+            verify(storeMenuRepository, times(1))
+                    .findAllByStoreIdAndDeletedAtIsNull(storeId, pageable);
+        }
+
+        @Test
+        @DisplayName("실패 - 가게가 존재하지 않은 경우")
+        void failure_storeNull() {
+            /* given */
+            UUID storeId = store.getId();
+            int page = 1;
+            int size = 10;
+
+            /* when */
+            when(storeRepository.findById(storeId)).thenReturn(Optional.empty());
+
+            /* then */
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () -> storeMenuService.getStoreMenusByStoreId(storeId, page, size)
+            );
+        }
+    }
+
+
+    // Put
+    @Nested
+    @DisplayName("가게 메뉴 수정 테스트")
+    class UpdateStoreMenuTest {
+
+        @Test
+        @DisplayName("성공")
+        void success() {
+            /* given */
+            UUID storeId = store.getId();
+            UUID menuId = menu1.getId();
+
+            // 수정 DTO
+            ReqUpdateStoreMenuDto reqUpdateStoreMenuDto = new ReqUpdateStoreMenuDto();
+            reqUpdateStoreMenuDto.setName("더블치즈버거");
+            reqUpdateStoreMenuDto.setPrice(4500);
+            reqUpdateStoreMenuDto.setDescription("두 배의 치즈와 소고기가 들어간 햄버거");
+            reqUpdateStoreMenuDto.setPrepTime("20분");
+            reqUpdateStoreMenuDto.setStockStatus(StockStatus.ON_SALE);
+            reqUpdateStoreMenuDto.setImageUrl("http://image.url/double_cheese.png");
+
+            Image newImage = Image.builder().imageUrl(reqUpdateStoreMenuDto.getImageUrl()).build();
+            when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+            when(storeMenuRepository.findByStoreIdAndIdAndDeletedAtIsNull(eq(storeId), eq(menuId), isNull()))
+                    .thenReturn(Optional.of(menu1));
+            when(imageRepository.save(any())).thenReturn(newImage);
+
+            /* when */
+            storeMenuService.updateStoreMenu(storeId, menuId, reqUpdateStoreMenuDto);
+
+            /* then */
+            verify(storeMenuRepository).findByStoreIdAndIdAndDeletedAtIsNull(storeId, menuId, null);
+            verify(imageRepository).save(any(Image.class));
+
+            assertEquals("더블치즈버거", menu1.getName());
+            assertEquals(4500, menu1.getPrice());
+            assertEquals("두 배의 치즈와 소고기가 들어간 햄버거", menu1.getDescription());
+            assertEquals("20분", menu1.getPrepTime());
+            assertEquals(StockStatus.ON_SALE, menu1.getStockStatus());
+            assertEquals(reqUpdateStoreMenuDto.getImageUrl(), menu1.getImage().getImageUrl());
+        }
+
+        @Test
+        @DisplayName("실패 - 가게가 존재하지 않는 경우")
+        void failure_storeNull() {
+            /* given */
+            UUID storeId = UUID.randomUUID();
+            UUID menuId = menu1.getId();
+            ReqUpdateStoreMenuDto updateDto = new ReqUpdateStoreMenuDto();
+
+            when(storeRepository.findById(storeId)).thenReturn(Optional.empty());
+
+            /* when & then */
+            IllegalArgumentException exception = assertThrows(
+                    IllegalArgumentException.class,
+                    () -> storeMenuService.updateStoreMenu(storeId, menuId, updateDto)
+            );
+
+            assertEquals("Store not found", exception.getMessage());
+        }
+
+        @Test
+        @DisplayName("실패 - 메뉴가 존재하지 않는 경우")
+        void failure_menuNull() {
+            /* given */
+            UUID storeId = store.getId();
+            UUID menuId = UUID.randomUUID();
+            ReqUpdateStoreMenuDto updateDto = new ReqUpdateStoreMenuDto();
+
+            when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+            when(storeMenuRepository.findByStoreIdAndIdAndDeletedAtIsNull(eq(storeId), eq(menuId), isNull()))
+                    .thenReturn(Optional.empty());
+
+            /* when & then */
+            IllegalArgumentException exception = assertThrows(
+                    IllegalArgumentException.class,
+                    () -> storeMenuService.updateStoreMenu(storeId, menuId, updateDto)
+            );
+
+            assertEquals("StoreMenu not found", exception.getMessage());
+        }
+    }
+
+    // Sort_order
+    @Nested
+    @DisplayName("가게 메뉴 순서 변경 테스트")
+    class UpdateStoreMenuSortOrderTest {
+
+        @Test
+        @DisplayName("성공")
+        void success() {
+            /* given */
+            UUID storeId = store.getId();
+
+            menu2 = StoreMenu.builder()
+                    .reqCreateStoreMenuDto(reqCreateStoreMenuDto)
+                    .store(store)
+                    .image(image)
+                    .build();
+            ReflectionTestUtils.setField(menu2, "id", UUID.randomUUID());
+            UUID menuId = menu2.getId();
+            ReqUpdateSortOrderDto reqUpdateSortOrderDto = new ReqUpdateSortOrderDto();
+            reqUpdateSortOrderDto.setSortOrder(1); // 이동하고 싶은 위치
+
+            List<StoreMenu> menusToShift = List.of(menu2);
+            when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+            when(storeMenuRepository.findByStoreIdAndIdAndDeletedAtIsNull(storeId, menuId, null))
+                    .thenReturn(Optional.of(menu2));
+            when(storeMenuRepository.findAllByStoreIdAndSortOrderGreaterThanEqualAndDeletedAtIsNull(storeId, 1))
+                    .thenReturn(menusToShift);
+
+            /* when */
+            storeMenuService.updateSortOrder(storeId, menuId, reqUpdateSortOrderDto);
+
+            /* then */
+            // 타겟 메뉴 순서 변경 확인
+            assertEquals(1, menu1.getSortOrder());
+
+            // 나머지 메뉴 순서 재정렬 확인
+            assertEquals(2, menusToShift.get(0).getSortOrder());
+
+            verify(storeMenuRepository, times(2))
+                    .flush(); // DB flush 호출 검증
+        }
+
+        @Test
+        @DisplayName("실패")
+        void failure() {
+            /* given */
+
+            /* when */
+
+            /* then */
+
+        }
+    }
+
 //    // Visibility
 //    @Nested
 //    @DisplayName("가게 메뉴 숨기기 테스트")
