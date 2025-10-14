@@ -1,0 +1,360 @@
+package com.sparta.delivery.backend.order.service;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import com.sparta.delivery.backend.address.entity.Address;
+import com.sparta.delivery.backend.address.repository.AddressRepository;
+import com.sparta.delivery.backend.cart.entity.Cart;
+import com.sparta.delivery.backend.cart.repository.CartRepository;
+import com.sparta.delivery.backend.customer.entity.Customer;
+import com.sparta.delivery.backend.customer.repository.CustomerRepository;
+import com.sparta.delivery.backend.image.entity.Image;
+import com.sparta.delivery.backend.order.dto.ReqCreateOrderDto;
+import com.sparta.delivery.backend.order.dto.ReqUpdateOrderStatusDto;
+import com.sparta.delivery.backend.order.entity.Order;
+import com.sparta.delivery.backend.order.entity.OrderMenu;
+import com.sparta.delivery.backend.order.enums.OrderStatus;
+import com.sparta.delivery.backend.order.repository.OrderMenuRepository;
+import com.sparta.delivery.backend.order.repository.OrderRepository;
+import com.sparta.delivery.backend.owner.entity.Owner;
+import com.sparta.delivery.backend.owner.repository.OwnerRepository;
+import com.sparta.delivery.backend.payment.entity.PayMethod;
+import com.sparta.delivery.backend.region.entity.Dong;
+import com.sparta.delivery.backend.region.entity.Sido;
+import com.sparta.delivery.backend.region.entity.Sigungu;
+import com.sparta.delivery.backend.store.entity.Store;
+import com.sparta.delivery.backend.store.entity.StoreStatusEnum;
+import com.sparta.delivery.backend.store.menu.dto.ReqCreateStoreMenuDto;
+import com.sparta.delivery.backend.store.menu.entity.StoreMenu;
+import com.sparta.delivery.backend.store.menu.enums.StockStatus;
+import com.sparta.delivery.backend.user.entity.User;
+import com.sparta.delivery.backend.user.entity.UserRoleEnum;
+
+@ExtendWith(MockitoExtension.class)
+@DisplayName("OrderService 테스트")
+class OrderServiceTest {
+
+	@InjectMocks
+	private OrderService orderService;
+
+	@Mock
+	private CartRepository cartRepository;
+	@Mock
+	private OrderRepository orderRepository;
+	@Mock
+	private CustomerRepository customerRepository;
+	@Mock
+	private OwnerRepository ownerRepository;
+	@Mock
+	private AddressRepository addressRepository;
+	@Mock
+	private OrderMenuRepository orderMenuRepository;
+
+	private User customerUser;
+	private User ownerUser;
+	private Customer customer;
+	private Owner owner;
+	private Store store;
+	private StoreMenu storeMenu;
+	private Order order;
+	private Address address;
+	private Cart cart;
+	private Dong dong;
+	private Sigungu sigungu;
+	private Sido sido;
+	private ReqCreateStoreMenuDto reqCreateStoreMenuDto;
+	private Image image;
+
+	@BeforeEach
+	void setup() {
+		// 테스트용 User(Customer) 생성
+		customerUser = User.builder()
+			.username("customerUser")
+			.password("pass")
+			.role(UserRoleEnum.CUSTOMER)
+			.build();
+		ReflectionTestUtils.setField(customerUser, "id", 1L);
+		ReflectionTestUtils.setField(customerUser, "publicId", UUID.randomUUID());
+
+		customer = Customer.builder()
+			.user(customerUser)
+			.nickname("테스트고객")
+			.build();
+		ReflectionTestUtils.setField(customer, "id", UUID.randomUUID());
+
+		// 테스트용 User(Owner) 생성
+		ownerUser = User.builder()
+			.username("ownerUser")
+			.password("pass")
+			.role(UserRoleEnum.OWNER)
+			.build();
+		ReflectionTestUtils.setField(ownerUser, "id", 2L);
+		ReflectionTestUtils.setField(ownerUser, "publicId", UUID.randomUUID());
+
+		owner = Owner.builder()
+			.user(ownerUser)
+			.nickname("테스트점주")
+			.build();
+		ReflectionTestUtils.setField(owner, "id", UUID.randomUUID());
+
+		// 테스트 주소
+		sido = Sido.builder()
+			.code("11")
+			.name("서울특별시")
+			.build();
+
+		sigungu = Sigungu.builder()
+			.code("680")
+			.name("강남구")
+			.sido(sido)
+			.build();
+
+		dong = Dong.builder()
+			.sigungu(sigungu)
+			.name("삼성동")
+			.code("101")
+			.build();
+		
+		address = Address.builder()
+			.user(customerUser)
+			.dong(dong)
+			.build();
+		ReflectionTestUtils.setField(address, "id", UUID.randomUUID());
+		
+		// 테스트 가게
+		store = Store.builder()
+			.owner(owner)
+			.name("테스트가게")
+			.regionDong(dong)
+			.deliveryFee(2000)
+			.minOrderPrice(10000)
+			.build();
+		ReflectionTestUtils.setField(store, "id", UUID.randomUUID());
+		
+		// 테스트 주문
+		order = Order.builder()
+			.customer(customer)
+			.store(store)
+			.orderStatus(OrderStatus.ORDERED)
+			.payMethod(PayMethod.CARD)
+			.build();
+		ReflectionTestUtils.setField(order, "id", UUID.randomUUID());
+		ReflectionTestUtils.setField(order, "dongEntity", dong);
+		ReflectionTestUtils.setField(order, "gu", "강남구");
+		ReflectionTestUtils.setField(order, "dong", "삼성동");
+		ReflectionTestUtils.setField(order, "addressDetails", "테스트주소 123");
+
+		// 테스트 이미지
+		image = Image.builder()
+			.imageUrl("https://example.com/hamburger.jpg")
+			.build();
+
+		// 테스트 메뉴
+		reqCreateStoreMenuDto = new ReqCreateStoreMenuDto();
+		reqCreateStoreMenuDto.setName("치즈버거");
+		reqCreateStoreMenuDto.setImageUrl(image.getImageUrl());
+		reqCreateStoreMenuDto.setPrice(4000);
+		reqCreateStoreMenuDto.setDescription("치즈, 소고기, 피클, 마요네즈가 들어있습니다.");
+		reqCreateStoreMenuDto.setPrepTime("15분");
+		reqCreateStoreMenuDto.setStockStatus(StockStatus.ON_SALE);
+		reqCreateStoreMenuDto.setIsHidden(false);
+
+		storeMenu = StoreMenu.builder()
+			.reqCreateStoreMenuDto(reqCreateStoreMenuDto)
+			.store(store)
+			.image(image)
+			.build();
+		ReflectionTestUtils.setField(storeMenu, "id", UUID.randomUUID()); // Test UUID 주입
+		storeMenu.setSortOrder(1);
+
+		// 테스트 주문 리스트
+		List<OrderMenu> orderMenus = List.of(
+			OrderMenu.builder()
+				.order(order)
+				.storeMenu(storeMenu)
+				.build()
+		);
+		ReflectionTestUtils.setField(order, "orderMenus", orderMenus);
+
+		// 테스트 장바구니
+		cart = Cart.builder()
+			.customer(customer)
+			.menu(storeMenu)
+			.build();
+		ReflectionTestUtils.setField(cart, "id", UUID.randomUUID());
+	}
+
+	@Nested
+	@DisplayName("주문 생성 테스트")
+	class CreateOrderTest {
+
+		@Test
+		@DisplayName("성공 - 기본 주소와 장바구니 기반으로 주문 생성")
+		void create_success() {
+			/* given */
+			ReqCreateOrderDto req = new ReqCreateOrderDto();
+			req.setRequestMessage("문앞에 두세요");
+
+			when(customerRepository.findByUserId(any())).thenReturn(Optional.of(customer));
+			when(addressRepository.findByUserIdAndIsDefaultTrueAndDeletedAtIsNull(any()))
+				.thenReturn(Optional.of(address));
+			when(cartRepository.findAllByCustomerIdAndDeletedAtIsNull(any()))
+				.thenReturn(List.of(cart));
+
+			when(orderRepository.save(any(Order.class))).thenAnswer(inv -> {
+				Order saved = inv.getArgument(0);
+				ReflectionTestUtils.setField(saved, "id", UUID.randomUUID());
+				return saved;
+			});
+
+			when(orderMenuRepository.save(any(OrderMenu.class)))
+				.thenAnswer(inv -> inv.getArgument(0));
+
+			/* when */
+			UUID orderId = orderService.createOrder(customerUser, req);
+
+			/* then */
+			assertNotNull(orderId);
+			verify(orderRepository, times(1)).save(any(Order.class));
+			verify(orderMenuRepository, atLeastOnce()).save(any(OrderMenu.class));
+		}
+
+		@Test
+		@DisplayName("실패 - 기본 주소 없음")
+		void failure_noAddress() {
+			/* given */
+			lenient().when(customerRepository.findByUserId(any())).thenReturn(Optional.of(customer));
+			lenient().when(addressRepository.findByUserIdAndIsDefaultTrueAndDeletedAtIsNull(any()))
+				.thenReturn(Optional.empty());
+
+			/* when & then */
+			assertThrows(IllegalStateException.class,
+				() -> orderService.createOrder(customerUser, new ReqCreateOrderDto()));
+		}
+	}
+
+	@Nested
+	@DisplayName("주문 목록 조회 테스트")
+	class GetOrderListTest {
+
+		@Test
+		@DisplayName("성공 - CUSTOMER의 주문 조회")
+		void getOrders_customer_success() {
+			/* given */
+			Page<Order> mockPage = new PageImpl<>(List.of(order));
+
+			when(customerRepository.findByUserId(customerUser.getId())).thenReturn(Optional.of(customer));
+			when(orderRepository.findByCustomerId(any(), any(Pageable.class))).thenReturn(mockPage);
+
+			/* when */
+			Page<?> result = orderService.getOrdersByUser(customerUser, 0, 10);
+
+			/* then */
+			assertEquals(1, result.getTotalElements());
+		}
+
+		@Test
+		@DisplayName("성공 - OWNER의 주문 조회")
+		void getOrders_owner_success() {
+			/* given */
+			Page<Order> mockPage = new PageImpl<>(List.of(order));
+
+			when(ownerRepository.findByUserId(ownerUser.getId())).thenReturn(Optional.of(owner));
+			when(orderRepository.findByStoreOwnerId(any(), any(Pageable.class))).thenReturn(mockPage);
+
+			/* when */
+			Page<?> result = orderService.getOrdersByUser(ownerUser, 0, 10);
+
+			/* then */
+			assertEquals(1, result.getContent().size());
+		}
+	}
+
+	@Nested
+	@DisplayName("주문 상태 변경 테스트")
+	class UpdateOrderStatusTest {
+
+		@Test
+		@DisplayName("성공 - 점주가 상태 변경")
+		void updateStatus_success() {
+			/* given */
+			when(orderRepository.findById(any())).thenReturn(Optional.of(order));
+			when(orderRepository.save(any())).thenReturn(order);
+
+			ReqUpdateOrderStatusDto req = new ReqUpdateOrderStatusDto();
+			req.setOrderStatus(OrderStatus.ACCEPTED);
+
+			/* when */
+			orderService.updateOrderStatus(ownerUser, order.getId(), req);
+
+			/* then */
+			verify(orderRepository).save(order);
+			assertEquals(OrderStatus.ACCEPTED, order.getOrderStatus());
+		}
+
+		@Test
+		@DisplayName("실패 - 고객이 상태 변경 시도")
+		void updateStatus_noPermission() {
+			/* given */
+			when(orderRepository.findById(any())).thenReturn(Optional.of(order));
+
+			ReqUpdateOrderStatusDto req = new ReqUpdateOrderStatusDto();
+			req.setOrderStatus(OrderStatus.CANCELLED);
+
+			/* when & then */
+			assertThrows(IllegalStateException.class,
+				() -> orderService.updateOrderStatus(customerUser, order.getId(), req));
+		}
+	}
+
+	@Nested
+	@DisplayName("주문 삭제 테스트")
+	class DeleteOrderTest {
+
+		@Test
+		@DisplayName("성공 - 본인 주문 삭제")
+		void delete_success() {
+			/* given */
+			when(orderRepository.findById(any())).thenReturn(Optional.of(order));
+			ReflectionTestUtils.setField(order, "orderStatus", OrderStatus.CANCELLED);
+
+			/* when */
+			orderService.deleteOrder(customerUser, order.getId());
+
+			/* then */
+			assertNotNull(order.getDeletedAt());
+			verify(orderRepository).save(order);
+		}
+
+		@Test
+		@DisplayName("실패 - 진행 중 주문 삭제 불가")
+		void failure_inProgress() {
+			/* given */
+			when(orderRepository.findById(any())).thenReturn(Optional.of(order));
+			ReflectionTestUtils.setField(order, "orderStatus", OrderStatus.ORDERED);
+
+			/* when & then */
+			assertThrows(IllegalStateException.class,
+				() -> orderService.deleteOrder(customerUser, order.getId()));
+		}
+	}
+}

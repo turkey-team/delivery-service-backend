@@ -1,13 +1,10 @@
 package com.sparta.delivery.backend.store.menu.repository;
 
-import com.sparta.delivery.backend.image.entity.Image;
-import com.sparta.delivery.backend.owner.entity.Owner;
-import com.sparta.delivery.backend.store.entity.Store;
-import com.sparta.delivery.backend.store.entity.StoreStatusEnum;
-import com.sparta.delivery.backend.store.menu.entity.StoreMenu;
-import com.sparta.delivery.backend.store.menu.enums.StockStatus;
-import com.sparta.delivery.backend.user.entity.User;
-import com.sparta.delivery.backend.user.entity.UserRoleEnum;
+import static org.assertj.core.api.Assertions.*;
+
+import java.util.List;
+import java.util.Optional;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -16,11 +13,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.*;
+import com.sparta.delivery.backend.image.entity.Image;
+import com.sparta.delivery.backend.owner.entity.Owner;
+import com.sparta.delivery.backend.store.entity.Store;
+import com.sparta.delivery.backend.store.entity.StoreStatusEnum;
+import com.sparta.delivery.backend.store.menu.entity.StoreMenu;
+import com.sparta.delivery.backend.store.menu.enums.StockStatus;
+import com.sparta.delivery.backend.user.entity.User;
+import com.sparta.delivery.backend.user.entity.UserRoleEnum;
 
 @DataJpaTest
 @DisplayName("StoreMenuRepository 테스트")
@@ -104,7 +104,8 @@ class StoreMenuRepositoryTest {
 		@Test
 		@DisplayName("성공 - 삭제되지 않은 메뉴만 조회됨")
 		void success_findActiveMenus() {
-			List<StoreMenu> menus = storeMenuRepository.findAllByStoreIdAndDeletedAtIsNull(store.getId(), null).getContent();
+			List<StoreMenu> menus = storeMenuRepository.findAllByStoreIdAndDeletedAtIsNull(store.getId(), null)
+				.getContent();
 			assertThat(menus)
 				.extracting("name")
 				.containsExactly("치즈버거");
@@ -113,7 +114,8 @@ class StoreMenuRepositoryTest {
 		@Test
 		@DisplayName("실패 - softDelete된 메뉴는 제외됨")
 		void failure_excludeDeletedMenus() {
-			List<StoreMenu> menus = storeMenuRepository.findAllByStoreIdAndDeletedAtIsNull(store.getId(), null).getContent();
+			List<StoreMenu> menus = storeMenuRepository.findAllByStoreIdAndDeletedAtIsNull(store.getId(), null)
+				.getContent();
 			assertThat(menus)
 				.noneMatch(menu -> menu.getDeletedAt() != null);
 		}
@@ -195,7 +197,8 @@ class StoreMenuRepositoryTest {
 
 	// 테스트용 메뉴 DTO 팩토리 (내부 static)
 	private static class TestMenuFactory {
-		static com.sparta.delivery.backend.store.menu.dto.ReqCreateStoreMenuDto create(String name, int price, StockStatus status) {
+		static com.sparta.delivery.backend.store.menu.dto.ReqCreateStoreMenuDto create(String name, int price,
+			StockStatus status) {
 			com.sparta.delivery.backend.store.menu.dto.ReqCreateStoreMenuDto dto =
 				new com.sparta.delivery.backend.store.menu.dto.ReqCreateStoreMenuDto();
 			dto.setName(name);
