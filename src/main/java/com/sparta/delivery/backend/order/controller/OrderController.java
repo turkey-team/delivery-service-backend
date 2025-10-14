@@ -1,34 +1,22 @@
 package com.sparta.delivery.backend.order.controller;
 
-import java.util.UUID;
-
+import com.sparta.delivery.backend.order.dto.*;
+import com.sparta.delivery.backend.order.service.OrderService;
+import com.sparta.delivery.backend.security.UserDetailsImpl;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.sparta.delivery.backend.order.dto.ReqCreateOrderDto;
-import com.sparta.delivery.backend.order.dto.ReqUpdateOrderStatusDto;
-import com.sparta.delivery.backend.order.dto.ResCheckOutOrderDto;
-import com.sparta.delivery.backend.order.dto.ResGetListOrderDto;
-import com.sparta.delivery.backend.order.dto.ResGetOrderDto;
-import com.sparta.delivery.backend.order.service.OrderService;
-import com.sparta.delivery.backend.security.UserDetailsImpl;
-
-import lombok.RequiredArgsConstructor;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/v1/orders")
 @RequiredArgsConstructor
+@Tag(name="Order-Controller", description = "주문 관련 API")
 public class OrderController {
 
 	private final OrderService orderService;
