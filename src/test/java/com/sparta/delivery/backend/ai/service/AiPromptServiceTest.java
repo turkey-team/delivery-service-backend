@@ -42,6 +42,7 @@ public class AiPromptServiceTest {
 		@Test
 		@DisplayName("성공")
 		void success() {
+			// given
 			ReqCreateAiPromptDto requestDto = new ReqCreateAiPromptDto("요청");
 			AiPrompt aiPrompt = AiPrompt.builder()
 				.reqMessage("요청")
@@ -51,8 +52,10 @@ public class AiPromptServiceTest {
 			given(googleAiService.createAiPrompt("요청")).willReturn("응답");
 			given(aiPromptRepository.save(any(AiPrompt.class))).willReturn(aiPrompt);
 
+			// when
 			ResCreateAiPromptDto responseDto = aiPromptService.createAiPrompt(requestDto);
 
+			// then
 			assertThat(responseDto.getResMessage()).isEqualTo("응답");
 			then(googleAiService).should(times(1)).createAiPrompt("요청");
 			then(aiPromptRepository).should(times(1)).save(any(AiPrompt.class));
@@ -67,6 +70,7 @@ public class AiPromptServiceTest {
 		@Test
 		@DisplayName("성공")
 		void success() {
+			// given
 			AiPrompt aiPrompt = AiPrompt.builder()
 				.reqMessage("요청")
 				.resMessage("응답")
@@ -76,8 +80,10 @@ public class AiPromptServiceTest {
 
 			given(aiPromptRepository.findAll(pageable)).willReturn(page);
 
+			// when
 			Page<ResReadAiPromptDto> responseDto = aiPromptService.getAllAiPrompts(pageable);
 
+			// then
 			assertThat(responseDto).hasSize(1);
 			assertThat(responseDto.getContent().get(0).getReqMessage()).isEqualTo("요청");
 			assertThat(responseDto.getContent().get(0).getResMessage()).isEqualTo("응답");
