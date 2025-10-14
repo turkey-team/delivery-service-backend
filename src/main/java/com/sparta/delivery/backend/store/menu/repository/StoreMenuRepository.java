@@ -15,7 +15,7 @@ public interface StoreMenuRepository extends JpaRepository<StoreMenu, UUID>, Sto
 	/*
 	 TODO:
 	  관리자가 조회할 때, Soft Delete한 메뉴들
-	  (deleteAt, deletedBy 존재 or sortOrder가 음수)
+	  (deleteAt, deletedBy 존재 && sortOrder가 음수)
 	  도 조회 가능해야 함
 	  이때의 정렬 기준은 createAt 기준이므로 sortOrder 는 고려하지 않아도 된다.
 	 */
