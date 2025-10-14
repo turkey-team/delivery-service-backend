@@ -9,5 +9,5 @@ import com.sparta.delivery.backend.store.entity.StoreImage;
 import com.sparta.delivery.backend.store.entity.StoreImageStatusEnum;
 
 public interface StoreImageRepository extends JpaRepository<StoreImage, UUID> {
-	StoreImage findFirstByStoreIdAndStatusOrderByCreatedAtAsc(UUID storeId, StoreImageStatusEnum storeImageStatusEnum);
+	Optional<StoreImage> findFirstByStoreIdAndStatusAndDeletedAtIsNullOrderByCreatedAtAsc(UUID storeId, StoreImageStatusEnum storeImageStatusEnum);
 }

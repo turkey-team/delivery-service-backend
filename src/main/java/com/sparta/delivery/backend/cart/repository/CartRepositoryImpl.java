@@ -69,8 +69,11 @@ public class CartRepositoryImpl implements CartRepositoryCustom{
 			.where(cart.customer.id.eq(cusomerId).and(cart.deletedAt.isNull()))
 			.limit(1)
 			.fetchOne();
+
+		Integer safeMinOrderPrice = storeInfo.getMinOrderPrice() != null ? storeInfo.getMinOrderPrice() : 0;
+
 		return new ResGetCartDto(storeInfo.getStoreName()
-			,storeInfo.minOrderPrice
+			,safeMinOrderPrice
 			,storeInfo.deliveryFee
 			,cartDtos
 		);

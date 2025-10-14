@@ -43,7 +43,8 @@ public class ReviewRepositoryImpl implements ReviewRepoistoryCustom {
 			.where(review.store.id.eq(storeId),
 				rateBetween(condition.getMinRate(), condition.getMaxRate()),
 				containsContext(condition.getContext()),
-				createdBetween(condition.getStartDate(), condition.getEndDate()))
+				createdBetween(condition.getStartDate(), condition.getEndDate()),
+				review.deletedAt.isNull())
 			.offset(pageable.getOffset())
 			.limit(pageable.getPageSize());
 
@@ -88,7 +89,8 @@ public class ReviewRepositoryImpl implements ReviewRepoistoryCustom {
 			.where(review.customer.id.eq(customerId),
 				rateBetween(condition.getMinRate(), condition.getMaxRate()),
 				containsContext(condition.getContext()),
-				createdBetween(condition.getStartDate(), condition.getEndDate()))
+				createdBetween(condition.getStartDate(), condition.getEndDate()),
+				review.deletedAt.isNull())
 			.offset(pageable.getOffset())
 			.limit(pageable.getPageSize());
 

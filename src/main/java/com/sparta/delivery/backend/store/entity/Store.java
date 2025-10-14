@@ -36,8 +36,8 @@ public class Store extends BaseEntity {
 	@OneToMany(mappedBy = "store")
 	private List<StoreImage> storeImages = new ArrayList<>();
 
-	@OneToOne
-	@JoinColumn(name = "p_region_dong_id")
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "p_region_dong_id", nullable = false)
 	private Dong regionDong;
 
 	@OneToMany(mappedBy = "store", fetch = FetchType.LAZY)

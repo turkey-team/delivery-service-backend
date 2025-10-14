@@ -1,5 +1,6 @@
 package com.sparta.delivery.backend.review.service;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
@@ -69,9 +70,11 @@ public class ReviewService {
 		cacheManager = "reviewCacheManager",
 		condition = "#pageable.pageNumber == 0")
 	@Transactional(readOnly = true)
-	public Page<ResViewReviewDto> getReviews(UUID storeId, ReviewRepositorySearchConditionDto condition,
+	public List<ResViewReviewDto> getReviews(UUID storeId, ReviewRepositorySearchConditionDto condition,
 		Pageable pageable) {
-		return reviewRepository.findReviews(storeId, condition, pageable);
+		Page<ResViewReviewDto> reviews = reviewRepository.findReviews(storeId, condition, pageable);
+
+		return reviews.getContent();
 	}
 
 	// 내가 작성한 reviews list 조회
@@ -124,12 +127,16 @@ public class ReviewService {
 			.rate(registerDto.getRate())
 			.build();
 
+		if (registerDto.getRate() < 1 || registerDto.getRate() > 5) {
+			throw new IllegalStateException("리뷰 평점은 1~5 사이여야 합니다.");
+		}
+
 		reviewRepository.save(review);
 
 		store.addReview(review.getRate());
 		em.flush();
 		em.clear();
-		
+
 		evictReviewCache(storeId);
 
 		Owner owner = store.getOwner();

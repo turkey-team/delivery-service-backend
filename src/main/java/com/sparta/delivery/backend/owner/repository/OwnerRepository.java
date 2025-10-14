@@ -13,7 +13,7 @@ import com.sparta.delivery.backend.owner.entity.Owner;
 @Repository
 public interface OwnerRepository extends JpaRepository<Owner, UUID> {
 
-	Owner findByUser_PublicId(UUID publicId);
+	Optional<Owner> findByIdAndDeletedAtIsNull(UUID ownerId);
 	
 	Optional<Owner> findByUserId(Long id);
 	
@@ -34,4 +34,5 @@ public interface OwnerRepository extends JpaRepository<Owner, UUID> {
 		"WHERE o.email = :email " +
 		"AND o.deletedAt IS NULL")
 	Optional<Owner> findByEmailAndDeletedAtIsNull(@Param("email") String email);
+
 }

@@ -6,6 +6,7 @@ import java.util.List;
 import com.sparta.delivery.backend.common.BaseEntity;
 import com.sparta.delivery.backend.store.entity.StoreImage;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
@@ -23,7 +24,7 @@ import lombok.Setter;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "p_image")
 public class Image extends BaseEntity {
-
+	@Column(length = 2048, unique = true)
 	private String imageUrl;
 
 	private String imageName;
