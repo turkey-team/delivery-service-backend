@@ -450,17 +450,20 @@ class StoreMenuServiceTest {
             /* given */
             UUID storeId = store.getId();
 
+			menu1.setSortOrder(1);
             menu2 = StoreMenu.builder()
                     .reqCreateStoreMenuDto(reqCreateStoreMenuDto)
                     .store(store)
                     .image(image)
                     .build();
             ReflectionTestUtils.setField(menu2, "id", UUID.randomUUID());
-            UUID menuId = menu2.getId();
+			menu2.setSortOrder(2);
+
+			UUID menuId = menu2.getId();
             ReqUpdateSortOrderDto reqUpdateSortOrderDto = new ReqUpdateSortOrderDto();
             reqUpdateSortOrderDto.setSortOrder(1); // 이동하고 싶은 위치
 
-            List<StoreMenu> menusToShift = List.of(menu2);
+            List<StoreMenu> menusToShift = List.of(menu1, menu2);
             when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
             when(storeMenuRepository.findByStoreIdAndIdAndDeletedAtIsNull(storeId, menuId, null))
                     .thenReturn(Optional.of(menu2));
@@ -471,11 +474,11 @@ class StoreMenuServiceTest {
             storeMenuService.updateSortOrder(storeId, menuId, reqUpdateSortOrderDto);
 
             /* then */
-            // 타겟 메뉴 순서 변경 확인
-            assertEquals(1, menu1.getSortOrder());
+            // 타겟 메뉴(menu2) 순서 변경 확인
+            assertEquals(1, menu2.getSortOrder());
 
-            // 나머지 메뉴 순서 재정렬 확인
-            assertEquals(2, menusToShift.get(0).getSortOrder());
+            // 나머지 메뉴(menu1) 순서 재정렬 확인
+			assertEquals(2, menu1.getSortOrder());
 
             verify(storeMenuRepository, times(2))
                     .flush(); // DB flush 호출 검증

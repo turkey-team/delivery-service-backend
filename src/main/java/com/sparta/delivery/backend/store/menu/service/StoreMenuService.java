@@ -174,7 +174,15 @@ public class StoreMenuService {
 
 		int order = 1;
 		for (StoreMenu menu : menus) {
+			if (menu.getSortOrder() >= 100) continue; // 임시 이동된 메뉴 제외하게끔
 			menu.setSortOrder(order++);
+		}
+
+		// 100 단위로 밀려있던 메뉴들 정렬 복원
+		for (StoreMenu menu : menus) {
+			if (menu.getSortOrder() >= 100) {
+				menu.setSortOrder(order++);
+			}
 		}
 	}
 
