@@ -1,14 +1,8 @@
 package com.sparta.delivery.backend.store.menu.service;
 
-import com.sparta.delivery.backend.common.LoginUserAuditorAware;
-import com.sparta.delivery.backend.image.entity.Image;
-import com.sparta.delivery.backend.image.repository.ImageRepository;
-import com.sparta.delivery.backend.store.entity.Store;
-import com.sparta.delivery.backend.store.menu.dto.*;
-import com.sparta.delivery.backend.store.menu.entity.StoreMenu;
-import com.sparta.delivery.backend.store.menu.repository.StoreMenuRepository;
-import com.sparta.delivery.backend.store.repository.StoreRepository;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+import java.util.UUID;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,8 +10,22 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.UUID;
+import com.sparta.delivery.backend.image.entity.Image;
+import com.sparta.delivery.backend.image.repository.ImageRepository;
+import com.sparta.delivery.backend.store.entity.Store;
+import com.sparta.delivery.backend.store.menu.dto.ReqCreateStoreMenuDto;
+import com.sparta.delivery.backend.store.menu.dto.ReqUpdateSortOrderDto;
+import com.sparta.delivery.backend.store.menu.dto.ReqUpdateStoreMenuDto;
+import com.sparta.delivery.backend.store.menu.dto.ReqUpdateVisibilityDto;
+import com.sparta.delivery.backend.store.menu.dto.ResGetListStoreMenuDto;
+import com.sparta.delivery.backend.store.menu.dto.ResGetStoreMenuDto;
+import com.sparta.delivery.backend.store.menu.entity.StoreMenu;
+import com.sparta.delivery.backend.store.menu.repository.StoreMenuRepository;
+import com.sparta.delivery.backend.store.repository.StoreRepository;
+import com.sparta.delivery.backend.user.entity.User;
+import com.sparta.delivery.backend.user.entity.UserRoleEnum;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -26,16 +34,19 @@ public class StoreMenuService {
 	private final StoreMenuRepository storeMenuRepository;
 	private final StoreRepository storeRepository;
 	private final ImageRepository imageRepository;
-	private final LoginUserAuditorAware loginUserAuditorAware;
 
 	/** 생성 **/
 	@Transactional
 	public void createStoreMenu(
+		User user,
 		UUID storeId,
 		ReqCreateStoreMenuDto reqCreateStoreMenuDto
 	) {
 		Store store = storeRepository.findById(storeId)
 			.orElseThrow(() -> new IllegalArgumentException("Store not found"));
+
+		validatePermission(user, storeId);
+		validateDuplicateMenuName(storeId, reqCreateStoreMenuDto.getName());
 
 		Image image = saveImage(reqCreateStoreMenuDto.getImageUrl());
 
@@ -73,10 +84,17 @@ public class StoreMenuService {
 		int page,
 		int size
 	) {
+		validateStore(storeId);
+
 		Pageable pageable = PageRequest.of(page, size, Sort.by("sortOrder").ascending());
 
 		Page<StoreMenu> storeMenuList =
 			storeMenuRepository.findAllByStoreIdAndDeletedAtIsNull(storeId, pageable);
+
+		// 메뉴가 하나도 없어도 빈 페이지는 반환
+		if (storeMenuList == null || storeMenuList.isEmpty()) {
+			return Page.empty(pageable);
+		}
 
 		return storeMenuList.map(ResGetListStoreMenuDto::new);
 	}
@@ -84,14 +102,17 @@ public class StoreMenuService {
 	/** 수정 **/
 	@Transactional
 	public void updateStoreMenu(
+		User user,
 		UUID storeId,
 		UUID menuId,
 		ReqUpdateStoreMenuDto reqUpdateStoreMenuDto
 	) {
 		validateStore(storeId);
+		validatePermission(user, storeId);
+		validateDuplicateMenuName(storeId, reqUpdateStoreMenuDto.getName());
+
 		StoreMenu storeMenu = findStoreMenu(storeId, menuId);
 
-		// 일단 이미지 테이블에서 일괄 관리한다고 가정했을때
 		Image image = saveImage(reqUpdateStoreMenuDto.getImageUrl());
 
 		storeMenu.updateStoreMenu(reqUpdateStoreMenuDto, image);
@@ -99,11 +120,13 @@ public class StoreMenuService {
 
 	@Transactional
 	public void updateSortOrder(
+		User user,
 		UUID storeId,
 		UUID menuId,
 		ReqUpdateSortOrderDto reqUpdateSortOrderDto
 	) {
 		validateStore(storeId);
+		validatePermission(user, storeId);
 
 		// 이동 대상 메뉴
 		StoreMenu targetMenu = findStoreMenu(storeId, menuId);
@@ -140,11 +163,13 @@ public class StoreMenuService {
 
 	@Transactional
 	public void updateVisibility(
+		User user,
 		UUID storeId,
 		UUID menuId,
 		ReqUpdateVisibilityDto reqUpdateVisibilityDto
 	) {
 		validateStore(storeId);
+		validatePermission(user, storeId);
 		StoreMenu storeMenu = findStoreMenu(storeId, menuId);
 
 		storeMenu.setHiddenAt(reqUpdateVisibilityDto.isHidden());
@@ -152,12 +177,12 @@ public class StoreMenuService {
 
 	/** 삭제 **/
 	@Transactional
-	public void deleteStoreMenu(UUID storeId, UUID menuId) {
+	public void deleteStoreMenu(User user, UUID storeId, UUID menuId) {
 		StoreMenu storeMenu = findStoreMenu(storeId, menuId);
+		validatePermission(user, storeId);
 
-		// 현재 로그인 중인 username 가져오기
-		Long userId = loginUserAuditorAware.getCurrentAuditor()
-			.orElseThrow(() -> new RuntimeException("Current user not found"));
+		// 현재 로그인 중인 userId
+		UUID userId = user.getPublicId();
 
 		storeMenu.softDelete(userId);
 
@@ -191,6 +216,28 @@ public class StoreMenuService {
 	private void validateStore(UUID storeId) {
 		storeRepository.findById(storeId)
 			.orElseThrow(() -> new IllegalArgumentException("Store not found"));
+	}
+
+	// 메뉴명 중복 검사
+	private void validateDuplicateMenuName(UUID storeId, String menuName) {
+		if (storeMenuRepository.findByStoreIdAndName(storeId, menuName).isPresent()) {
+			throw new IllegalArgumentException("Menu name already exists");
+		}
+	}
+
+	// 권한 검증
+	private void validatePermission(User user, UUID storeId) {
+		Store store = storeRepository.findById(storeId)
+			.orElseThrow(() -> new IllegalArgumentException("Store not found"));
+
+		// Store의 Owner 인 경우
+		if (store.getOwner().getUser().getPublicId().equals(user.getPublicId())) return;
+
+		// TODO: Manager 인데, 해당 Store의 Manager 일 경우에만 가능하게
+		// Manager or Master 권한 허용
+		if (user.getRole() == UserRoleEnum.MANAGER || user.getRole() == UserRoleEnum.MASTER) return;
+
+		throw new SecurityException("You do not have permission");
 	}
 
 	// 가게 메뉴 검색 (삭제된 메뉴 제외)
