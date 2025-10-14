@@ -21,11 +21,12 @@ public class ResGetCartDto {
 	private Integer minOrderPrice;
 	@Schema(description = "배달료", example = "1500")
 	private int deliveryFee;
-	@Schema(name = "cartDtoList",description = "장바구니 메뉴")
+	@Schema(name = "cartDtoList",description = "장바구니 메뉴 리스트")
 	private List<CartDto> cartDtoList;
 
 	@Getter
 	@NoArgsConstructor
+	@Schema(description = "장바구니 내 메뉴 정보")
 	public static class CartDto {
 		@Schema(description = "장바구니 UUID", example = "123e4567-e89b-12d3-a456-426614174000")
 		private UUID cartId;

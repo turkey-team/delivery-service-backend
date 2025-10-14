@@ -99,12 +99,12 @@ public class StoreRepositoryImpl implements StoreRepositoryCustom {
 
 		// 전체 count
 		Long total = queryFactory
-			.select(store.countDistinct()) // 중복을 제외한 가게의 수를 셉니다.
+			.select(store.countDistinct())
 			.from(store)
 			.innerJoin(store.storeCategories, storeCategory)
 			.innerJoin(storeCategory.category, category)
 			.where(condition)
-			.fetchOne(); // 결과가 하나이므로 fetchOne()을 사용합니다.
+			.fetchOne();
 
 		return new PageImpl<>(storeDtos, pageable, total != null ? total : 0 );
 	}

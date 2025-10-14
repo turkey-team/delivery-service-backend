@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -78,10 +79,15 @@ public class StoreService {
 		}
 
 		//Owner 조회
-		Owner owner = ownerRepository.findByUser_PublicId(user.getPublicId());
+		Owner owner = ownerRepository.findByUserIdAndDeletedAtIsNull(user.getId()).orElse(null);
 
-		if (owner == null && user.getRole() == UserRoleEnum.MANAGER){
-			owner = ownerRepository.findById(requestDto.getOwnerId()).orElseThrow(()-> new ResponseStatusException(HttpStatus.BAD_REQUEST, "OwnerId가 적절하지 않습니다."));
+		if (owner == null){
+			if (user.getRole() == UserRoleEnum.MANAGER){
+				owner = ownerRepository.findByIdAndDeletedAtIsNull(requestDto.getOwnerId())
+					.orElseThrow(()-> new ResponseStatusException(HttpStatus.BAD_REQUEST, "OwnerId가 적절하지 않습니다."));
+			}else{
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "점주가 아니면 가게를 생성할 수 없습니다.");
+			}
 		}
 
 		// Region Dong 조회
@@ -154,7 +160,14 @@ public class StoreService {
 		StoreDetails details = storeDetailsRepository.findByStoreId(storeId).orElseThrow(()->new ResponseStatusException(HttpStatus.BAD_REQUEST,"해당 가게가 존재하지 않습니다"));
 
 
-		StoreImage storeImage = storeImageRepository.findFirstByStoreIdAndStatusOrderByCreatedAtAsc(storeId, StoreImageStatusEnum.STORE);
+		StoreImage storeImage = storeImageRepository.findFirstByStoreIdAndStatusAndDeletedAtIsNullOrderByCreatedAtAsc(storeId, StoreImageStatusEnum.STORE).orElse(null);
+		String imgUrl;
+
+		if (storeImage != null && storeImage.getImage().getImageUrl() != null){
+			imgUrl = storeImage.getImage().getImageUrl();
+		}else{
+			imgUrl = "";
+		}
 
 		ResGetStoreDto resGetStoreDto = ResGetStoreDto.builder()
 			.storeid(store.getId())
@@ -167,7 +180,7 @@ public class StoreService {
 			.description(details.getDescription())
 			.holiday(details.getHoliday())
 			.operationHours(details.getOperationHours())
-			.imageUrl(storeImage.getImage().getImageUrl())
+			.imageUrl(imgUrl)
 			.build();
 
 		return resGetStoreDto;
@@ -189,6 +202,7 @@ public class StoreService {
 
 		Set<UUID> existingCategoryIds = currentCategories.stream()
 			.filter(sc -> !sc.isDeleted())  // 삭제되지 않은 카테고리만
+			.filter(sc -> sc.getCategory() != null)
 			.map(sc -> sc.getCategory().getId())
 			.collect(Collectors.toSet());
 
@@ -256,7 +270,18 @@ public class StoreService {
 		// URL로 검색해서 있으면 Image로 받거나 아님 Image로 신규 저장
 		for (ReqUpdateStoreInfoDto.ImageDto dto : newImages) {
 			Image image = imageRepository.findByImageUrl(dto.getUrl())
-				.orElseGet(() -> imageRepository.save(Image.builder().imageUrl(dto.getUrl()).build()));
+				.orElseGet(() -> {
+					// 2. 존재하지 않으면 신규 저장 시도
+					try {
+						return imageRepository.save(Image.builder().imageUrl(dto.getUrl()).build());
+					} catch (DataIntegrityViolationException e) {
+						throw new ResponseStatusException(
+							HttpStatus.BAD_REQUEST,
+							"이미지 URL이 중복되어 등록할 수 없습니다. URL: " + dto.getUrl()
+						);
+					}
+				});
+
 			newImageMap.put(dto.getUrl(), image);
 		}
 
@@ -531,6 +556,10 @@ public class StoreService {
 
 		boolean IsManger = (user.getRole() == UserRoleEnum.MANAGER)?true:false;
 		boolean IsOwner = store.getOwner().getUser().getId().equals(user.getId());
+
+		if (user.getDeletedAt() != null){
+			throw new AccessDeniedException("탈퇴 회원은 가게를 생성할 수 없습니다.");
+		}
 
 		// 가게 Owner || Manager가 아니면 수정 불가
 		if (!(IsManger || IsOwner)) {

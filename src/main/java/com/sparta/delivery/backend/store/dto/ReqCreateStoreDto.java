@@ -40,11 +40,15 @@ public class ReqCreateStoreDto {
 	private Integer minOrderPrice;
 
 	@NotEmpty(message = "카테고리는 필수로 선택해주세요.")
-	@Schema(description = "가게 카테고리 UUID", example = "123e4567-e89b-12d3-a456-426614174000, 223e4567-e89b-12d3-a456-426614174001", required = true)
+	@Schema(    description = "가게 카테고리 UUID 리스트",
+		example = "[\"123e4567-e89b-12d3-a456-426614174000\", \"223e4567-e89b-12d3-a456-426614174001\"]",
+		required = true)
 	private List<UUID> categories;
 
 	@NotEmpty(message = "사업자등록증과 가게 사진을 첨부해주세요.")
-	@Schema(description = "사업자등록증, 이미지", required = true)
+	@Schema(description = "사업자등록증, 이미지"
+		, example = "[{\"url\": \"xxx.png\", \"type\": \"business\"}, {\"url\": \"yyy.png\", \"type\": \"store\"}]"
+		, required = true)
 	private List<ImageDto> images;
 
 	@Getter

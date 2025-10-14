@@ -31,6 +31,7 @@ import com.sparta.delivery.backend.store.service.StoreService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -74,7 +75,7 @@ public class StoreController {
 	@Operation(summary = "가게 목록 조회", description = "가게 목록을 조회합니다.")
 	@ApiResponses(value= {
 		@ApiResponse(responseCode = "200", description = "가게 목록 조회 성공"
-			,content = @Content(schema = @Schema(implementation = ResGetStoreDto.class)))
+			,content = @Content(schema = @Schema(implementation = ResGetListStoreDto.class)))
 		,@ApiResponse(responseCode = "400", description = "카테고리 없음")
 	})
 	public Page<ResGetListStoreDto> getStores(
