@@ -17,4 +17,7 @@ public interface StoreMenuRepositoryCustom {
 
 	// 현재 store의 최대 sortOrder 조회
 	Integer findMaxSortOrderByStore(UUID storeId);
+
+	// 현재 store의 최소 sortOrder 조회 (삭제된 메뉴 포함)
+	Integer findMinSortOrderByStore(UUID storeId);
 }

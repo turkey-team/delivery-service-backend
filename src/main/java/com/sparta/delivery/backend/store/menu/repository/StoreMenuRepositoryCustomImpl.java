@@ -70,4 +70,18 @@ public class StoreMenuRepositoryCustomImpl implements StoreMenuRepositoryCustom 
 			.where(sm.store.id.eq(storeId), sm.deletedAt.isNull())
 			.fetchOne();
 	}
+
+	@Override
+	public Integer findMinSortOrderByStore(UUID storeId) {
+		QStoreMenu sm = QStoreMenu.storeMenu;
+
+		return queryFactory
+			.select(sm.sortOrder.min())
+			.from(sm)
+			.where(
+				sm.store.id.eq(storeId),
+				sm.sortOrder.lt(0) // -1부터 시작
+			)
+			.fetchOne();
+	}
 }

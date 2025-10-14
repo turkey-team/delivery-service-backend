@@ -41,6 +41,7 @@ import com.sparta.delivery.backend.user.entity.User;
 import com.sparta.delivery.backend.user.entity.UserRoleEnum;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("StoreMenuService 테스트")
 class StoreMenuServiceTest {
 
 	@Mock

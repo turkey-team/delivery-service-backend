@@ -178,14 +178,13 @@ public class StoreMenuService {
 	@Transactional
 	public void deleteStoreMenu(User user, UUID storeId, UUID menuId) {
 		validatePermission(user, storeId);
-
 		StoreMenu storeMenu = findStoreMenu(storeId, menuId);
 
-		// 현재 로그인 중인 userId
-		UUID userId = user.getPublicId();
+		// sortOrder 중 가장 작은 수 - 1로 지정, 즉 삭제된 메뉴들이 음수 sortOrder 값의 내림차순으로 쌓이는 과정
+		Integer minSortOrder = storeMenuRepository.findMinSortOrderByStore(storeId);
+		if (minSortOrder == null) minSortOrder = 0;
 
-		storeMenu.softDelete(userId);
-
+		storeMenu.softDelete(user.getPublicId(), minSortOrder);
 		// 남은 메뉴들 순서 재정렬
 		reorderSortOrder(storeId);
 	}
