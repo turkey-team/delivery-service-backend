@@ -70,12 +70,12 @@ public class ReqCreateStoreDto {
 	private UUID ownerId;
 
 	//details
-	@Schema(description = "가게 설명", example = "광화문 김밥천국입니다.", required = true)
+	@Schema(description = "가게 설명", example = "광화문 김밥천국입니다.")
 	private String description;
 	@NotBlank(message = "영업시간을 설정해주세요.")
 	@Schema(description = "가게 운영시간", example = "08:00 ~ 20:00", required = true)
 	private String operatingHours;
-	@Schema(description = "가게 휴업일", example = "일요일", required = true)
+	@Schema(description = "가게 휴업일", example = "일요일")
 	private String holiday;
 	@NotBlank(message = "사업자등록증번호는 필수로 입력해주세요.")
 	@Length(min=10,max = 12)

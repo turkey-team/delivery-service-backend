@@ -162,6 +162,7 @@ public class StoreService {
 		Store store = storeRepository.findById(storeId).orElseThrow(()->new ResponseStatusException(HttpStatus.BAD_REQUEST,"해당 가게가 존재하지 않습니다"));
 		StoreDetails details = storeDetailsRepository.findByStoreId(storeId).orElseThrow(()->new ResponseStatusException(HttpStatus.BAD_REQUEST,"해당 가게가 존재하지 않습니다"));
 
+		checkStoreIsActive(store, details);
 
 		StoreImage storeImage = storeImageRepository.findFirstByStoreIdAndStatusAndDeletedAtIsNullOrderByCreatedAtAsc(storeId, StoreImageStatusEnum.STORE).orElse(null);
 		String imgUrl;
@@ -189,6 +190,7 @@ public class StoreService {
 		return resGetStoreDto;
 	}
 
+
 	@Transactional
 	public ResUpdateStoreInfoDto updateStoreInfo(UUID storeId, ReqUpdateStoreInfoDto requestDto, User user) {
 
@@ -198,6 +200,8 @@ public class StoreService {
 		// Store 검증
 		Store store = storeRepository.findById(storeId).orElseThrow(()-> new ResponseStatusException(HttpStatus.BAD_REQUEST,"존재하지 않는 가게입니다."));
 		StoreDetails storeDetails = storeDetailsRepository.findByStoreId(storeId).orElseThrow(()-> new ResponseStatusException(HttpStatus.BAD_REQUEST,"존재하지 않는 가게입니다."));
+
+		checkStoreIsActive(store, storeDetails);
 
 		// 소유주 검증
 		if (user.getRole().equals(UserRoleEnum.OWNER)){
@@ -360,7 +364,7 @@ public class StoreService {
 			.storeName(store.getName())
 			.addressDetails(store.getAddressDetails())
 			.phoneNumber(store.getPhoneNumber())
-			.regionDong(store.getRegionDong().getCode()) //dong 연결되면 해제
+			.regionDong(store.getRegionDong().getCode())
 			.build();
 
 		return resUpdateStoreInfoDto;
@@ -379,6 +383,8 @@ public class StoreService {
 		if (user.getRole().equals(UserRoleEnum.OWNER)){
 			checkUserIsStoreOwner(user,store);
 		}
+
+		checkStoreIsActive(store, storeDetails);
 
 		// 검증 완료
 
@@ -447,6 +453,9 @@ public class StoreService {
 
 		// Store 검증
 		Store store = storeRepository.findById(storeId).orElseThrow(()-> new ResponseStatusException(HttpStatus.BAD_REQUEST,"존재하지 않는 가게입니다."));
+		if (store.getDeletedAt() != null){
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"이미 삭제된 가게입니다");
+		}
 
 		// 소유주 검증
 		if (user.getRole().equals(UserRoleEnum.OWNER)){
@@ -482,6 +491,8 @@ public class StoreService {
 
 		Store store = storeRepository.findById(storeId).orElseThrow(()-> new ResponseStatusException(HttpStatus.BAD_REQUEST,"존재하지 않는 가게입니다."));
 		StoreDetails storeDetails = storeDetailsRepository.findByStoreId(storeId).orElseThrow(()-> new ResponseStatusException(HttpStatus.BAD_REQUEST,"존재하지 않는 가게입니다."));
+
+		checkStoreIsActive(store,storeDetails);
 
 		// 소유주 검증
 		if (user.getRole().equals(UserRoleEnum.OWNER)){
@@ -568,6 +579,12 @@ public class StoreService {
 		storeCategoryRepository.saveAll(storeCategories);
 	}
 
+
+	private void checkStoreIsActive(Store store, StoreDetails details) {
+		if (store.getDeletedAt() != null || details.getDeletedAt() != null){
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "이미 삭제된 가게입니다.");
+		}
+	}
 
 	public void checkUserIsActive(User user) {
 
