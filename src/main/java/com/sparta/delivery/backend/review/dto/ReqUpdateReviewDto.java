@@ -1,6 +1,9 @@
 package com.sparta.delivery.backend.review.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,6 +20,9 @@ public class ReqUpdateReviewDto {
 	private String context;
 
 	@Schema(description = "리뷰 평점 (1~5)", example = "3")
+	@NotNull(message = "리뷰 평점은 필수입니다.")
+	@Min(value = 1, message = "리뷰 평점은 최소 1점입니다.")
+	@Max(value = 5, message = "리뷰 평점은 최대 5점입니다.")
 	private int rate;
 
 	@Schema(description = "리뷰 이미지 URL", example = "https://example.com/image.jpg")
