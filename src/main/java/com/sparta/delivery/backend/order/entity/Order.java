@@ -112,4 +112,8 @@ public class Order extends BaseEntity {
 			this.cancelledReason = reqUpdateOrderStatusDto.getCancelledReason();
 		}
 	}
+
+	public void delete(Long deletedByUserId) {
+		this.softDelete(deletedByUserId);
+	}
 }

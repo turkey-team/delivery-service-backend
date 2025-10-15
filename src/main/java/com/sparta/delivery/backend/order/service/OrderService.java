@@ -1,5 +1,7 @@
 package com.sparta.delivery.backend.order.service;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -158,6 +160,24 @@ public class OrderService {
 	public void updateOrderStatus(User user, UUID orderId, ReqUpdateOrderStatusDto reqUpdateOrderStatusDto) {
 		// 단건 주문 조회
 		Order order = findOrderOrThrow(orderId);
+
+		// 고객 취소 허용: 주문 생성 후 5분 이내 && 요청 상태가 주문 중(취소 가능)
+		boolean isCustomer = user.getRole() == UserRoleEnum.CUSTOMER;
+		boolean isCancelRequest = reqUpdateOrderStatusDto.getOrderStatus() == OrderStatus.CANCELLED;
+
+		if (isCustomer && isCancelRequest) {
+			if (order.getOrderStatus() != OrderStatus.ORDERED) {
+				throw new IllegalStateException("주문중 상태에만 주문을 취소할 수 있습니다.");
+			}
+			long minutesSinceOrder = ChronoUnit.MINUTES.between(order.getCreatedAt(), Instant.now());
+			if (minutesSinceOrder <= 5) {
+				order.updateOrderStatus(user, reqUpdateOrderStatusDto);
+				orderRepository.save(order);
+				return;
+			} else {
+				throw new IllegalStateException("주문 5분 이내에만 주문을 취소할 수 있습니다.");
+			}
+		}
 
 		// 권한 확인: 이 주문의 가게 주인인지 확인
 		if (!order.getStore().getOwner().getUser().getId().equals(user.getId())) {

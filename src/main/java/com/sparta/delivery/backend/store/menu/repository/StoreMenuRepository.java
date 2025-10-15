@@ -25,5 +25,7 @@ public interface StoreMenuRepository extends JpaRepository<StoreMenu, UUID>, Sto
 	// Owner: 삭제한 StoreMenu 들은 조회할 필요 없음
 	Page<StoreMenu> findAllByStoreIdAndDeletedAtIsNull(UUID storeId, Pageable pageable);
 
+	Page<StoreMenu> findAllByStoreIdAndDeletedAtIsNullAndHiddenAtIsNull(UUID storeId, Pageable pageable);
+
 	Optional<StoreMenu> findByStoreIdAndName(UUID storeId, String name);
 }

@@ -110,8 +110,8 @@ public class StoreMenu extends BaseEntity {
 	}
 
 	// sortOrder 가 음수로 변경 → 조회 시 제외됨
-	public void softDelete(UUID deletedByUserId, int minSortOrder) {
-		super.softDelete(null);
+	public void softDelete(Long deletedByUserId, int minSortOrder) {
+		this.softDelete(deletedByUserId);
 		this.sortOrder = minSortOrder - 1;
 	}
 }

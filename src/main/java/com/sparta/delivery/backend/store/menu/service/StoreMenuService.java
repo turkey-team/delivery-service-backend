@@ -42,8 +42,6 @@ public class StoreMenuService {
 		UUID storeId,
 		ReqCreateStoreMenuDto reqCreateStoreMenuDto
 	) {
-
-
 		Store store = validatePermission(user, storeId);
 		validateDuplicateMenuName(storeId, reqCreateStoreMenuDto.getName());
 
@@ -81,17 +79,36 @@ public class StoreMenuService {
 	// 전체 메뉴 조회 (페이징)
 	@Transactional(readOnly = true)
 	public Page<ResGetListStoreMenuDto> getStoreMenusByStoreId(
+		User user,
 		UUID storeId,
 		int page,
 		int size
 	) {
-		storeRepository.findById(storeId)
+		Store store = storeRepository.findById(storeId)
 			.orElseThrow(() -> new IllegalArgumentException("Store not found"));
 
 		Pageable pageable = PageRequest.of(page, size, Sort.by("sortOrder").ascending());
 
-		Page<StoreMenu> storeMenuList =
-			storeMenuRepository.findAllByStoreIdAndDeletedAtIsNull(storeId, pageable);
+		Page<StoreMenu> storeMenuList;
+
+		// Customer || Owner 이지만 본인의 가게가 아닌 경우
+		if (user.getRole() == UserRoleEnum.CUSTOMER || !store.getOwner().getUser().getPublicId().equals(user.getPublicId())) {
+			// 숨김되지 않은 메뉴만 조회
+			storeMenuList = storeMenuRepository.findAllByStoreIdAndDeletedAtIsNullAndHiddenAtIsNull(storeId, pageable);
+		} else {
+			// 가게의 Owner, Manager, Master는 숨김된 메뉴 포함 조회
+			storeMenuList = storeMenuRepository.findAllByStoreIdAndDeletedAtIsNull(storeId, pageable);
+		}
+
+		/* 현재는 Manager, Master 도 삭제된 값들을 보지 못하도록 설계하기로 결정
+		// UserRole이 Manager, Master이면 softDelete 된 목록들도 조회할 수 있게 처리
+
+		if (user.getRole() == UserRoleEnum.MANAGER) {
+			storeMenuList = storeMenuRepository.findAllByStoreId(storeId, pageable);
+		} else if (user.getRole() == UserRoleEnum.MASTER) {
+			storeMenuList = storeMenuRepository.findAllByStoreId(storeId, pageable);
+		}
+		*/
 
 		// 메뉴가 하나도 없어도 빈 페이지는 반환
 		if (storeMenuList == null || storeMenuList.isEmpty()) {
@@ -195,7 +212,7 @@ public class StoreMenuService {
 		Integer minSortOrder = storeMenuRepository.findMinSortOrderByStore(storeId);
 		if (minSortOrder == null) minSortOrder = 0;
 
-		storeMenu.softDelete(user.getPublicId(), minSortOrder);
+		storeMenu.softDelete(user.getId(), minSortOrder);
 		// 남은 메뉴들 순서 재정렬
 		reorderSortOrder(storeId);
 	}

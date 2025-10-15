@@ -52,20 +52,20 @@ class StoreMenuRepositoryTest {
 			.user(user)
 			.nickname("테스트 사장님")
 			.email("owner@test.com")
-			.phoneNumber("010-1234-5678")
+			.phoneNumber("01012345678")
 			.build();
 		em.persist(owner);
 
 		store = Store.builder()
 			.owner(owner)
 			.name("테스트 가게")
-			.addressDetails("서울시 마포구")
+			.addressDetails("서울시 마포구의 문앞에 있어요")
 			.reviewRate(4.5)
 			.minOrderPrice(10000)
 			.deliveryFee(2000)
 			.regionDong(null)
 			.status(StoreStatusEnum.OPEN)
-			.phoneNumber("02-1234-5678")
+			.phoneNumber("0212345678")
 			.build();
 		em.persist(store);
 
@@ -180,13 +180,13 @@ class StoreMenuRepositoryTest {
 			Store emptyStore = Store.builder()
 				.owner(owner)
 				.name("빈가게")
-				.addressDetails("서울시 중구")
+				.addressDetails("서울시 중구 쯔음에 있어요")
 				.reviewRate(0)
 				.minOrderPrice(0)
 				.deliveryFee(0)
 				.regionDong(null)
 				.status(StoreStatusEnum.OPEN)
-				.phoneNumber("000-0000")
+				.phoneNumber("01012345678")
 				.build();
 			em.persist(emptyStore);
 
