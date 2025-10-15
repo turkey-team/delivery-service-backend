@@ -22,4 +22,12 @@ public class ReviewRepositorySearchConditionDto {
 	private Instant startDate;
 	private Instant endDate;
 
+	public boolean isNull() {
+		return minRate == null
+			&& maxRate == null
+			&& (context == null || context.isEmpty())
+			&& startDate == null
+			&& endDate == null;
+	}
+
 }

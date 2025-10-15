@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -57,7 +58,9 @@ public class ReviewController {
 	public List<ResViewReviewDto> getReviews(
 		@Parameter(description = "리뷰를 조회할 매장의 UUID") @PathVariable UUID storeId,
 		@ParameterObject @ModelAttribute ReviewRepositorySearchConditionDto condition,
-		@Parameter(description = "페이지네이션 정보") @ParameterObject Pageable pageable) {
+		@Parameter(description = "페이지네이션 정보") @ParameterObject
+		@PageableDefault(page = 0, size = 10)
+		Pageable pageable) {
 		return reviewService.getReviews(storeId, condition, pageable);
 	}
 

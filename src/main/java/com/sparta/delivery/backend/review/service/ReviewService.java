@@ -72,7 +72,7 @@ public class ReviewService {
 		key = "'review:store:' + #storeId + ':page:' + #pageable.pageNumber + ':gen:' + "
 			+ "@util.getGeneration(#storeId)",
 		cacheManager = "reviewCacheManager",
-		condition = "#pageable.pageNumber == 0")
+		condition = "#pageable.pageNumber == 0 && (#condition == null || #condition.isNull())")
 	@Transactional(readOnly = true)
 	public List<ResViewReviewDto> getReviews(UUID storeId, ReviewRepositorySearchConditionDto condition,
 		Pageable pageable) {
