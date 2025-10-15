@@ -5,6 +5,7 @@ import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -76,7 +77,7 @@ public class OwnerController {
         @ApiResponse(responseCode = "403", description = "권한 없음", content = @Content(schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "404", description = "점주 정보를 찾을 수 없음", content = @Content(schema = @Schema(hidden = true)))
     })
-    @Secured(UserRoleEnum.Authority.MANAGER)
+	@PreAuthorize("hasAnyRole('MANAGER', 'MASTER')")
     @GetMapping("/{ownerUserPublicId}")
     public ResponseEntity<ResGetOwnerDto> getOwnerByUserPublicId(@PathVariable UUID ownerUserPublicId) {
         ResGetOwnerDto response = ownerService.getOwnerByUserPublicId(ownerUserPublicId);
@@ -157,7 +158,7 @@ public class OwnerController {
         @ApiResponse(responseCode = "403", description = "권한 없음", content = @Content(schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "404", description = "점주를 찾을 수 없음", content = @Content(schema = @Schema(hidden = true)))
     })
-    @Secured(UserRoleEnum.Authority.MANAGER)
+	@PreAuthorize("hasAnyRole('MANAGER', 'MASTER')")
     @DeleteMapping("/{ownerUserPublicId}")
     public ResponseEntity<Void> deleteOwnerByManager(
         @AuthenticationPrincipal UserDetailsImpl userDetails,

@@ -3,14 +3,15 @@ package com.sparta.delivery.backend.order.dto;
 import java.util.List;
 import java.util.UUID;
 
-import com.sparta.delivery.backend.order.entity.OrderMenu;
 import com.sparta.delivery.backend.payment.entity.PayMethod;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
+@Setter
 @NoArgsConstructor
 public class ReqCreateOrderDto {
 

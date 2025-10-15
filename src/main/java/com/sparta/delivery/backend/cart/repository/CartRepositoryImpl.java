@@ -27,7 +27,7 @@ public class CartRepositoryImpl implements CartRepositoryCustom{
 	}
 
 	@Override
-	public ResGetCartDto findCartGroupByMenu(UUID cusomerId) {
+	public ResGetCartDto findCartGroupByMenu(UUID customerId) {
 		QStore store = QStore.store;
 		QStoreMenu menu = QStoreMenu.storeMenu;
 		QCart cart = QCart.cart;
@@ -47,10 +47,10 @@ public class CartRepositoryImpl implements CartRepositoryCustom{
 			.from(cart)
 			.join(cart.menu, menu)
 			.leftJoin(menu.image, image)
-			.where(cart.customer.id.eq(cusomerId)
+			.where(cart.customer.id.eq(customerId)
 				.and(cart.deletedAt.isNull())
 			)
-			.groupBy(menu.id, menu.name, menu.price)
+			.groupBy(menu.id, menu.name, menu.price, image.imageUrl)
 			.fetch();
 
 		if (cartDtos.isEmpty()) {
@@ -66,7 +66,7 @@ public class CartRepositoryImpl implements CartRepositoryCustom{
 		)).from(cart)
 			.join(cart.menu,menu)
 			.join(menu.store,store)
-			.where(cart.customer.id.eq(cusomerId).and(cart.deletedAt.isNull()))
+			.where(cart.customer.id.eq(customerId).and(cart.deletedAt.isNull()))
 			.limit(1)
 			.fetchOne();
 

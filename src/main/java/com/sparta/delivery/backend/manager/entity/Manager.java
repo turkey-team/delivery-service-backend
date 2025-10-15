@@ -20,13 +20,13 @@ public class Manager extends BaseEntity {
     @JoinColumn(name = "p_user_id", nullable = false)
     private User user;
 
-    @Column(name = "name", length = 50, nullable = false, unique = true)
+    @Column(name = "name", length = 50, nullable = false)
     private String name;
 
     @Column(name = "phone_number", length = 20)
     private String phoneNumber;
 
-    @Column(name = "email", length = 320, unique = true)
+    @Column(name = "email", length = 320)
     private String email;
 
     @Builder

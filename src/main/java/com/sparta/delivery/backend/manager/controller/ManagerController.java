@@ -13,8 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.sparta.delivery.backend.manager.dto.ReqCreateManagerDto;
 import com.sparta.delivery.backend.manager.service.ManagerService;
-import com.sparta.delivery.backend.security.UserDetailsImpl;
-import com.sparta.delivery.backend.user.entity.UserRoleEnum;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +25,7 @@ public class ManagerController {
 
 	@PostMapping
 	//TODO: 추후 개발이 거의 완료 된다면 해당 API @Secured 필요
-	//@Secured(UserRoleEnum.Authority.MANAGER)
+	// @PreAuthorize("hasAnyRole('MANAGER', 'MASTER')")
 	public ResponseEntity<Void> createManager(@Valid @RequestBody ReqCreateManagerDto requestDto) {
 		managerService.createManager(requestDto);
 		return ResponseEntity.status(HttpStatus.CREATED).build();

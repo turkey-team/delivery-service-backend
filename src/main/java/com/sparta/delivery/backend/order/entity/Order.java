@@ -1,6 +1,7 @@
 package com.sparta.delivery.backend.order.entity;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.sparta.delivery.backend.common.BaseEntity;
@@ -21,10 +22,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-
 import lombok.AccessLevel;
 import lombok.Builder;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -79,7 +78,7 @@ public class Order extends BaseEntity {
 	private String cancelledReason;
 
 	@OneToMany(mappedBy = "order")
-	private List<OrderMenu> orderMenus;
+	private List<OrderMenu> orderMenus = new ArrayList<>();
 
 	@Builder
 	private Order(Store store, Customer customer, Dong dongEntity, String gu, String dong,
@@ -112,5 +111,9 @@ public class Order extends BaseEntity {
 			this.cancelledBy = user.getId();
 			this.cancelledReason = reqUpdateOrderStatusDto.getCancelledReason();
 		}
+	}
+
+	public void delete(Long deletedByUserId) {
+		this.softDelete(deletedByUserId);
 	}
 }

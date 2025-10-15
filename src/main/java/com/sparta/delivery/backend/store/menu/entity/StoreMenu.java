@@ -49,7 +49,7 @@ public class StoreMenu extends BaseEntity {
 	@Column(nullable = false, length = 100, unique = true) // 메뉴 이름은 중복 불가
 	private String name;
 
-	@Column(nullable = false)
+	@Column(length = 50)
 	private int price;
 
 	@Column(length = 500)
@@ -110,7 +110,8 @@ public class StoreMenu extends BaseEntity {
 	}
 
 	// sortOrder 가 음수로 변경 → 조회 시 제외됨
-	public void softDelete(UUID deletedByUserId) {
-		this.sortOrder = -Math.abs(this.sortOrder);
+	public void softDelete(Long deletedByUserId, int minSortOrder) {
+		this.softDelete(deletedByUserId);
+		this.sortOrder = minSortOrder - 1;
 	}
 }

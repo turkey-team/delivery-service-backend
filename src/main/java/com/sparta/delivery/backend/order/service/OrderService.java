@@ -1,5 +1,7 @@
 package com.sparta.delivery.backend.order.service;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -56,6 +58,20 @@ public class OrderService {
 		// 주문할 가게는 모두 동일
 		Store store = getStoreFromCart(user);
 
+		// Cart 를 담은 본인만 주문 가능
+		List<Cart> carts = cartRepository.findAllByCustomerIdAndDeletedAtIsNull(
+			customerRepository.findByUserId(user.getId())
+				.orElseThrow(() -> new IllegalArgumentException("고객 정보가 존재하지 않습니다."))
+				.getId()
+		);
+
+		boolean notOwnerOfCart = carts.stream()
+			.anyMatch(c -> !c.getCustomer().getUser().getId().equals(user.getId()));
+
+		if (notOwnerOfCart) {
+			throw new SecurityException("본인 장바구니가 아닙니다.");
+		}
+
 		// Address 엔티티에서 Dong 객체 가져오기
 		Address defaultAddressEntity = addressRepository.findByUserIdAndIsDefaultTrueAndDeletedAtIsNull(user.getId())
 			.orElseThrow(() -> new IllegalStateException("기본 주소 정보가 없습니다."));
@@ -78,7 +94,7 @@ public class OrderService {
 		orderRepository.save(order);
 
 		// Cart → OrderMenu 변환 후, Cart 비우기
-		List<Cart> carts = cartRepository.findAllByCustomerIdAndDeletedAtIsNull(customer.getId());
+		carts = cartRepository.findAllByCustomerIdAndDeletedAtIsNull(customer.getId());
 		carts.forEach(cart -> {
 			orderMenuRepository.save(OrderMenu.builder()
 				.order(order)
@@ -145,6 +161,24 @@ public class OrderService {
 		// 단건 주문 조회
 		Order order = findOrderOrThrow(orderId);
 
+		// 고객 취소 허용: 주문 생성 후 5분 이내 && 요청 상태가 주문 중(취소 가능)
+		boolean isCustomer = user.getRole() == UserRoleEnum.CUSTOMER;
+		boolean isCancelRequest = reqUpdateOrderStatusDto.getOrderStatus() == OrderStatus.CANCELLED;
+
+		if (isCustomer && isCancelRequest) {
+			if (order.getOrderStatus() != OrderStatus.ORDERED) {
+				throw new IllegalStateException("주문중 상태에만 주문을 취소할 수 있습니다.");
+			}
+			long minutesSinceOrder = ChronoUnit.MINUTES.between(order.getCreatedAt(), Instant.now());
+			if (minutesSinceOrder <= 5) {
+				order.updateOrderStatus(user, reqUpdateOrderStatusDto);
+				orderRepository.save(order);
+				return;
+			} else {
+				throw new IllegalStateException("주문 5분 이내에만 주문을 취소할 수 있습니다.");
+			}
+		}
+
 		// 권한 확인: 이 주문의 가게 주인인지 확인
 		if (!order.getStore().getOwner().getUser().getId().equals(user.getId())) {
 			throw new IllegalStateException("Owner만 주문 상태를 변경할 수 있습니다.");
@@ -181,8 +215,9 @@ public class OrderService {
 	private void validateRoleAccess(User user, Order order) {
 		boolean isOwner = order.getStore().getOwner().getUser().getId().equals(user.getId());
 		boolean isManager = user.getRole() == UserRoleEnum.MANAGER;
+		boolean isMaster = user.getRole() == UserRoleEnum.MASTER;
 
-		if (!(isOwner || isManager)) {
+		if (!(isOwner || isManager || isMaster)) {
 			throw new IllegalStateException("접근 권한이 없습니다.");
 		}
 	}

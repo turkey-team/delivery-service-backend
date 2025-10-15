@@ -1,18 +1,16 @@
 package com.sparta.delivery.backend.store.menu.repository;
 
-import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import org.springframework.stereotype.Repository;
-
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.sparta.delivery.backend.store.menu.entity.QStoreMenu;
 import com.sparta.delivery.backend.store.menu.entity.StoreMenu;
-
 import jakarta.persistence.EntityManager;
+import org.springframework.stereotype.Repository;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public class StoreMenuRepositoryCustomImpl implements StoreMenuRepositoryCustom {
@@ -31,7 +29,7 @@ public class StoreMenuRepositoryCustomImpl implements StoreMenuRepositoryCustom 
 	}
 
 	@Override
-	public Optional<StoreMenu> findByStoreIdAndDeletedAtIsNull(UUID storeId, UUID menuId, Instant deletedAt) {
+	public Optional<StoreMenu> findByStoreIdAndIdAndDeletedAtIsNull(UUID storeId, UUID menuId, Instant deletedAt) {
 		QStoreMenu sm = QStoreMenu.storeMenu;
 
 		StoreMenu result = queryFactory
@@ -70,6 +68,20 @@ public class StoreMenuRepositoryCustomImpl implements StoreMenuRepositoryCustom 
 			.select(sm.sortOrder.max())
 			.from(sm)
 			.where(sm.store.id.eq(storeId), sm.deletedAt.isNull())
+			.fetchOne();
+	}
+
+	@Override
+	public Integer findMinSortOrderByStore(UUID storeId) {
+		QStoreMenu sm = QStoreMenu.storeMenu;
+
+		return queryFactory
+			.select(sm.sortOrder.min())
+			.from(sm)
+			.where(
+				sm.store.id.eq(storeId),
+				sm.sortOrder.lt(0) // -1부터 시작
+			)
 			.fetchOne();
 	}
 }

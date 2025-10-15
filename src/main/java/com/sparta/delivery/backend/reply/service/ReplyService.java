@@ -115,7 +115,7 @@ public class ReplyService {
 			throw new UnauthorizedException("리뷰 답글을 조회할 권한이 없습니다.");
 		}
 
-		return replyRepository.findByReviewId(reviewId)
+		return replyRepository.findAllByReviewIdAndDeletedAtIsNull(reviewId)
 			.stream()
 			.map(ResViewReplyDto::of)
 			.collect(Collectors.toList());

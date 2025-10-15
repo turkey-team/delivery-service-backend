@@ -48,7 +48,7 @@ public class ReplyController {
 		@ApiResponse(responseCode = "403", description = "권한 없음"),
 		@ApiResponse(responseCode = "404", description = "리뷰를 찾을 수 없음")
 	})
-	@PreAuthorize("hasAnyRole('OWNER', 'MANAGER')")
+	@PreAuthorize("hasAnyRole('OWNER', 'MANAGER', 'MASTER')")
 	@GetMapping("/review/{reviewId}")
 	public List<ResViewReplyDto> getReplies(
 		@Parameter(description = "조회할 리뷰 ID", required = true) @PathVariable UUID reviewId,
@@ -66,7 +66,7 @@ public class ReplyController {
 		@ApiResponse(responseCode = "403", description = "권한 없음"),
 		@ApiResponse(responseCode = "404", description = "리뷰를 찾을 수 없음")
 	})
-	@PreAuthorize("hasAnyRole('OWNER', 'MANAGER')")
+	@PreAuthorize("hasAnyRole('OWNER', 'MANAGER', 'MASTER')")
 	@PostMapping("/review/{reviewId}")
 	public ResViewReplyDto writeReply(
 		@Parameter(description = "작성할 답글 DTO", required = true)
@@ -88,7 +88,7 @@ public class ReplyController {
 		@ApiResponse(responseCode = "403", description = "권한 없음"),
 		@ApiResponse(responseCode = "404", description = "답글을 찾을 수 없음")
 	})
-	@PreAuthorize("hasAnyRole('OWNER', 'MANAGER')")
+	@PreAuthorize("hasAnyRole('OWNER', 'MANAGER', 'MASTER')")
 	@PutMapping("/{replyId}")
 	public ResViewReplyDto updateReply(
 		@Parameter(description = "수정할 답글 DTO", required = true)
@@ -109,7 +109,7 @@ public class ReplyController {
 		@ApiResponse(responseCode = "403", description = "권한 없음"),
 		@ApiResponse(responseCode = "404", description = "답글을 찾을 수 없음")
 	})
-	@PreAuthorize("hasAnyRole('OWNER', 'MANAGER')")
+	@PreAuthorize("hasAnyRole('OWNER', 'MANAGER', 'MASTER')")
 	@DeleteMapping("/{replyId}")
 	public ResDeleteReplyDto deleteReply(
 		@Parameter(description = "삭제할 답글 ID", required = true)

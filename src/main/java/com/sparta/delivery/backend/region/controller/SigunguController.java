@@ -76,7 +76,7 @@ public class SigunguController {
 			}))
 	})
 	@PostMapping("/sidos/{sidoId}/sigungus")
-	@PreAuthorize("isAuthenticated() && hasRole('MANAGER')")
+	@PreAuthorize("isAuthenticated() && hasAnyRole('MANAGER', 'MASTER')")
 	public ResponseEntity<List<ResCreateSigunguDto>> createSigungus(
 		@Parameter(description = "시·도 ID", example = "fba4b623-1f39-425c-98ff-fe739bfbd010") @PathVariable UUID sidoId,
 		@RequestBody List<@Valid ReqCreateSigunguDto> requestDtoList
@@ -102,7 +102,7 @@ public class SigunguController {
 			}))
 	})
 	@GetMapping("/sidos/{sidoId}/sigungus")
-	@PreAuthorize("isAuthenticated() && hasAnyRole('MANAGER', 'OWNER', 'CUSTOMER')")
+	@PreAuthorize("isAuthenticated() && hasAnyRole('MASTER', 'MANAGER', 'OWNER', 'CUSTOMER')")
 	public ResponseEntity<List<ResReadSigunguDto>> getAllSigungu(
 		@Parameter(description = "시·도 ID", example = "fba4b623-1f39-425c-98ff-fe739bfbd010") @PathVariable UUID sidoId
 	) {
@@ -139,7 +139,7 @@ public class SigunguController {
 			}))
 	})
 	@PutMapping("/sidos/{sidoId}/sigungus/{sigunguId}")
-	@PreAuthorize("isAuthenticated() && hasRole('MANAGER')")
+	@PreAuthorize("isAuthenticated() && hasAnyRole('MANAGER', 'MASTER')")
 	public ResponseEntity<ResUpdateSigunguDto> updateSigungu(
 		@Parameter(description = "시·도 ID", example = "fba4b623-1f39-425c-98ff-fe739bfbd010") @PathVariable UUID sidoId,
 		@Parameter(description = "시·군·구 ID", example = "cc1093ef-66c9-419d-a013-9718ae639a6b") @PathVariable UUID sigunguId,
@@ -165,7 +165,7 @@ public class SigunguController {
 			}))
 	})
 	@DeleteMapping("/sidos/{sidoId}/sigungus/{sigunguId}")
-	@PreAuthorize("isAuthenticated() && hasRole('MANAGER')")
+	@PreAuthorize("isAuthenticated() && hasAnyRole('MANAGER', 'MASTER')")
 	public ResponseEntity<Void> deleteSigungu(
 		@Parameter(description = "시·도 ID", example = "fba4b623-1f39-425c-98ff-fe739bfbd010") @PathVariable UUID sidoId,
 		@Parameter(description = "시·군·구 ID", example = "cc1093ef-66c9-419d-a013-9718ae639a6b") @PathVariable UUID sigunguId,

@@ -28,6 +28,7 @@ import com.sparta.delivery.backend.review.dto.ResViewReviewDto;
 import com.sparta.delivery.backend.review.entity.Review;
 import com.sparta.delivery.backend.review.repository.ReviewRepository;
 import com.sparta.delivery.backend.review.repository.ReviewRepositorySearchConditionDto;
+import com.sparta.delivery.backend.review.util.ReviewGenerationUtil;
 import com.sparta.delivery.backend.store.entity.Store;
 import com.sparta.delivery.backend.store.repository.StoreRepository;
 
@@ -48,6 +49,8 @@ public class ReviewService {
 	private final CacheManager cacheManager;
 	private final ReplyService replyService;
 
+	private final ReviewGenerationUtil util;
+
 	@PersistenceContext
 	private EntityManager em;
 
@@ -66,7 +69,8 @@ public class ReviewService {
 	// reviews list 조회
 	@Cacheable(
 		value = "reviewList",
-		key = "'review:store:' + #storeId + ':page:' + #pageable.pageNumber",
+		key = "'review:store:' + #storeId + ':page:' + #pageable.pageNumber + ':gen:' + "
+			+ "@util.getGeneration(#storeId)",
 		cacheManager = "reviewCacheManager",
 		condition = "#pageable.pageNumber == 0")
 	@Transactional(readOnly = true)

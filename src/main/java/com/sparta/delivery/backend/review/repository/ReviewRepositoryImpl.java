@@ -146,25 +146,12 @@ public class ReviewRepositoryImpl implements ReviewRepoistoryCustom {
 
 	private BooleanExpression createdBetween(Instant startDate, Instant endDate) {
 		QReview review = QReview.review;
-		if (startDate == null && endDate == null) {
+		if (startDate == null && endDate == null)
 			return null;
-		}
-
-		// 시작일만 null → endDate 이전(이하) 조건
-		if (startDate == null) {
-			// 하루의 끝을 23:59:59로 맞춰주려면 endDate에 하루 -1초를 더함
-			Instant endOfDay = endDate.plusSeconds(86399); // 24h - 1s
-			return review.createdAt.loe(endOfDay);
-		}
-
-		// 종료일만 null → startDate 이후(이상) 조건
-		if (endDate == null) {
+		if (startDate == null)
+			return review.createdAt.loe(endDate);
+		if (endDate == null)
 			return review.createdAt.goe(startDate);
-		}
-
-		// 둘 다 존재할 경우: start 이상 AND end 이하
-		Instant endOfDay = endDate.plusSeconds(86399);
-		return review.createdAt.between(startDate, endOfDay);
+		return review.createdAt.between(startDate, endDate);
 	}
-
 }
