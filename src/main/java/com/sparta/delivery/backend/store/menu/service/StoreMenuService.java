@@ -10,7 +10,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.sparta.delivery.backend.common.LoginUserAuditorAware;
 import com.sparta.delivery.backend.image.entity.Image;
 import com.sparta.delivery.backend.image.repository.ImageRepository;
 import com.sparta.delivery.backend.store.entity.Store;
@@ -23,6 +22,8 @@ import com.sparta.delivery.backend.store.menu.dto.ResGetStoreMenuDto;
 import com.sparta.delivery.backend.store.menu.entity.StoreMenu;
 import com.sparta.delivery.backend.store.menu.repository.StoreMenuRepository;
 import com.sparta.delivery.backend.store.repository.StoreRepository;
+import com.sparta.delivery.backend.user.entity.User;
+import com.sparta.delivery.backend.user.entity.UserRoleEnum;
 
 import lombok.RequiredArgsConstructor;
 
@@ -33,16 +34,18 @@ public class StoreMenuService {
 	private final StoreMenuRepository storeMenuRepository;
 	private final StoreRepository storeRepository;
 	private final ImageRepository imageRepository;
-	private final LoginUserAuditorAware loginUserAuditorAware;
 
 	/** 생성 **/
 	@Transactional
 	public void createStoreMenu(
+		User user,
 		UUID storeId,
 		ReqCreateStoreMenuDto reqCreateStoreMenuDto
 	) {
-		Store store = storeRepository.findById(storeId)
-			.orElseThrow(() -> new IllegalArgumentException("Store not found"));
+
+
+		Store store = validatePermission(user, storeId);
+		validateDuplicateMenuName(storeId, reqCreateStoreMenuDto.getName());
 
 		Image image = saveImage(reqCreateStoreMenuDto.getImageUrl());
 
@@ -68,7 +71,9 @@ public class StoreMenuService {
 		UUID storeId,
 		UUID menuId
 	) {
-		validateStore(storeId);
+		storeRepository.findById(storeId)
+			.orElseThrow(() -> new IllegalArgumentException("Store not found"));
+
 		StoreMenu storeMenu = findStoreMenu(storeId, menuId);
 		return new ResGetStoreMenuDto(storeMenu);
 	}
@@ -80,10 +85,18 @@ public class StoreMenuService {
 		int page,
 		int size
 	) {
+		storeRepository.findById(storeId)
+			.orElseThrow(() -> new IllegalArgumentException("Store not found"));
+
 		Pageable pageable = PageRequest.of(page, size, Sort.by("sortOrder").ascending());
 
 		Page<StoreMenu> storeMenuList =
 			storeMenuRepository.findAllByStoreIdAndDeletedAtIsNull(storeId, pageable);
+
+		// 메뉴가 하나도 없어도 빈 페이지는 반환
+		if (storeMenuList == null || storeMenuList.isEmpty()) {
+			return Page.empty(pageable);
+		}
 
 		return storeMenuList.map(ResGetListStoreMenuDto::new);
 	}
@@ -91,14 +104,16 @@ public class StoreMenuService {
 	/** 수정 **/
 	@Transactional
 	public void updateStoreMenu(
+		User user,
 		UUID storeId,
 		UUID menuId,
 		ReqUpdateStoreMenuDto reqUpdateStoreMenuDto
 	) {
-		validateStore(storeId);
+		validatePermission(user, storeId);
+		validateDuplicateMenuName(storeId, reqUpdateStoreMenuDto.getName());
+
 		StoreMenu storeMenu = findStoreMenu(storeId, menuId);
 
-		// 일단 이미지 테이블에서 일괄 관리한다고 가정했을때
 		Image image = saveImage(reqUpdateStoreMenuDto.getImageUrl());
 
 		storeMenu.updateStoreMenu(reqUpdateStoreMenuDto, image);
@@ -106,11 +121,12 @@ public class StoreMenuService {
 
 	@Transactional
 	public void updateSortOrder(
+		User user,
 		UUID storeId,
 		UUID menuId,
 		ReqUpdateSortOrderDto reqUpdateSortOrderDto
 	) {
-		validateStore(storeId);
+		validatePermission(user, storeId);
 
 		// 이동 대상 메뉴
 		StoreMenu targetMenu = findStoreMenu(storeId, menuId);
@@ -147,32 +163,42 @@ public class StoreMenuService {
 
 	@Transactional
 	public void updateVisibility(
+		User user,
 		UUID storeId,
 		UUID menuId,
 		ReqUpdateVisibilityDto reqUpdateVisibilityDto
 	) {
-		validateStore(storeId);
+		validatePermission(user, storeId);
 		StoreMenu storeMenu = findStoreMenu(storeId, menuId);
+
+		// 중복 상태 요청
+		boolean currentlyHidden = storeMenu.getHiddenAt() != null;
+		boolean wantHidden = reqUpdateVisibilityDto.isHidden();
+
+		if (currentlyHidden && wantHidden) {
+			throw new IllegalStateException("이미 숨김 상태입니다.");
+		}
+		if (!currentlyHidden && !wantHidden) {
+			throw new IllegalStateException("이미 표시 상태입니다.");
+		}
 
 		storeMenu.setHiddenAt(reqUpdateVisibilityDto.isHidden());
 	}
 
 	/** 삭제 **/
 	@Transactional
-	public void deleteStoreMenu(UUID storeId, UUID menuId) {
+	public void deleteStoreMenu(User user, UUID storeId, UUID menuId) {
+		validatePermission(user, storeId);
 		StoreMenu storeMenu = findStoreMenu(storeId, menuId);
 
-		// 현재 로그인 중인 username 가져오기
-		Long userId = loginUserAuditorAware.getCurrentAuditor()
-			.orElseThrow(() -> new RuntimeException("Current user not found"));
+		// sortOrder 중 가장 작은 수 - 1로 지정, 즉 삭제된 메뉴들이 음수 sortOrder 값의 내림차순으로 쌓이는 과정
+		Integer minSortOrder = storeMenuRepository.findMinSortOrderByStore(storeId);
+		if (minSortOrder == null) minSortOrder = 0;
 
-		storeMenu.softDelete(userId);
-
+		storeMenu.softDelete(user.getPublicId(), minSortOrder);
 		// 남은 메뉴들 순서 재정렬
 		reorderSortOrder(storeId);
 	}
-
-
 
 	/** 삭제 시 재정렬 **/
 	// 메뉴 삭제 시 모든 메뉴 순서 1부터 오름차순 재배치
@@ -181,20 +207,44 @@ public class StoreMenuService {
 
 		int order = 1;
 		for (StoreMenu menu : menus) {
+			if (menu.getSortOrder() >= 100) continue; // 임시 이동된 메뉴 제외하게끔
 			menu.setSortOrder(order++);
+		}
+
+		// 100 단위로 밀려있던 메뉴들 정렬 복원
+		for (StoreMenu menu : menus) {
+			if (menu.getSortOrder() >= 100) {
+				menu.setSortOrder(order++);
+			}
 		}
 	}
 
 	/** --------------------- Helper --------------------- **/
-	// 가게 검증
-	private void validateStore(UUID storeId) {
-		storeRepository.findById(storeId)
+	// 메뉴명 중복 검사
+	private void validateDuplicateMenuName(UUID storeId, String menuName) {
+		if (storeMenuRepository.findByStoreIdAndName(storeId, menuName).isPresent()) {
+			throw new IllegalArgumentException("Menu name already exists");
+		}
+	}
+
+	// 권한 검증
+	private Store validatePermission(User user, UUID storeId) {
+		// 가게 유효성 검증
+		Store store = storeRepository.findById(storeId)
 			.orElseThrow(() -> new IllegalArgumentException("Store not found"));
+
+		// Store의 Owner 인 경우
+		if (store.getOwner().getUser().getPublicId().equals(user.getPublicId())) return store;
+
+		// Manager or Master 권한 허용
+		if (user.getRole() == UserRoleEnum.MANAGER || user.getRole() == UserRoleEnum.MASTER) return store;
+
+		throw new SecurityException("You do not have permission");
 	}
 
 	// 가게 메뉴 검색 (삭제된 메뉴 제외)
 	private StoreMenu findStoreMenu(UUID storeId, UUID menuId) {
-		return storeMenuRepository.findByStoreIdAndDeletedAtIsNull(storeId, menuId, null)
+		return storeMenuRepository.findByStoreIdAndIdAndDeletedAtIsNull(storeId, menuId, null)
 			.orElseThrow(() -> new IllegalArgumentException("StoreMenu not found"));
 	}
 

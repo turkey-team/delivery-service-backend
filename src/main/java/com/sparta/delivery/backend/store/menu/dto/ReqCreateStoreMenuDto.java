@@ -1,7 +1,6 @@
 package com.sparta.delivery.backend.store.menu.dto;
 
 import com.sparta.delivery.backend.store.menu.enums.StockStatus;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

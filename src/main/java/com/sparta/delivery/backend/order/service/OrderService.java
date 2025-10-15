@@ -56,6 +56,20 @@ public class OrderService {
 		// 주문할 가게는 모두 동일
 		Store store = getStoreFromCart(user);
 
+		// Cart 를 담은 본인만 주문 가능
+		List<Cart> carts = cartRepository.findAllByCustomerIdAndDeletedAtIsNull(
+			customerRepository.findByUserId(user.getId())
+				.orElseThrow(() -> new IllegalArgumentException("고객 정보가 존재하지 않습니다."))
+				.getId()
+		);
+
+		boolean notOwnerOfCart = carts.stream()
+			.anyMatch(c -> !c.getCustomer().getUser().getId().equals(user.getId()));
+
+		if (notOwnerOfCart) {
+			throw new SecurityException("본인 장바구니가 아닙니다.");
+		}
+
 		// Address 엔티티에서 Dong 객체 가져오기
 		Address defaultAddressEntity = addressRepository.findByUserIdAndIsDefaultTrueAndDeletedAtIsNull(user.getId())
 			.orElseThrow(() -> new IllegalStateException("기본 주소 정보가 없습니다."));
@@ -78,7 +92,7 @@ public class OrderService {
 		orderRepository.save(order);
 
 		// Cart → OrderMenu 변환 후, Cart 비우기
-		List<Cart> carts = cartRepository.findAllByCustomerIdAndDeletedAtIsNull(customer.getId());
+		carts = cartRepository.findAllByCustomerIdAndDeletedAtIsNull(customer.getId());
 		carts.forEach(cart -> {
 			orderMenuRepository.save(OrderMenu.builder()
 				.order(order)
@@ -181,8 +195,9 @@ public class OrderService {
 	private void validateRoleAccess(User user, Order order) {
 		boolean isOwner = order.getStore().getOwner().getUser().getId().equals(user.getId());
 		boolean isManager = user.getRole() == UserRoleEnum.MANAGER;
+		boolean isMaster = user.getRole() == UserRoleEnum.MASTER;
 
-		if (!(isOwner || isManager)) {
+		if (!(isOwner || isManager || isMaster)) {
 			throw new IllegalStateException("접근 권한이 없습니다.");
 		}
 	}

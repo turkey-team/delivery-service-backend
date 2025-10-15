@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.sparta.delivery.backend.common.BaseEntity;
 import com.sparta.delivery.backend.store.entity.StoreImage;
+import com.sparta.delivery.backend.store.menu.entity.StoreMenu;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -31,6 +32,9 @@ public class Image extends BaseEntity {
 
 	@OneToMany(mappedBy = "image", fetch = FetchType.LAZY)
 	private List<StoreImage> storeImages = new ArrayList<>();
+
+	@OneToMany(mappedBy = "image", fetch = FetchType.LAZY)
+	private List<StoreMenu> storeMenus = new ArrayList<>();
 
 	@Builder
 	private Image(String imageUrl) {
