@@ -66,11 +66,11 @@ public class ReviewService {
 		return ResViewReviewDto.of(review);
 	}
 
-	// reviews list 조회
+	// reviews list 조회 + cache
 	@Cacheable(
 		value = "reviewList",
-		key = "'review:store:' + #storeId + ':page:' + #pageable.pageNumber + ':gen:' + "
-			+ "@util.getGeneration(#storeId)",
+		key = "'review:store:' + #storeId + ':page:' + #pageable.pageNumber + "
+			+ "':size:' + #pageable.pageSize + ':gen:' + @util.getGeneration(#storeId)",
 		cacheManager = "reviewCacheManager",
 		condition = "#pageable.pageNumber == 0 && (#condition == null || #condition.isNull())")
 	@Transactional(readOnly = true)

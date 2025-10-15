@@ -54,6 +54,7 @@ public class ReviewController {
 		@ApiResponse(responseCode = "401", description = "인증 실패"),
 		@ApiResponse(responseCode = "404", description = "리뷰 또는 매장 없음")
 	})
+	// default 추가
 	@GetMapping("/stores/{storeId}/reviews")
 	public List<ResViewReviewDto> getReviews(
 		@Parameter(description = "리뷰를 조회할 매장의 UUID") @PathVariable UUID storeId,
