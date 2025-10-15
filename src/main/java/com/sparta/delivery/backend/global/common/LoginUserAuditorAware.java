@@ -1,4 +1,4 @@
-package com.sparta.delivery.backend.common;
+package com.sparta.delivery.backend.global.common;
 
 import java.util.Optional;
 

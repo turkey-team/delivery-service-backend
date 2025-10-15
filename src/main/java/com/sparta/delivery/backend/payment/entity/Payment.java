@@ -2,7 +2,7 @@ package com.sparta.delivery.backend.payment.entity;
 
 import java.time.Instant;
 
-import com.sparta.delivery.backend.common.BaseEntity;
+import com.sparta.delivery.backend.global.common.BaseEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
