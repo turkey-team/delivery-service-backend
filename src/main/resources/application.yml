@@ -11,3 +11,7 @@ spring:
       - mail
       - s3
       - openai
+      - slack
+
+  config:
+    import: optional:file:.env[.properties]
