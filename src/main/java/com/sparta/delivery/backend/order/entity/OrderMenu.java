@@ -1,9 +1,8 @@
 package com.sparta.delivery.backend.order.entity;
 
-import com.sparta.delivery.backend.common.BaseEntity;
+import com.sparta.delivery.backend.global.common.BaseEntity;
 import com.sparta.delivery.backend.store.menu.entity.StoreMenu;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;

@@ -3,7 +3,7 @@ package com.sparta.delivery.backend.image.entity;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sparta.delivery.backend.common.BaseEntity;
+import com.sparta.delivery.backend.global.common.BaseEntity;
 import com.sparta.delivery.backend.store.entity.StoreImage;
 import com.sparta.delivery.backend.store.menu.entity.StoreMenu;
 
@@ -11,7 +11,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;

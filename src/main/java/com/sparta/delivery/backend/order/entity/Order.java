@@ -4,7 +4,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sparta.delivery.backend.common.BaseEntity;
+import com.sparta.delivery.backend.global.common.BaseEntity;
 import com.sparta.delivery.backend.customer.entity.Customer;
 import com.sparta.delivery.backend.order.dto.ReqUpdateOrderStatusDto;
 import com.sparta.delivery.backend.order.enums.OrderStatus;

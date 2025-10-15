@@ -1,4 +1,4 @@
-package com.sparta.delivery.backend.common.config;
+package com.sparta.delivery.backend.global.common.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

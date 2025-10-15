@@ -3,7 +3,7 @@ package com.sparta.delivery.backend.store.entity;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sparta.delivery.backend.common.BaseEntity;
+import com.sparta.delivery.backend.global.common.BaseEntity;
 import com.sparta.delivery.backend.image.entity.Image;
 import com.sparta.delivery.backend.owner.entity.Owner;
 import com.sparta.delivery.backend.region.entity.Dong;
@@ -17,7 +17,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;

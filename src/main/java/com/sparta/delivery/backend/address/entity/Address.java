@@ -1,6 +1,6 @@
 package com.sparta.delivery.backend.address.entity;
 
-import com.sparta.delivery.backend.common.BaseEntity;
+import com.sparta.delivery.backend.global.common.BaseEntity;
 import com.sparta.delivery.backend.region.entity.Dong;
 import com.sparta.delivery.backend.user.entity.User;
 

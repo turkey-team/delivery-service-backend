@@ -1,7 +1,6 @@
 package com.sparta.delivery.backend.store.entity;
 
-import com.sparta.delivery.backend.common.BaseEntity;
-import com.sparta.delivery.backend.store.dto.ReqUpdateStoreInfoDto;
+import com.sparta.delivery.backend.global.common.BaseEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

@@ -3,7 +3,7 @@ package com.sparta.delivery.backend.category.entity;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sparta.delivery.backend.common.BaseEntity;
+import com.sparta.delivery.backend.global.common.BaseEntity;
 import com.sparta.delivery.backend.store.entity.StoreCategory;
 
 import jakarta.persistence.Column;

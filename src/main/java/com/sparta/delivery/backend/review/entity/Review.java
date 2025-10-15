@@ -1,6 +1,6 @@
 package com.sparta.delivery.backend.review.entity;
 
-import com.sparta.delivery.backend.common.BaseEntity;
+import com.sparta.delivery.backend.global.common.BaseEntity;
 import com.sparta.delivery.backend.customer.entity.Customer;
 import com.sparta.delivery.backend.store.entity.Store;
 
