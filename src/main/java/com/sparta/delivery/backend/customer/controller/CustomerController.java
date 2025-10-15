@@ -5,6 +5,7 @@ import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -75,7 +76,7 @@ public class CustomerController {
 		@ApiResponse(responseCode = "403", description = "권한 없음", content = @Content(schema = @Schema(hidden = true))),
 		@ApiResponse(responseCode = "404", description = "고객 정보를 찾을 수 없음", content = @Content(schema = @Schema(hidden = true)))
 	})
-	@Secured(UserRoleEnum.Authority.MANAGER)
+	@PreAuthorize("hasAnyRole('MANAGER', 'MASTER')")
 	@GetMapping("/{customerUserPublicId}")
 	public ResponseEntity<ResGetCustomerDto> getCustomerByUserPublicId(@PathVariable UUID customerUserPublicId) {
 		ResGetCustomerDto response = customerService.getCustomerByUserPublicId(customerUserPublicId);
@@ -128,6 +129,18 @@ public class CustomerController {
 		));
 	}
 
+	@Operation(summary = "비밀번호 재설정 확인", description = "토큰을 사용하여 새 비밀번호로 재설정합니다")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "재설정 성공"),
+		@ApiResponse(responseCode = "400", description = "유효하지 않거나 만료된 토큰", content = @Content()),
+		@ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음", content = @Content())
+	})
+	@PostMapping("/password-reset/confirm")
+	public ResponseEntity<Void> resetPassword(@Valid @RequestBody ReqPasswordResetDto requestDto) {
+		customerService.resetPassword(requestDto);
+		return ResponseEntity.ok().build();
+	}
+
 	@Operation(summary = "내 계정 탈퇴", description = "로그인한 고객이 본인 계정을 탈퇴합니다")
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "204", description = "탈퇴 성공"),
@@ -146,7 +159,7 @@ public class CustomerController {
 		@ApiResponse(responseCode = "403", description = "권한 없음", content = @Content(schema = @Schema(hidden = true))),
 		@ApiResponse(responseCode = "404", description = "고객을 찾을 수 없음", content = @Content(schema = @Schema(hidden = true)))
 	})
-	@Secured(UserRoleEnum.Authority.MANAGER)
+	@PreAuthorize("hasAnyRole('MANAGER', 'MASTER')")
 	@DeleteMapping("/{customerUserPublicId}")
 	public ResponseEntity<Void> deleteCustomerByManager(@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable UUID customerUserPublicId) {
