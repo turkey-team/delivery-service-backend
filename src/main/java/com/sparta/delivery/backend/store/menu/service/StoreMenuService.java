@@ -93,12 +93,18 @@ public class StoreMenuService {
 
 		Page<StoreMenu> storeMenuList;
 
-		// UserRole이 Manager || Master이면 softDelete 된 목록들도 조회할 수 있게 처리
-		if (user.getRole() == UserRoleEnum.MANAGER || user.getRole() == UserRoleEnum.MASTER) {
+		// 기본값은 삭제되지 않은 값들만 조회
+		storeMenuList = storeMenuRepository.findAllByStoreIdAndDeletedAtIsNull(storeId, pageable);
+
+		/* 현재는 Manager, Master 도 삭제된 값들을 보지 못하도록 설계하기로 결정
+		// UserRole이 Manager, Master이면 softDelete 된 목록들도 조회할 수 있게 처리
+
+		if (user.getRole() == UserRoleEnum.MANAGER) {
 			storeMenuList = storeMenuRepository.findAllByStoreId(storeId, pageable);
-		} else {
-			storeMenuList = storeMenuRepository.findAllByStoreIdAndDeletedAtIsNull(storeId, pageable);
+		} else if (user.getRole() == UserRoleEnum.MASTER) {
+			storeMenuList = storeMenuRepository.findAllByStoreId(storeId, pageable);
 		}
+		*/
 
 		// 메뉴가 하나도 없어도 빈 페이지는 반환
 		if (storeMenuList == null || storeMenuList.isEmpty()) {

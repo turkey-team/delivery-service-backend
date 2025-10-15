@@ -389,7 +389,9 @@ class StoreMenuServiceTest {
 	class GetListStoreMenuTest {
 
 		@Test
-		@DisplayName("성공 - Owner는 softDelete 되지 않은 메뉴들만 조회")
+		@DisplayName("성공")
+		// 추후에 바뀔 가능성 있음
+		// @DisplayName("성공 - Owner는 softDelete 되지 않은 메뉴들만 조회")
 		void getList_success() {
 			/* given */
 			UUID storeId = store.getId();
@@ -434,48 +436,49 @@ class StoreMenuServiceTest {
 				.findAllByStoreIdAndDeletedAtIsNull(storeId, pageable);
 		}
 
-		@Test
-		@DisplayName("성공 - MANAGER는 softDelete된 메뉴도 조회 가능")
-		void getList_success_managerCanSeeDeleted() {
-			/* given */
-			UUID storeId = store.getId();
-			int page = 0;
-			int size = 10;
-			Pageable pageable = PageRequest.of(page, size, Sort.by("sortOrder").ascending());
-
-			// MANAGER 권한 부여
-			user = User.builder()
-				.username("managerUser")
-				.password("pass")
-				.role(UserRoleEnum.MANAGER)
-				.build();
-			ReflectionTestUtils.setField(user, "publicId", UUID.randomUUID());
-
-			// softDelete된 메뉴 포함
-			menu1.softDelete(user.getPublicId(), -1);
-			menu2 = StoreMenu.builder()
-				.reqCreateStoreMenuDto(reqCreateStoreMenuDto)
-				.store(store)
-				.image(image)
-				.build();
-			ReflectionTestUtils.setField(menu2, "id", UUID.randomUUID());
-
-			List<StoreMenu> allMenus = List.of(menu1, menu2);
-			Page<StoreMenu> pageResult = new org.springframework.data.domain.PageImpl<>(allMenus, pageable, allMenus.size());
-
-			when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
-			when(storeMenuRepository.findAllByStoreId(storeId, pageable))
-				.thenReturn(pageResult);
-
-			/* when */
-			Page<ResGetListStoreMenuDto> result = storeMenuService.getStoreMenusByStoreId(user, storeId, page, size);
-
-			/* then */
-			assertNotNull(result);
-			assertEquals(2, result.getContent().size());
-			verify(storeMenuRepository, times(1))
-				.findAllByStoreId(storeId, pageable);
-		}
+		// 현재 Manager, Master 도 삭제된 메뉴는 안보이도록 설계하기로 결정
+		// @Test
+		// @DisplayName("성공 - Manager, Master는 softDelete된 메뉴도 조회 가능")
+		// void getList_success_managerAndMasterCanSeeDeleted() {
+		// 	/* given */
+		// 	UUID storeId = store.getId();
+		// 	int page = 0;
+		// 	int size = 10;
+		// 	Pageable pageable = PageRequest.of(page, size, Sort.by("sortOrder").ascending());
+		//
+		// 	// MANAGER 권한 부여
+		// 	user = User.builder()
+		// 		.username("managerUser")
+		// 		.password("pass")
+		// 		.role(UserRoleEnum.MANAGER)
+		// 		.build();
+		// 	ReflectionTestUtils.setField(user, "publicId", UUID.randomUUID());
+		//
+		// 	// softDelete된 메뉴 포함
+		// 	menu1.softDelete(user.getPublicId(), -1);
+		// 	menu2 = StoreMenu.builder()
+		// 		.reqCreateStoreMenuDto(reqCreateStoreMenuDto)
+		// 		.store(store)
+		// 		.image(image)
+		// 		.build();
+		// 	ReflectionTestUtils.setField(menu2, "id", UUID.randomUUID());
+		//
+		// 	List<StoreMenu> allMenus = List.of(menu1, menu2);
+		// 	Page<StoreMenu> pageResult = new org.springframework.data.domain.PageImpl<>(allMenus, pageable, allMenus.size());
+		//
+		// 	when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+		// 	when(storeMenuRepository.findAllByStoreId(storeId, pageable))
+		// 		.thenReturn(pageResult);
+		//
+		// 	/* when */
+		// 	Page<ResGetListStoreMenuDto> result = storeMenuService.getStoreMenusByStoreId(user, storeId, page, size);
+		//
+		// 	/* then */
+		// 	assertNotNull(result);
+		// 	assertEquals(2, result.getContent().size());
+		// 	verify(storeMenuRepository, times(1))
+		// 		.findAllByStoreId(storeId, pageable);
+		// }
 
 		@Test
 		@DisplayName("성공 - Image 미설정 시 기본 Image")
