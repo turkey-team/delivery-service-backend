@@ -3,6 +3,8 @@ package com.sparta.delivery.backend.order.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -160,6 +162,7 @@ class OrderServiceTest {
 		ReflectionTestUtils.setField(order, "gu", "강남구");
 		ReflectionTestUtils.setField(order, "dong", "삼성동");
 		ReflectionTestUtils.setField(order, "addressDetails", "테스트주소 123입니다아아");
+		ReflectionTestUtils.setField(order, "createdAt", Instant.now());
 
 		// 테스트 이미지
 		image = Image.builder()
@@ -350,13 +353,90 @@ class OrderServiceTest {
 		}
 
 		@Test
-		@DisplayName("실패 - Customer가 상태 변경 시도")
+		@DisplayName("성공 - Customer가 주문 생성 5분 이내에 취소")
+		void cancelByCustomer_within5Minutes_success() {
+			/* given */
+			when(orderRepository.findById(any())).thenReturn(Optional.of(order));
+			when(orderRepository.save(any())).thenReturn(order);
+
+			// 현재 주문 중 상태이고
+			ReflectionTestUtils.setField(order, "orderStatus", OrderStatus.ORDERED);
+
+			// 만약 주문 후 4분이 지났다면
+			ReflectionTestUtils.setField(order, "createdAt", Instant.now().minus(4, ChronoUnit.MINUTES));
+
+			// 취소 요청 가능
+			ReqUpdateOrderStatusDto req = new ReqUpdateOrderStatusDto();
+			req.setOrderStatus(OrderStatus.CANCELLED);
+
+			/* when */
+			orderService.updateOrderStatus(customerUser, order.getId(), req);
+
+			/* then */
+			verify(orderRepository).save(order);
+			assertEquals(OrderStatus.CANCELLED, order.getOrderStatus());
+		}
+
+		@Test
+		@DisplayName("실패 - Customer가 주문 생성 5분 초과 후 취소 시도")
+		void cancelByCustomer_after5Minutes_fail() {
+			/* given */
+			when(orderRepository.findById(any())).thenReturn(Optional.of(order));
+
+			// 현재 주문 중 상태이지만
+			ReflectionTestUtils.setField(order, "orderStatus", OrderStatus.ORDERED);
+
+			// 만약 주문 후 5분이 넘었다면 (10분)
+			ReflectionTestUtils.setField(order, "createdAt", Instant.now().minus(10, ChronoUnit.MINUTES));
+
+			// 취소를 보내도 불가능
+			ReqUpdateOrderStatusDto req = new ReqUpdateOrderStatusDto();
+			req.setOrderStatus(OrderStatus.CANCELLED);
+
+			/* when & then */
+			IllegalStateException ex = assertThrows(
+				IllegalStateException.class,
+				() -> orderService.updateOrderStatus(customerUser, order.getId(), req)
+			);
+
+			assertEquals("주문 5분 이내에만 주문을 취소할 수 있습니다.", ex.getMessage());
+			verify(orderRepository, never()).save(any());
+		}
+
+		@Test
+		@DisplayName("실패 - Customer가 주문 중 상태가 아닌 경우에 취소 시도")
+		void cancelByCustomer_notOrdered_fail() {
+			/* given */
+			when(orderRepository.findById(any())).thenReturn(Optional.of(order));
+
+			// 현재 주문 중 상태가 아니라면
+			ReflectionTestUtils.setField(order, "orderStatus", OrderStatus.ACCEPTED);
+
+			// 만약 주문 후 5분이 안지났더라도
+			ReflectionTestUtils.setField(order, "createdAt", Instant.now().minus(2, ChronoUnit.MINUTES));
+
+			// 취소 불가능
+			ReqUpdateOrderStatusDto req = new ReqUpdateOrderStatusDto();
+			req.setOrderStatus(OrderStatus.CANCELLED);
+
+			/* when & then */
+			IllegalStateException ex = assertThrows(
+				IllegalStateException.class,
+				() -> orderService.updateOrderStatus(customerUser, order.getId(), req)
+			);
+
+			assertEquals("주문중 상태에만 주문을 취소할 수 있습니다.", ex.getMessage());
+			verify(orderRepository, never()).save(any());
+		}
+
+		@Test
+		@DisplayName("실패 - Customer가 주문 수락 시도")
 		void updateStatus_noPermission() {
 			/* given */
 			when(orderRepository.findById(any())).thenReturn(Optional.of(order));
 
 			ReqUpdateOrderStatusDto req = new ReqUpdateOrderStatusDto();
-			req.setOrderStatus(OrderStatus.CANCELLED);
+			req.setOrderStatus(OrderStatus.ACCEPTED);
 
 			/* when & then */
 			assertThrows(IllegalStateException.class,
