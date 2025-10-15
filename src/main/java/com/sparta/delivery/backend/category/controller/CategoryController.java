@@ -31,6 +31,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -50,7 +51,7 @@ public class CategoryController {
 		,@ApiResponse(responseCode = "403", description = "매니저 권한이 아니면 생성 불가")
 	})
 	@PreAuthorize("hasAnyRole('MASTER', 'MANAGER')")
-	public ResCreateCategoryDto createCategory(@RequestBody ReqCreateCategoryDto reqCreateCategoryDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+	public ResCreateCategoryDto createCategory(@RequestBody @Valid ReqCreateCategoryDto reqCreateCategoryDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
 	 	return categoryService.createCategory(reqCreateCategoryDto.getName(), userDetails.getUser());
 	}
 
@@ -89,7 +90,7 @@ public class CategoryController {
 		,@ApiResponse(responseCode = "400", description = "카테고리 없음 혹은 카테고리명 중복")
 	})
 	@PreAuthorize("hasAnyRole('MASTER', 'MANAGER')")
-	public ResUpdateCategoryDto updateCategory(@PathVariable UUID categoryId, @RequestBody ReqUpdateCategoryDto reqUpdateCategoryDto, @AuthenticationPrincipal UserDetailsImpl userDetails){
+	public ResUpdateCategoryDto updateCategory(@PathVariable UUID categoryId, @RequestBody @Valid ReqUpdateCategoryDto reqUpdateCategoryDto, @AuthenticationPrincipal UserDetailsImpl userDetails){
 		return categoryService.updateCategory(categoryId, reqUpdateCategoryDto.getName(), userDetails.getUser());
 	}
 
