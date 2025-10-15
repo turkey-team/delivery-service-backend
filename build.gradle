@@ -88,6 +88,9 @@ dependencies {
     // AWS S3
     implementation platform('software.amazon.awssdk:bom:2.20.26')
     implementation 'software.amazon.awssdk:s3'
+
+    // Slack API
+    implementation("com.slack.api:slack-api-client:1.45.0")
 }
 
 tasks.named('test') {
