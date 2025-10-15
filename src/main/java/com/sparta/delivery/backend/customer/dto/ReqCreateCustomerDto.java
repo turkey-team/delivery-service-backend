@@ -28,8 +28,10 @@ public class ReqCreateCustomerDto {
 	@Size(max = 50, message = "닉네임은 최대 50자까지 가능합니다.")
 	private String nickname;
 
-	@Schema(description = "이메일", example = "customer@example.com", maxLength = 320)
+	@Schema(description = "이메일", example = "customer@example.com", maxLength = 320, requiredMode = Schema.RequiredMode.REQUIRED)
+	@NotBlank(message = "이메일은 필수입니다.")
 	@Email(message = "올바른 이메일 형식이 아닙니다.")
+	@Size(max = 320, message = "이메일은 최대 320자까지 가능합니다.")
 	private String email;
 
 	@Schema(description = "전화번호", example = "010-1234-5678", maxLength = 20)
