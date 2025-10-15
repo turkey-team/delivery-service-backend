@@ -8,6 +8,7 @@ import org.hibernate.validator.constraints.Length;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -60,10 +61,10 @@ public class ReqCreateStoreDto {
 		private String url;
 
 		@NotBlank
-		@Schema(description = "이미지 타입[store, business]", example = "business")
+		@Pattern(regexp = "^(store|business)$", message = "이미지는 가게사진과 사업자등록증만 가능합니다.")
+		@Schema(description = "이미지 타입[store, business]", example = "business", allowableValues = {"store", "business"})
 		private String type;
-		// store : 가게사진
-		// business : 사업자등록증
+
 	}
 
 	@Schema(description = "manager가 가게 등록시 필요한 OwnerUUID", example = "123e4567-e89b-12d3-a456-426614174000")
