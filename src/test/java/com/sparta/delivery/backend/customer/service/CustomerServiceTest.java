@@ -275,7 +275,7 @@ public class CustomerServiceTest {
 			ReflectionTestUtils.setField(requestDto, "newPasswordConfirm", newPassword);
 
 			when(userDetails.getId()).thenReturn(userId);
-			when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+			when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user));
 			when(passwordEncoder.matches(currentPassword, user.getPassword())).thenReturn(true);
 			when(passwordEncoder.encode(newPassword)).thenReturn(newEncodedPassword);
 
@@ -283,7 +283,7 @@ public class CustomerServiceTest {
 			customerService.changePassword(userDetails, requestDto);
 
 			// then
-			verify(userRepository, times(1)).findById(userId);
+			verify(userRepository, times(1)).findByIdAndDeletedAtIsNull(userId);
 			verify(passwordEncoder, times(1)).matches(currentPassword, "OldEncodedPassword1!");
 			assertEquals(user.getPassword(), newEncodedPassword);
 		}
@@ -302,7 +302,7 @@ public class CustomerServiceTest {
 			ReflectionTestUtils.setField(requestDto, "newPasswordConfirm", newPassword);
 
 			when(userDetails.getId()).thenReturn(userId);
-			when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+			when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user));
 			when(passwordEncoder.matches(wrongPassword, user.getPassword())).thenReturn(false);
 
 			// when & then
@@ -329,7 +329,7 @@ public class CustomerServiceTest {
 			ReflectionTestUtils.setField(requestDto, "newPasswordConfirm", differentPassword);
 
 			when(userDetails.getId()).thenReturn(userId);
-			when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+			when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user));
 			when(passwordEncoder.matches(currentPassword, user.getPassword())).thenReturn(true);
 
 			// when & then
@@ -349,7 +349,7 @@ public class CustomerServiceTest {
 			ReqChangePasswordDto requestDto = new ReqChangePasswordDto();
 
 			when(userDetails.getId()).thenReturn(userId);
-			when(userRepository.findById(userId)).thenReturn(Optional.empty());
+			when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.empty());
 
 			// when & then
 			IllegalArgumentException exception = assertThrows(

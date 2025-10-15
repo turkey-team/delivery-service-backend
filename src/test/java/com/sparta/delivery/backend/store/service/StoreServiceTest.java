@@ -239,7 +239,7 @@ public class StoreServiceTest {
 		// user.setId(userId);
 		// user.setPublicId(userPublicId);
 
-		Owner owner = Owner.builder().nickname("ownerTest").email("abc@naver.com").phoneNumber("010147852369").businessNumber("9874563210").user(user).build();
+		Owner owner = Owner.builder().nickname("ownerTest").email("abc@naver.com").phoneNumber("010147852369").user(user).build();
 		// owner.setId(ownerId);
 
 		Category category = Category.builder().name("한식").build();
@@ -289,7 +289,7 @@ public class StoreServiceTest {
 		// store.setId(storeId);
 
 		// when
-		when(ownerRepository.findByUser_PublicId(userPublicId)).thenReturn(owner);
+		when(ownerRepository.findByUserPublicIdAndDeletedAtIsNull(userPublicId)).thenReturn(Optional.of(owner));
 		when(dongRepository.findByCode("123")).thenReturn(Optional.of(dong));
 		when(categoryRepository.findAllById(List.of(categoryId))).thenReturn(categoriesList);
 
