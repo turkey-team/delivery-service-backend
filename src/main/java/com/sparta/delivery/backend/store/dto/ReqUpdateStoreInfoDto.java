@@ -6,8 +6,10 @@ import java.util.UUID;
 import org.hibernate.validator.constraints.Length;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -49,6 +51,7 @@ public class ReqUpdateStoreInfoDto {
 			+ ", {\"imageId\": \"223e4567-e89b-12d3-a456-426614174001\""
 			+ ", \"url\": \"yyy.png\", \"type\": \"store\"}]")
 	@NotEmpty(message = "가게 사진을 첨부해주세요.")
+	@Valid
 	private List<ImageDto> images;
 
 	@Getter
@@ -63,6 +66,7 @@ public class ReqUpdateStoreInfoDto {
 		private String url;
 
 		@NotBlank
+		@Pattern(regexp = "^(store)$", message = "이미지는 가게사진만 수정 가능합니다.")
 		@Schema(description = "이미지 타입", example = "store", required = true)
 		private String type;
 		// 배민 정책 참고하면 사업자번호 변경은 고객센터 통한 요청 필요 -> 사업자등록증 이미지 변경 불가
