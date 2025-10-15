@@ -3,11 +3,13 @@ package com.sparta.delivery.backend.review.controller;
 import java.util.List;
 import java.util.UUID;
 
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -54,8 +56,8 @@ public class ReviewController {
 	@GetMapping("/stores/{storeId}/reviews")
 	public List<ResViewReviewDto> getReviews(
 		@Parameter(description = "리뷰를 조회할 매장의 UUID") @PathVariable UUID storeId,
-		@Parameter(description = "검색 조건 DTO") ReviewRepositorySearchConditionDto condition,
-		@Parameter(description = "페이지네이션 정보") Pageable pageable) {
+		@ParameterObject @ModelAttribute ReviewRepositorySearchConditionDto condition,
+		@Parameter(description = "페이지네이션 정보") @ParameterObject Pageable pageable) {
 		return reviewService.getReviews(storeId, condition, pageable);
 	}
 
