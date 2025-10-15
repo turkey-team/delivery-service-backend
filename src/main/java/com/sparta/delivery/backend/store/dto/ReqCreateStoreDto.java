@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.hibernate.validator.constraints.Length;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
@@ -50,6 +51,7 @@ public class ReqCreateStoreDto {
 	@Schema(description = "사업자등록증, 이미지"
 		, example = "[{\"url\": \"xxx.png\", \"type\": \"business\"}, {\"url\": \"yyy.png\", \"type\": \"store\"}]"
 		, required = true)
+	@Valid
 	private List<ImageDto> images;
 
 	@Getter

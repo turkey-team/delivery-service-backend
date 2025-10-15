@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.hibernate.validator.constraints.Length;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
@@ -50,6 +51,7 @@ public class ReqUpdateStoreInfoDto {
 			+ ", {\"imageId\": \"223e4567-e89b-12d3-a456-426614174001\""
 			+ ", \"url\": \"yyy.png\", \"type\": \"store\"}]")
 	@NotEmpty(message = "가게 사진을 첨부해주세요.")
+	@Valid
 	private List<ImageDto> images;
 
 	@Getter
