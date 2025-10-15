@@ -2,6 +2,10 @@ package com.sparta.delivery.backend.owner.controller;
 
 import java.util.UUID;
 
+import org.springdoc.core.annotations.ParameterObject;
+import org.springdoc.core.converters.models.PageableAsQueryParam;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
@@ -14,8 +18,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.sparta.delivery.backend.customer.dto.ResGetCustomersDto;
+import com.sparta.delivery.backend.global.common.dto.PageResponse;
 import com.sparta.delivery.backend.owner.dto.ReqChangePasswordDto;
 import com.sparta.delivery.backend.owner.dto.ReqCreateOwnerDto;
 import com.sparta.delivery.backend.owner.dto.ReqPasswordResetDto;
@@ -23,6 +30,7 @@ import com.sparta.delivery.backend.owner.dto.ReqPasswordResetRequestDto;
 import com.sparta.delivery.backend.owner.dto.ReqUpdateOwnerDto;
 import com.sparta.delivery.backend.owner.dto.ResGetMyOwnerDto;
 import com.sparta.delivery.backend.owner.dto.ResGetOwnerDto;
+import com.sparta.delivery.backend.owner.dto.ResGetOwnersDto;
 import com.sparta.delivery.backend.owner.dto.ResPasswordResetRequestDto;
 import com.sparta.delivery.backend.owner.service.OwnerService;
 import com.sparta.delivery.backend.security.UserDetailsImpl;
@@ -83,6 +91,22 @@ public class OwnerController {
         ResGetOwnerDto response = ownerService.getOwnerByUserPublicId(ownerUserPublicId);
         return ResponseEntity.ok(response);
     }
+
+	@Operation(summary = "점주 목록 조회 (관리자용)", description = "관리자가 점주 목록을 이름으로 검색합니다")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "조회 성공"),
+		@ApiResponse(responseCode = "403", description = "권한 없음", content = @Content(schema = @Schema(hidden = true)))
+	})
+	@PageableAsQueryParam
+	@PreAuthorize("hasAnyRole('MANAGER', 'MASTER')")
+	@GetMapping
+	public ResponseEntity<PageResponse<ResGetOwnersDto>> getCustomers(
+		@RequestParam(required = false) String nickName,
+		@ParameterObject @PageableDefault Pageable pageable
+	) {
+		PageResponse<ResGetOwnersDto> response = ownerService.getOwners(nickName, pageable);
+		return ResponseEntity.ok(response);
+	}
 
     @Operation(summary = "내 정보 수정", description = "로그인한 점주의 정보를 수정합니다")
     @ApiResponses(value = {
