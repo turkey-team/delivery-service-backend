@@ -119,16 +119,16 @@ public class DongRepositoryTest {
 	}
 
 	@Nested
-	@DisplayName("existsByCodeInCustom 메서드는")
+	@DisplayName("existsByCodeInAndSigunguCustom 메서드는")
 	class ExistsByCodeInCustomTest {
 
 		@Test
-		@DisplayName("해당 시/군/구에 코드가 같은 동 하나라도 존재하면, true를 반환한다.")
+		@DisplayName("해당 시/군/구에 코드가 같은 동이 하나라도 존재하면, true를 반환한다.")
 		void returnTrueWhenCodeExistsInSigungu() {
 			createDongs();
 
 			List<String> codes = List.of("050", "030");
-			boolean exists = dongRepository.existsByCodeInCustom(codes);
+			boolean exists = dongRepository.existsByCodeInAndSigunguCustom(codes, gangnam);
 			assertThat(exists).isTrue();
 		}
 
@@ -138,7 +138,7 @@ public class DongRepositoryTest {
 			createDongs();
 
 			List<String> codes = List.of("050", "080");
-			boolean exists = dongRepository.existsByCodeInCustom(codes);
+			boolean exists = dongRepository.existsByCodeInAndSigunguCustom(codes, gangnam);
 			assertThat(exists).isFalse();
 		}
 
@@ -152,7 +152,7 @@ public class DongRepositoryTest {
 			assertThat(persistedSamsung.isDeleted()).isTrue();
 
 			List<String> codes = List.of("050", "030");
-			boolean exists = dongRepository.existsByCodeInCustom(codes);
+			boolean exists = dongRepository.existsByCodeInAndSigunguCustom(codes, gangnam);
 			assertThat(exists).isFalse();
 		}
 
@@ -231,24 +231,24 @@ public class DongRepositoryTest {
 	}
 
 	@Nested
-	@DisplayName("existsByCodeAndIdNotCustom 메서드는")
+	@DisplayName("existsByCodeAndSigunguAndIdNotCustom 메서드는")
 	class ExistsByCodeAndIdNotCustomTest {
 
 		@Test
-		@DisplayName("전체 시/군/구에 코드가 일치하고 Id가 자신이 아닌 동이 존재하면, true를 반환한다.")
-		void returnTrueWhenCodeExistsAndIdIsNotSame() {
+		@DisplayName("해당 시/군/구에 코드가 일치하고 Id가 자신이 아닌 동이 존재하면, true를 반환한다.")
+		void returnTrueWhenCodeExistsAndIdIsNotSameInSigungu() {
 			createDongs();
 
-			boolean exists = dongRepository.existsByCodeAndIdNotCustom("030", UUID.randomUUID());
+			boolean exists = dongRepository.existsByCodeAndSigunguAndIdNotCustom("030", gangnam, UUID.randomUUID());
 			assertThat(exists).isTrue();
 		}
 
 		@Test
-		@DisplayName("전체 시/군/구에 코드가 일치하고 Id가 자신인 동이 존재하면, false를 반환한다.")
-		void returnFalseWhenCodeExistsAndIdIsSame() {
+		@DisplayName("해당 시/군/구에 코드가 일치하고 Id가 자신인 동이 존재하면, false를 반환한다.")
+		void returnFalseWhenCodeExistsAndIdIsSameInSigungu() {
 			createDongs();
 
-			boolean exists = dongRepository.existsByCodeAndIdNotCustom("030", samsung.getId());
+			boolean exists = dongRepository.existsByCodeAndSigunguAndIdNotCustom("030", gangnam, samsung.getId());
 			assertThat(exists).isFalse();
 		}
 
@@ -261,7 +261,7 @@ public class DongRepositoryTest {
 			persistedSamsung.softDelete(user.getId());
 			assertThat(persistedSamsung.isDeleted()).isTrue();
 
-			boolean exists = dongRepository.existsByCodeAndIdNotCustom("030", UUID.randomUUID());
+			boolean exists = dongRepository.existsByCodeAndSigunguAndIdNotCustom("030", gangnam, UUID.randomUUID());
 			assertThat(exists).isFalse();
 		}
 

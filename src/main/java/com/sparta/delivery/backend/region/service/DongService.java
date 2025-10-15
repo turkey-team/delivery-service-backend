@@ -63,7 +63,7 @@ public class DongService {
 			throw new RegionDuplicateRequestException("요청에 중복된 동 코드가 포함되어 있습니다.");
 		}
 
-		if (dongRepository.existsByCodeInCustom(codes)) {
+		if (dongRepository.existsByCodeInAndSigunguCustom(codes, sigungu)) {
 			log.warn("동 지역 코드 중복");
 			throw new RegionAlreadyExistsException("이미 존재하는 동 코드가 포함되어 있습니다.");
 		}
@@ -112,7 +112,7 @@ public class DongService {
 			throw new RegionAlreadyExistsException("이미 존재하는 동 이름입니다.");
 		}
 
-		if (dongRepository.existsByCodeAndIdNotCustom(requestDto.getCode(), dong.getId())) {
+		if (dongRepository.existsByCodeAndSigunguAndIdNotCustom(requestDto.getCode(), sigungu, dong.getId())) {
 			log.warn("동 지역 코드 중복");
 			throw new RegionAlreadyExistsException("이미 존재하는 동 코드입니다.");
 		}

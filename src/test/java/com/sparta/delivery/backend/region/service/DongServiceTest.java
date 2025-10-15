@@ -66,7 +66,7 @@ public class DongServiceTest {
 
 			given(sigunguRepository.findByIdCustom(any())).willReturn(Optional.of(sigungu));
 			given(dongRepository.existsByNameInAndSigunguCustom(anyList(), any())).willReturn(false);
-			given(dongRepository.existsByCodeInCustom(anyList())).willReturn(false);
+			given(dongRepository.existsByCodeInAndSigunguCustom(anyList(), any())).willReturn(false);
 			given(dongRepository.saveAll(anyList())).willReturn(dongList);
 
 			// when
@@ -76,7 +76,7 @@ public class DongServiceTest {
 			assertThat(responseDtoList).hasSize(1);
 			then(sigunguRepository).should(times(1)).findByIdCustom(any());
 			then(dongRepository).should(times(1)).existsByNameInAndSigunguCustom(anyList(), any());
-			then(dongRepository).should(times(1)).existsByCodeInCustom(anyList());
+			then(dongRepository).should(times(1)).existsByCodeInAndSigunguCustom(anyList(), any());
 			then(dongRepository).should(times(1)).saveAll(anyList());
 		}
 
@@ -162,7 +162,7 @@ public class DongServiceTest {
 
 			given(sigunguRepository.findByIdCustom(any())).willReturn(Optional.of(sigungu));
 			given(dongRepository.existsByNameInAndSigunguCustom(anyList(), any())).willReturn(false);
-			given(dongRepository.existsByCodeInCustom(anyList())).willReturn(true);
+			given(dongRepository.existsByCodeInAndSigunguCustom(anyList(), any())).willReturn(true);
 
 			// when & then
 			assertThatThrownBy(() -> dongService.createDongs(sigungu.getId(), requestDtoList))
@@ -231,7 +231,7 @@ public class DongServiceTest {
 			given(sigunguRepository.findByIdCustom(any())).willReturn(Optional.of(sigungu));
 			given(dongRepository.findByIdAndSigunguCustom(any(), any())).willReturn(Optional.of(dong));
 			given(dongRepository.existsByNameAndSigunguAndIdNotCustom(any(), any(), any())).willReturn(false);
-			given(dongRepository.existsByCodeAndIdNotCustom(any(), any())).willReturn(false);
+			given(dongRepository.existsByCodeAndSigunguAndIdNotCustom(any(), any(), any())).willReturn(false);
 
 			// when
 			ResUpdateDongDto responseDto = dongService.updateDong(sigungu.getId(), dong.getId(), requestDto);
@@ -242,7 +242,7 @@ public class DongServiceTest {
 			then(sigunguRepository).should(times(1)).findByIdCustom(any());
 			then(dongRepository).should(times(1)).findByIdAndSigunguCustom(any(), any());
 			then(dongRepository).should(times(1)).existsByNameAndSigunguAndIdNotCustom(any(), any(), any());
-			then(dongRepository).should(times(1)).existsByCodeAndIdNotCustom(any(), any());
+			then(dongRepository).should(times(1)).existsByCodeAndSigunguAndIdNotCustom(any(), any(), any());
 		}
 
 		@Test
@@ -307,7 +307,7 @@ public class DongServiceTest {
 			given(sigunguRepository.findByIdCustom(any())).willReturn(Optional.of(sigungu));
 			given(dongRepository.findByIdAndSigunguCustom(any(), any())).willReturn(Optional.of(dong));
 			given(dongRepository.existsByNameAndSigunguAndIdNotCustom(any(), any(), any())).willReturn(false);
-			given(dongRepository.existsByCodeAndIdNotCustom(any(), any())).willReturn(true);
+			given(dongRepository.existsByCodeAndSigunguAndIdNotCustom(any(), any(), any())).willReturn(true);
 
 			// when & then
 			assertThatThrownBy(() -> dongService.updateDong(sigungu.getId(), dong.getId(), requestDto))
@@ -316,7 +316,7 @@ public class DongServiceTest {
 			then(sigunguRepository).should(times(1)).findByIdCustom(any());
 			then(dongRepository).should(times(1)).findByIdAndSigunguCustom(any(), any());
 			then(dongRepository).should(times(1)).existsByNameAndSigunguAndIdNotCustom(any(), any(), any());
-			then(dongRepository).should(times(1)).existsByCodeAndIdNotCustom(any(), any());
+			then(dongRepository).should(times(1)).existsByCodeAndSigunguAndIdNotCustom(any(), any(), any());
 		}
 
 	}

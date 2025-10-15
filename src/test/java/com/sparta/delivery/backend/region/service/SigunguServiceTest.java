@@ -55,7 +55,7 @@ public class SigunguServiceTest {
 
 			given(sidoRepository.findByIdCustom(any())).willReturn(Optional.of(sido));
 			given(sigunguRepository.existsByNameInAndSidoCustom(anyList(), any())).willReturn(false);
-			given(sigunguRepository.existsByCodeInCustom(anyList())).willReturn(false);
+			given(sigunguRepository.existsByCodeInAndSidoCustom(anyList(), any())).willReturn(false);
 			given(sigunguRepository.saveAll(anyList())).willReturn(sigunguList);
 
 			// when
@@ -65,7 +65,7 @@ public class SigunguServiceTest {
 			assertThat(responseDto).hasSize(1);
 			then(sidoRepository).should(times(1)).findByIdCustom(any());
 			then(sigunguRepository).should(times(1)).existsByNameInAndSidoCustom(anyList(), any());
-			then(sigunguRepository).should(times(1)).existsByCodeInCustom(anyList());
+			then(sigunguRepository).should(times(1)).existsByCodeInAndSidoCustom(anyList(), any());
 			then(sigunguRepository).should(times(1)).saveAll(anyList());
 		}
 
@@ -155,7 +155,7 @@ public class SigunguServiceTest {
 
 			given(sidoRepository.findByIdCustom(any())).willReturn(Optional.of(sido));
 			given(sigunguRepository.existsByNameInAndSidoCustom(anyList(), any())).willReturn(false);
-			given(sigunguRepository.existsByCodeInCustom(anyList())).willReturn(true);
+			given(sigunguRepository.existsByCodeInAndSidoCustom(anyList(), any())).willReturn(true);
 
 			// when & then
 			assertThatThrownBy(() -> sigunguService.createSigungus(sido.getId(), requestDtoList))
@@ -225,7 +225,7 @@ public class SigunguServiceTest {
 			given(sidoRepository.findByIdCustom(any())).willReturn(Optional.of(sido));
 			given(sigunguRepository.findByIdAndSidoCustom(any(), any())).willReturn(Optional.of(sigungu));
 			given(sigunguRepository.existsByNameAndSidoAndIdNotCustom(any(), any(), any())).willReturn(false);
-			given(sigunguRepository.existsByCodeAndIdNotCustom(any(), any())).willReturn(false);
+			given(sigunguRepository.existsByCodeAndSidoAndIdNotCustom(any(), any(), any())).willReturn(false);
 
 			// when
 			ResUpdateSigunguDto responseDto = sigunguService.updateSigungu(sido.getId(), sigungu.getId(), requestDto);
@@ -235,7 +235,7 @@ public class SigunguServiceTest {
 			assertThat(responseDto.getCode()).isEqualTo("740");
 			then(sidoRepository).should(times(1)).findByIdCustom(any());
 			then(sigunguRepository).should(times(1)).existsByNameAndSidoAndIdNotCustom(any(), any(), any());
-			then(sigunguRepository).should(times(1)).existsByCodeAndIdNotCustom(any(), any());
+			then(sigunguRepository).should(times(1)).existsByCodeAndSidoAndIdNotCustom(any(), any(), any());
 		}
 
 		@Test
@@ -289,7 +289,7 @@ public class SigunguServiceTest {
 			assertThatThrownBy(() -> sigunguService.updateSigungu(sido.getId(), sigungu.getId(), requestDto))
 				.isInstanceOf(RegionAlreadyExistsException.class)
 				.hasMessage("이미 존재하는 시/군/구 이름입니다.");
-			then(sigunguRepository).should(never()).existsByCodeAndIdNotCustom(any(), any());
+			then(sigunguRepository).should(never()).existsByCodeAndSidoAndIdNotCustom(any(), any(), any());
 		}
 
 		@Test
@@ -303,13 +303,13 @@ public class SigunguServiceTest {
 			given(sidoRepository.findByIdCustom(any())).willReturn(Optional.of(sido));
 			given(sigunguRepository.findByIdAndSidoCustom(any(), any())).willReturn(Optional.of(sigungu));
 			given(sigunguRepository.existsByNameAndSidoAndIdNotCustom(any(), any(), any())).willReturn(false);
-			given(sigunguRepository.existsByCodeAndIdNotCustom(any(), any())).willReturn(true);
+			given(sigunguRepository.existsByCodeAndSidoAndIdNotCustom(any(), any(), any())).willReturn(true);
 
 			// when & then
 			assertThatThrownBy(() -> sigunguService.updateSigungu(sido.getId(), sigungu.getId(), requestDto))
 				.isInstanceOf(RegionAlreadyExistsException.class)
 				.hasMessage("이미 존재하는 시/군/구 코드입니다.");
-			then(sigunguRepository).should(times(1)).existsByCodeAndIdNotCustom(any(), any());
+			then(sigunguRepository).should(times(1)).existsByCodeAndSidoAndIdNotCustom(any(), any(), any());
 		}
 
 	}

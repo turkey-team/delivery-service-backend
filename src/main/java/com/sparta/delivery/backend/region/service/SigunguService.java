@@ -63,7 +63,7 @@ public class SigunguService {
 			throw new RegionDuplicateRequestException("요청에 중복된 시/군/구 코드가 포함되어 있습니다.");
 		}
 
-		if (sigunguRepository.existsByCodeInCustom(codes)) {
+		if (sigunguRepository.existsByCodeInAndSidoCustom(codes, sido)) {
 			log.warn("시/군/구 지역 코드 중복");
 			throw new RegionAlreadyExistsException("이미 존재하는 시/군/구 코드가 포함되어 있습니다.");
 		}
@@ -114,7 +114,8 @@ public class SigunguService {
 			throw new RegionAlreadyExistsException("이미 존재하는 시/군/구 이름입니다.");
 		}
 
-		if (sigunguRepository.existsByCodeAndIdNotCustom(requestDto.getCode(), sigungu.getId())) {
+		if (sigunguRepository.existsByCodeAndSidoAndIdNotCustom(requestDto.getCode(), sido,
+			sigungu.getId())) {
 			log.warn("시/군/구 지역 코드 중복");
 			throw new RegionAlreadyExistsException("이미 존재하는 시/군/구 코드입니다.");
 		}
