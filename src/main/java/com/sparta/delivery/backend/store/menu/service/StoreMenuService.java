@@ -42,8 +42,6 @@ public class StoreMenuService {
 		UUID storeId,
 		ReqCreateStoreMenuDto reqCreateStoreMenuDto
 	) {
-
-
 		Store store = validatePermission(user, storeId);
 		validateDuplicateMenuName(storeId, reqCreateStoreMenuDto.getName());
 

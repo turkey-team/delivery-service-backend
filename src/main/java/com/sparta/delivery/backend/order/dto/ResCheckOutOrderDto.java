@@ -28,7 +28,7 @@ public class ResCheckOutOrderDto {
 	@Schema(description = "상세 주소", example = "백양로 65")
 	private String addressDetail;
 
-	@Schema(description = "고객 연락처", example = "01012345678")
+	@Schema(description = "고객 연락처", example = "010-1234-5678")
 	private String phoneNumber;
 
 	@Schema(description = "메뉴 합계", example = "13000")
