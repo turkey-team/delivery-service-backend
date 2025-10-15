@@ -70,9 +70,9 @@ public class ReviewService {
 	@Cacheable(
 		value = "reviewList",
 		key = "'review:store:' + #storeId + ':page:' + #pageable.pageNumber + "
-			+ "':size:' + #pageable.pageSize + ':gen:' + @util.getGeneration(#storeId)",
-		cacheManager = "reviewCacheManager",
-		condition = "#pageable.pageNumber == 0 && (#condition == null || #condition.isNull())")
+			+ "':size:' + #pageable.pageSize + ':condHash:' + (#condition == null ? 'null' : #condition.hashCode()) + "
+			+ "':gen:' + @util.getGeneration(#storeId)",
+		cacheManager = "reviewCacheManager")
 	@Transactional(readOnly = true)
 	public List<ResViewReviewDto> getReviews(UUID storeId, ReviewRepositorySearchConditionDto condition,
 		Pageable pageable) {
