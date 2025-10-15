@@ -141,7 +141,8 @@ public class ReviewService {
 		em.flush();
 		em.clear();
 
-		evictReviewCache(storeId);
+		//evictReviewCache(storeId);
+		util.increaseGeneration(storeId);
 
 		Owner owner = store.getOwner();
 		log.info("registerReview 완료 - 비동기 호출 직전 thread: {}", Thread.currentThread().getName());
@@ -176,7 +177,8 @@ public class ReviewService {
 
 		Store store = review.getStore();
 		store.updateReview(oldRate, dto.getRate());
-		evictReviewCache(store.getId());
+		//evictReviewCache(store.getId());
+		util.increaseGeneration(store.getId());
 
 		return ResResultReviewDto.of(review);
 	}
@@ -204,7 +206,8 @@ public class ReviewService {
 
 		Store store = review.getStore();
 		store.deleteReview(review.getRate());
-		evictReviewCache(store.getId());
+		//evictReviewCache(store.getId());
+		util.increaseGeneration(store.getId());
 
 		return ResDeleteReviewDto.of(review);
 	}
