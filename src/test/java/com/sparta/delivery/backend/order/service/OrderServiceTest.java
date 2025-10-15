@@ -159,7 +159,7 @@ class OrderServiceTest {
 		ReflectionTestUtils.setField(order, "dongEntity", dong);
 		ReflectionTestUtils.setField(order, "gu", "강남구");
 		ReflectionTestUtils.setField(order, "dong", "삼성동");
-		ReflectionTestUtils.setField(order, "addressDetails", "테스트주소 123");
+		ReflectionTestUtils.setField(order, "addressDetails", "테스트주소 123입니다아아");
 
 		// 테스트 이미지
 		image = Image.builder()

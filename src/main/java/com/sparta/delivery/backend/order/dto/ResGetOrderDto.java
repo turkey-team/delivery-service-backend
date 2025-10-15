@@ -43,7 +43,7 @@ public class ResGetOrderDto {
 	@Schema(description = "상세 주소", example = "백양로 65")
 	private String addressDetail;
 
-	@Schema(description = "고객 연락처", example = "010-1234-5678")
+	@Schema(description = "고객 연락처", example = "01012345678")
 	private String phoneNumber;
 
 	@Schema(description = "주문 생성일", example = "2025-10-13T06:43:02.892Z")

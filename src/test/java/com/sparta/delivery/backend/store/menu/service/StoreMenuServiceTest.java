@@ -80,7 +80,7 @@ class StoreMenuServiceTest {
 		owner = Owner.builder()
 			.nickname("Owner1234")
 			.email("testOwner1@naver.com")
-			.phoneNumber("010-2222-3333")
+			.phoneNumber("01022223333")
 			.user(user)
 			.build();
 		ReflectionTestUtils.setField(owner, "id", UUID.randomUUID());
@@ -95,7 +95,7 @@ class StoreMenuServiceTest {
 			.deliveryFee(1500)
 			.regionDong(null) // 추후 필요하면 더미 Dong 생성
 			.status(StoreStatusEnum.OPEN)
-			.phoneNumber("010-1234-5678")
+			.phoneNumber("01012345678")
 			.build();
 		ReflectionTestUtils.setField(store, "id", UUID.randomUUID());
 

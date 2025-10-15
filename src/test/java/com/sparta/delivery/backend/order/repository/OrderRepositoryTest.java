@@ -79,7 +79,7 @@ class OrderRepositoryTest {
 			.user(ownerUser)
 			.nickname("테스트점주")
 			.email("owner@test.com")
-			.phoneNumber("010-0000-0000")
+			.phoneNumber("01000000000")
 			.build();
 		em.persist(owner);
 
@@ -87,7 +87,7 @@ class OrderRepositoryTest {
 			.user(customerUser)
 			.nickname("테스트고객")
 			.email("hong@test.com")
-			.phoneNumber("010-1234-5678")
+			.phoneNumber("01012345678")
 			.build();
 		em.persist(customer);
 
@@ -122,13 +122,13 @@ class OrderRepositoryTest {
 		store = Store.builder()
 			.owner(owner)
 			.name("테스트가게")
-			.addressDetails("서울시 강남구")
+			.addressDetails("서울시 강남구 어디인가입니다")
 			.reviewRate(4.5)
 			.minOrderPrice(10000)
 			.deliveryFee(2000)
 			.regionDong(dong)
 			.status(StoreStatusEnum.OPEN)
-			.phoneNumber("02-1111-2222")
+			.phoneNumber("03111112222")
 			.build();
 		em.persist(store);
 
@@ -147,7 +147,7 @@ class OrderRepositoryTest {
 			.dongEntity(dong)
 			.gu("강남구")
 			.dong("삼성동")
-			.addressDetails("삼성로 100")
+			.addressDetails("삼성로 100의 주변에 있어요")
 			.orderStatus(OrderStatus.ORDERED)
 			.payMethod(PayMethod.CARD)
 			.build();
