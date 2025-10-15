@@ -86,15 +86,21 @@ public class StoreMenuService {
 		int page,
 		int size
 	) {
-		storeRepository.findById(storeId)
+		Store store = storeRepository.findById(storeId)
 			.orElseThrow(() -> new IllegalArgumentException("Store not found"));
 
 		Pageable pageable = PageRequest.of(page, size, Sort.by("sortOrder").ascending());
 
 		Page<StoreMenu> storeMenuList;
 
-		// 기본값은 삭제되지 않은 값들만 조회
-		storeMenuList = storeMenuRepository.findAllByStoreIdAndDeletedAtIsNull(storeId, pageable);
+		// Customer || Owner 이지만 본인의 가게가 아닌 경우
+		if (user.getRole() == UserRoleEnum.CUSTOMER || !store.getOwner().getUser().getPublicId().equals(user.getPublicId())) {
+			// 숨김되지 않은 메뉴만 조회
+			storeMenuList = storeMenuRepository.findAllByStoreIdAndDeletedAtIsNullAndHiddenAtIsNull(storeId, pageable);
+		} else {
+			// 가게의 Owner, Manager, Master는 숨김된 메뉴 포함 조회
+			storeMenuList = storeMenuRepository.findAllByStoreIdAndDeletedAtIsNull(storeId, pageable);
+		}
 
 		/* 현재는 Manager, Master 도 삭제된 값들을 보지 못하도록 설계하기로 결정
 		// UserRole이 Manager, Master이면 softDelete 된 목록들도 조회할 수 있게 처리

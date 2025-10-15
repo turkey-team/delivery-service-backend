@@ -389,32 +389,118 @@ class StoreMenuServiceTest {
 	class GetListStoreMenuTest {
 
 		@Test
-		@DisplayName("성공")
-		// 추후에 바뀔 가능성 있음
-		// @DisplayName("성공 - Owner는 softDelete 되지 않은 메뉴들만 조회")
-		void getList_success() {
+		@DisplayName("성공 - Customer는 숨김된 메뉴를 조회하지 않음")
+		void getList_customer_excludesHiddenMenus() {
 			/* given */
 			UUID storeId = store.getId();
 			int page = 0;
 			int size = 10;
 			Pageable pageable = PageRequest.of(page, size, Sort.by("sortOrder").ascending());
 
-			reqCreateStoreMenuDto = new ReqCreateStoreMenuDto();
-			reqCreateStoreMenuDto.setName("새우버거");
-			reqCreateStoreMenuDto.setImageUrl(image.getImageUrl());
-			reqCreateStoreMenuDto.setPrice(3000);
-			reqCreateStoreMenuDto.setDescription("새우, 마요네즈가 들어있습니다.");
-			reqCreateStoreMenuDto.setPrepTime("10분");
-			reqCreateStoreMenuDto.setStockStatus(StockStatus.LOW_STOCK);
-			reqCreateStoreMenuDto.setIsHidden(false);
+			User customerUser = User.builder()
+				.username("customerUser")
+				.password("pass")
+				.role(UserRoleEnum.CUSTOMER)
+				.build();
+			ReflectionTestUtils.setField(customerUser, "publicId", UUID.randomUUID());
 
-			// 테스트 가게 메뉴
+			// 메뉴 2만 숨김 처리
+			menu1.setHiddenAt(null);
 			menu2 = StoreMenu.builder()
 				.reqCreateStoreMenuDto(reqCreateStoreMenuDto)
 				.store(store)
 				.image(image)
 				.build();
-			ReflectionTestUtils.setField(menu2, "id", UUID.randomUUID()); // Test UUID 주입
+			ReflectionTestUtils.setField(menu2, "id", UUID.randomUUID());
+			menu2.setHiddenAt(true);
+
+			List<StoreMenu> menuList = List.of(menu1);
+			Page<StoreMenu> pageResult = new org.springframework.data.domain.PageImpl<>(menuList, pageable,
+				menuList.size());
+
+			when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+			when(storeMenuRepository.findAllByStoreIdAndDeletedAtIsNullAndHiddenAtIsNull(storeId, pageable))
+				.thenReturn(pageResult);
+
+			/* when */
+			Page<ResGetListStoreMenuDto> resGetListStoreMenuDto = storeMenuService.getStoreMenusByStoreId(customerUser, storeId, 0,
+				10);
+
+			/* then */
+			assertNotNull(resGetListStoreMenuDto);
+			assertEquals(1, resGetListStoreMenuDto.getContent().size());
+			assertEquals(menu1.getName(), resGetListStoreMenuDto.getContent().get(0).getName());
+			verify(storeMenuRepository, times(1))
+				.findAllByStoreIdAndDeletedAtIsNullAndHiddenAtIsNull(storeId, pageable);
+		}
+
+		@Test
+		@DisplayName("성공 - 다른 가게의 Owner는 숨김된 메뉴를 조회하지 않음")
+		void getList_differentOwner_cannotAccessOtherStore() {
+			/* given */
+			UUID storeId = store.getId();
+			int page = 0;
+			int size = 10;
+			Pageable pageable = PageRequest.of(page, size, Sort.by("sortOrder").ascending());
+
+			// 새로운 다른 Owner 유저 생성
+			User differentOwner = User.builder()
+				.username("otherOwner")
+				.password("testPass")
+				.role(UserRoleEnum.OWNER)
+				.build();
+			ReflectionTestUtils.setField(differentOwner, "publicId", UUID.randomUUID());
+
+			when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+
+			// 메뉴 2만 숨김 처리
+			menu1.setHiddenAt(null);
+			menu2 = StoreMenu.builder()
+				.reqCreateStoreMenuDto(reqCreateStoreMenuDto)
+				.store(store)
+				.image(image)
+				.build();
+			ReflectionTestUtils.setField(menu2, "id", UUID.randomUUID());
+			menu2.setHiddenAt(true);
+
+			List<StoreMenu> menuList = List.of(menu1);
+			Page<StoreMenu> pageResult = new org.springframework.data.domain.PageImpl<>(menuList, pageable,
+				menuList.size());
+
+			when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+			when(storeMenuRepository.findAllByStoreIdAndDeletedAtIsNullAndHiddenAtIsNull(storeId, pageable))
+				.thenReturn(pageResult);
+
+			/* when */
+			Page<ResGetListStoreMenuDto> resGetListStoreMenuDto = storeMenuService.getStoreMenusByStoreId(differentOwner, storeId, 0,
+				10);
+
+			/* then */
+			assertNotNull(resGetListStoreMenuDto);
+			assertEquals(1, resGetListStoreMenuDto.getContent().size());
+			assertEquals(menu1.getName(), resGetListStoreMenuDto.getContent().get(0).getName());
+			verify(storeMenuRepository, times(1))
+				.findAllByStoreIdAndDeletedAtIsNullAndHiddenAtIsNull(storeId, pageable);
+		}
+
+		@Test
+		@DisplayName("성공 - 가게의 Owner 본인은 숨긴 메뉴도 조회 가능")
+		void getList_owner_includesHiddenMenus() {
+			/* given */
+			UUID storeId = store.getId();
+			int page = 0;
+			int size = 10;
+			Pageable pageable = PageRequest.of(page, size, Sort.by("sortOrder").ascending());
+
+			// 메뉴 2만 숨김 처리
+			menu1.setHiddenAt(null);
+			menu2 = StoreMenu.builder()
+				.reqCreateStoreMenuDto(reqCreateStoreMenuDto)
+				.store(store)
+				.image(image)
+				.build();
+			ReflectionTestUtils.setField(menu2, "id", UUID.randomUUID());
+			menu2.setHiddenAt(true);
 
 			List<StoreMenu> menuList = List.of(menu1, menu2);
 			Page<StoreMenu> pageResult = new org.springframework.data.domain.PageImpl<>(menuList, pageable,
