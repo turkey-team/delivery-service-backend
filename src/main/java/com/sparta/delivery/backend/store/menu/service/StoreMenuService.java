@@ -212,7 +212,7 @@ public class StoreMenuService {
 		Integer minSortOrder = storeMenuRepository.findMinSortOrderByStore(storeId);
 		if (minSortOrder == null) minSortOrder = 0;
 
-		storeMenu.softDelete(user.getPublicId(), minSortOrder);
+		storeMenu.softDelete(user.getId(), minSortOrder);
 		// 남은 메뉴들 순서 재정렬
 		reorderSortOrder(storeId);
 	}
