@@ -1,13 +1,20 @@
 package com.sparta.delivery.backend.manager.service;
 
+import java.util.List;
+import java.util.UUID;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sparta.delivery.backend.global.excpetion.DuplicateUsernameException;
 import com.sparta.delivery.backend.manager.dto.ReqCreateManagerDto;
+import com.sparta.delivery.backend.manager.dto.ReqUpdateRoleDto;
+import com.sparta.delivery.backend.manager.dto.ResGetManagerDetailDto;
+import com.sparta.delivery.backend.manager.dto.ResGetManagerSummaryDto;
 import com.sparta.delivery.backend.manager.entity.Manager;
 import com.sparta.delivery.backend.manager.repository.ManagerRepository;
+import com.sparta.delivery.backend.security.UserDetailsImpl;
 import com.sparta.delivery.backend.user.entity.User;
 import com.sparta.delivery.backend.user.entity.UserRoleEnum;
 import com.sparta.delivery.backend.user.repository.UserRepository;
@@ -44,4 +51,44 @@ public class ManagerService {
 
 		managerRepository.save(manager);
 	}
+
+	@Transactional(readOnly = true)
+	public List<ResGetManagerSummaryDto> getAllManagers() {
+		return managerRepository.findAllByDeletedAtIsNull().stream()
+			.map(ResGetManagerSummaryDto::from)
+			.toList();
+	}
+
+	@Transactional(readOnly = true)
+	public ResGetManagerDetailDto getManager(UUID managerUserPublicId) {
+		Manager manager = managerRepository.findByUserPublicIdAndDeletedAtIsNull(managerUserPublicId)
+			.orElseThrow(() -> new IllegalArgumentException("잘못된 유저 아이디입니다."));
+
+		return ResGetManagerDetailDto.from(manager);
+	}
+
+	@Transactional
+	public void updateRole(UUID managerUserPublicId, ReqUpdateRoleDto requestDto) {
+		Manager manager = managerRepository.findByUserPublicIdAndDeletedAtIsNull(managerUserPublicId)
+			.orElseThrow(() -> new IllegalArgumentException("잘못된 유저 아이디입니다."));
+
+		if (manager.getUserRole().equals(UserRoleEnum.MASTER)) {
+			throw new IllegalArgumentException("MASTER의 권한은 변경할 수 없습니다.");
+		}
+
+		manager.updateRole(requestDto.getRole());
+	}
+
+	@Transactional
+	public void deleteManager(UUID managerUserPublicId, UserDetailsImpl userDetails) {
+		Manager manager = managerRepository.findByUserPublicIdAndDeletedAtIsNull(managerUserPublicId)
+			.orElseThrow(() -> new IllegalArgumentException("잘못된 유저 아이디입니다."));
+
+		if (manager.getUserRole().equals(UserRoleEnum.MASTER)) {
+			throw new IllegalArgumentException("MASTER는 삭제할 수 없습니다.");
+		}
+
+		manager.delete(userDetails.getId());
+	}
+
 }
