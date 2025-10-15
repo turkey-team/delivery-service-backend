@@ -1,5 +1,6 @@
 package com.sparta.delivery.backend.owner.service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -23,6 +24,8 @@ import com.sparta.delivery.backend.owner.dto.ResGetOwnerDto;
 import com.sparta.delivery.backend.owner.entity.Owner;
 import com.sparta.delivery.backend.owner.repository.OwnerRepository;
 import com.sparta.delivery.backend.security.UserDetailsImpl;
+import com.sparta.delivery.backend.store.entity.Store;
+import com.sparta.delivery.backend.store.repository.StoreRepository;
 import com.sparta.delivery.backend.user.entity.User;
 import com.sparta.delivery.backend.user.entity.UserRoleEnum;
 import com.sparta.delivery.backend.user.repository.UserRepository;
@@ -41,6 +44,7 @@ public class OwnerService {
 	private final EmailVerificationTokenValidator emailVerificationTokenValidator;
 	private final RedisTemplate redisTemplate;
 	private final EmailSender emailSender;
+	private final StoreRepository storeRepository;
 
 	@Transactional
 	public void createOwner(ReqCreateOwnerDto requestDto) {
@@ -169,6 +173,9 @@ public class OwnerService {
 	@Transactional
 	public void deleteCurrentOwner(UserDetailsImpl userDetails) {
 		Owner owner = getOwnerByUserId(userDetails);
+		List<Store> stores = storeRepository.findByOwner(owner);
+
+		stores.forEach(s -> s.delete(userDetails.getId()));
 		owner.delete(userDetails.getId());
 	}
 
@@ -176,6 +183,9 @@ public class OwnerService {
 	public void deleteOwnerByManager(UserDetailsImpl userDetails, UUID ownerUserPublicId) {
 		Owner owner = ownerRepository.findByUserPublicIdAndDeletedAtIsNull(ownerUserPublicId)
 			.orElseThrow(() -> new IllegalArgumentException("잘못된 유저 아이디 입니다."));
+		List<Store> stores = storeRepository.findByOwner(owner);
+
+		stores.forEach(s -> s.delete(userDetails.getId()));
 		owner.delete(userDetails.getId());
 	}
 

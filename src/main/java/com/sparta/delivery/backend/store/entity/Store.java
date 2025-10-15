@@ -127,4 +127,9 @@ public class Store extends BaseEntity {
 	public void updateStoreStatus(StoreStatusEnum status) {
 		this.status = status;
 	}
+
+	public void delete(Long deletedBy) {
+		this.softDelete(deletedBy);
+		//추가적으로 지워져야 하는 부분 고민해보기
+	}
 }
