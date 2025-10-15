@@ -81,6 +81,7 @@ public class StoreMenuService {
 	// 전체 메뉴 조회 (페이징)
 	@Transactional(readOnly = true)
 	public Page<ResGetListStoreMenuDto> getStoreMenusByStoreId(
+		User user,
 		UUID storeId,
 		int page,
 		int size
@@ -90,8 +91,14 @@ public class StoreMenuService {
 
 		Pageable pageable = PageRequest.of(page, size, Sort.by("sortOrder").ascending());
 
-		Page<StoreMenu> storeMenuList =
-			storeMenuRepository.findAllByStoreIdAndDeletedAtIsNull(storeId, pageable);
+		Page<StoreMenu> storeMenuList;
+
+		// UserRole이 Manager || Master이면 softDelete 된 목록들도 조회할 수 있게 처리
+		if (user.getRole() == UserRoleEnum.MANAGER || user.getRole() == UserRoleEnum.MASTER) {
+			storeMenuList = storeMenuRepository.findAllByStoreId(storeId, pageable);
+		} else {
+			storeMenuList = storeMenuRepository.findAllByStoreIdAndDeletedAtIsNull(storeId, pageable);
+		}
 
 		// 메뉴가 하나도 없어도 빈 페이지는 반환
 		if (storeMenuList == null || storeMenuList.isEmpty()) {

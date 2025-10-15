@@ -49,11 +49,12 @@ public class StoreMenuController {
 			@ApiResponse(responseCode = "400", description = "가게 없음")
 	})
 	public ResponseEntity<Page<ResGetListStoreMenuDto>> getAllStoreMenusByStoreId(
+		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable UUID storeId,
 		@RequestParam("page") int page,
 		@RequestParam("size") int size
 	) {
-		Page<ResGetListStoreMenuDto> menus = storeMenuService.getStoreMenusByStoreId(storeId, page - 1, size);
+		Page<ResGetListStoreMenuDto> menus = storeMenuService.getStoreMenusByStoreId(userDetails.getUser(), storeId, page - 1, size);
 		return ResponseEntity.ok(menus);
 	}
 
