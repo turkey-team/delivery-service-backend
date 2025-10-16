@@ -47,7 +47,7 @@ public class DongController {
 
 	private final DongService dongService;
 
-	@Operation(summary = "동 생성", description = "새로운 동을 등록합니다. MANAGER만 사용 가능합니다.")
+	@Operation(summary = "동 생성", description = "새로운 동을 등록합니다. MASTER와 MANAGER만 사용 가능합니다.")
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "201", description = "동이 생성되었습니다.",
 			content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResCreateDongDto.class))),
@@ -86,7 +86,7 @@ public class DongController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(responseDtoList);
 	}
 
-	@Operation(summary = "동 목록 조회", description = "등록된 동 목록을 조회합니다. MANAGER, OWNER, CUSTOMER가 사용가능합니다.")
+	@Operation(summary = "동 목록 조회", description = "등록된 동 목록을 조회합니다. MASTER, MANAGER, OWNER, CUSTOMER가 사용가능합니다.")
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "200", description = "동 목록을 조회했습니다.",
 			content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResReadDongDto.class))),
@@ -109,7 +109,7 @@ public class DongController {
 		return ResponseEntity.ok(responseDtoList);
 	}
 
-	@Operation(summary = "동 수정", description = "기존의 동을 수정합니다. MANAGER만 사용 가능합니다.")
+	@Operation(summary = "동 수정", description = "기존의 동을 수정합니다. MASTER와 MANAGER만 사용 가능합니다.")
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "200", description = "동이 수정되었습니다.",
 			content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResUpdateDongDto.class))),
@@ -148,7 +148,7 @@ public class DongController {
 		return ResponseEntity.ok(responseDto);
 	}
 
-	@Operation(summary = "동 삭제", description = "기존의 동을 삭제합니다. MANAGER만 사용 가능합니다.")
+	@Operation(summary = "동 삭제", description = "기존의 동을 삭제합니다. MASTER와 MANAGER만 사용 가능합니다.")
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "204", description = "동이 삭제되었습니다.",
 			content = @Content()),

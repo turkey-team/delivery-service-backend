@@ -10,6 +10,7 @@ import com.sparta.delivery.backend.ai.dto.ResCreateAiPromptDto;
 import com.sparta.delivery.backend.ai.dto.ResReadAiPromptDto;
 import com.sparta.delivery.backend.ai.entity.AiPrompt;
 import com.sparta.delivery.backend.ai.repository.AiPromptRepository;
+import com.sparta.delivery.backend.global.common.dto.PageResponse;
 
 import lombok.RequiredArgsConstructor;
 
@@ -35,9 +36,11 @@ public class AiPromptService {
 	}
 
 	@Transactional(readOnly = true)
-	public Page<ResReadAiPromptDto> getAllAiPrompts(Pageable pageable) {
-		return aiPromptRepository.findAll(pageable)
+	public PageResponse<ResReadAiPromptDto> getAllAiPrompts(Pageable pageable) {
+		Page<ResReadAiPromptDto> responseDtoPage = aiPromptRepository.findAll(pageable)
 			.map(ResReadAiPromptDto::from);
+
+		return PageResponse.of(responseDtoPage);
 	}
 
 }
