@@ -71,7 +71,7 @@ public class CustomerController {
 		@ApiResponse(responseCode = "403", description = "권한 없음", content = @Content(schema = @Schema(hidden = true))),
 		@ApiResponse(responseCode = "404", description = "고객 정보를 찾을 수 없음", content = @Content(schema = @Schema(hidden = true)))
 	})
-	@Secured(UserRoleEnum.Authority.CUSTOMER)
+	@PreAuthorize("hasRole('CUSTOMER')")
 	@GetMapping("/me")
 	public ResponseEntity<ResGetMyCustomerDto> getCurrentCustomer(
 		@AuthenticationPrincipal UserDetailsImpl userDetails) {
@@ -115,7 +115,7 @@ public class CustomerController {
 		@ApiResponse(responseCode = "403", description = "권한 없음", content = @Content(schema = @Schema(hidden = true))),
 		@ApiResponse(responseCode = "404", description = "고객 정보를 찾을 수 없음", content = @Content(schema = @Schema(hidden = true)))
 	})
-	@Secured(UserRoleEnum.Authority.CUSTOMER)
+	@PreAuthorize("hasRole('CUSTOMER')")
 	@PatchMapping("/me")
 	public ResponseEntity<ResGetMyCustomerDto> updateCurrentCustomer(
 		@AuthenticationPrincipal UserDetailsImpl userDetails, @Valid @RequestBody ReqUpdateCustomerDto requestDto) {
@@ -130,7 +130,7 @@ public class CustomerController {
 		@ApiResponse(responseCode = "403", description = "권한 없음", content = @Content(schema = @Schema(hidden = true))),
 		@ApiResponse(responseCode = "404", description = "고객 정보를 찾을 수 없음", content = @Content(schema = @Schema(hidden = true)))
 	})
-	@Secured(UserRoleEnum.Authority.CUSTOMER)
+	@PreAuthorize("hasRole('CUSTOMER')")
 	@PatchMapping("/me/password")
 	public ResponseEntity<Void> changePassword(@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@Valid @RequestBody ReqChangePasswordDto requestDto
@@ -171,7 +171,7 @@ public class CustomerController {
 		@ApiResponse(responseCode = "204", description = "탈퇴 성공"),
 		@ApiResponse(responseCode = "403", description = "권한 없음", content = @Content(schema = @Schema(hidden = true)))
 	})
-	@Secured(UserRoleEnum.Authority.CUSTOMER)
+	@PreAuthorize("hasRole('CUSTOMER')")
 	@DeleteMapping("/me")
 	public ResponseEntity<Void> deleteCurrentCustomer(@AuthenticationPrincipal UserDetailsImpl userDetails) {
 		customerService.deleteCurrentCustomer(userDetails);

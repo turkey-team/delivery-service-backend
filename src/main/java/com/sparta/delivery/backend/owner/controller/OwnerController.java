@@ -71,7 +71,7 @@ public class OwnerController {
         @ApiResponse(responseCode = "403", description = "권한 없음", content = @Content(schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "404", description = "점주 정보를 찾을 수 없음", content = @Content(schema = @Schema(hidden = true)))
     })
-    @Secured(UserRoleEnum.Authority.OWNER)
+	@PreAuthorize("hasRole('OWNER')")
     @GetMapping("/me")
     public ResponseEntity<ResGetMyOwnerDto> getCurrentOwner(
         @AuthenticationPrincipal UserDetailsImpl userDetails) {
@@ -115,7 +115,7 @@ public class OwnerController {
         @ApiResponse(responseCode = "403", description = "권한 없음", content = @Content(schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "404", description = "점주 정보를 찾을 수 없음", content = @Content(schema = @Schema(hidden = true)))
     })
-    @Secured(UserRoleEnum.Authority.OWNER)
+	@PreAuthorize("hasRole('OWNER')")
     @PatchMapping("/me")
     public ResponseEntity<Void> updateCurrentOwner(
         @AuthenticationPrincipal UserDetailsImpl userDetails, 
@@ -131,7 +131,7 @@ public class OwnerController {
         @ApiResponse(responseCode = "403", description = "권한 없음", content = @Content(schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "404", description = "점주 정보를 찾을 수 없음", content = @Content(schema = @Schema(hidden = true)))
     })
-    @Secured(UserRoleEnum.Authority.OWNER)
+	@PreAuthorize("hasRole('OWNER')")
     @PatchMapping("/me/password")
     public ResponseEntity<Void> changePassword(
         @AuthenticationPrincipal UserDetailsImpl userDetails,
@@ -169,7 +169,7 @@ public class OwnerController {
         @ApiResponse(responseCode = "200", description = "탈퇴 성공"),
         @ApiResponse(responseCode = "403", description = "권한 없음", content = @Content(schema = @Schema(hidden = true)))
     })
-    @Secured(UserRoleEnum.Authority.OWNER)
+	@PreAuthorize("hasRole('OWNER')")
     @DeleteMapping("/me")
     public ResponseEntity<Void> deleteCurrentOwner(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         ownerService.deleteCurrentOwner(userDetails);
