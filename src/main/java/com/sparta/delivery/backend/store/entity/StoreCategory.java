@@ -20,11 +20,11 @@ import lombok.NoArgsConstructor;
 public class StoreCategory extends BaseEntity {
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="store_id")
+	@JoinColumn(name="p_store_id")
 	private Store store;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "category_id")
+	@JoinColumn(name = "p_category_id")
 	private Category category;
 
 	@Builder
