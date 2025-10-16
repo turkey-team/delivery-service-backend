@@ -30,6 +30,7 @@ import com.sparta.delivery.backend.customer.entity.Customer;
 import com.sparta.delivery.backend.customer.entity.CustomerAddress;
 import com.sparta.delivery.backend.customer.repository.CustomerAddressRepository;
 import com.sparta.delivery.backend.customer.repository.CustomerRepository;
+import com.sparta.delivery.backend.global.common.dto.PageResponse;
 import com.sparta.delivery.backend.image.entity.Image;
 import com.sparta.delivery.backend.order.dto.ReqCreateOrderDto;
 import com.sparta.delivery.backend.order.dto.ReqUpdateOrderStatusDto;
@@ -317,7 +318,7 @@ class OrderServiceTest {
 			when(orderRepository.findByCustomerId(any(), any(Pageable.class))).thenReturn(mockPage);
 
 			/* when */
-			Page<?> result = orderService.getOrdersByUser(customerUser, 0, 10);
+			PageResponse<?> result = orderService.getOrdersByUser(customerUser, 0, 10);
 
 			/* then */
 			assertEquals(1, result.getTotalElements());
@@ -333,7 +334,7 @@ class OrderServiceTest {
 			when(orderRepository.findByStoreOwnerId(any(), any(Pageable.class))).thenReturn(mockPage);
 
 			/* when */
-			Page<?> result = orderService.getOrdersByUser(ownerUser, 0, 10);
+			PageResponse<?> result = orderService.getOrdersByUser(ownerUser, 0, 10);
 
 			/* then */
 			assertEquals(1, result.getContent().size());
