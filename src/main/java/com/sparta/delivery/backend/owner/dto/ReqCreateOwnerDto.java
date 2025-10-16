@@ -1,11 +1,11 @@
 package com.sparta.delivery.backend.owner.dto;
 
+import com.sparta.delivery.backend.global.validation.annotation.ValidEmail;
 import com.sparta.delivery.backend.global.validation.annotation.ValidPassword;
 import com.sparta.delivery.backend.global.validation.annotation.ValidPhoneNumber;
 import com.sparta.delivery.backend.global.validation.annotation.ValidUsername;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -31,7 +31,7 @@ public class ReqCreateOwnerDto {
 
 	@Schema(description = "이메일", example = "owner@example.com")
 	@NotBlank(message = "이메일은 필수입니다.")
-	@Email(message = "올바른 이메일 형식이 아닙니다.")
+	@ValidEmail
 	@Size(max = 320, message = "이메일은 최대 320자까지 가능합니다.")
 	private String email;
 
