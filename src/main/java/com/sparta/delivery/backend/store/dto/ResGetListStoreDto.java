@@ -2,6 +2,7 @@ package com.sparta.delivery.backend.store.dto;
 
 import java.util.UUID;
 
+import com.sparta.delivery.backend.store.entity.Store;
 import com.sparta.delivery.backend.store.entity.StoreStatusEnum;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -39,5 +40,17 @@ public class ResGetListStoreDto {
 		this.deliveryFee = deliveryFee;
 		this.minOrderPrice = minOrderPrice;
 		this.status = status;
+	}
+
+	public static ResGetListStoreDto from(Store store){
+		return ResGetListStoreDto.builder()
+			.storeId(store.getId())
+			.name(store.getName())
+			.reviewCnt(store.getReviewCnt())
+			.reviewRate(store.getReviewRate())
+			.deliveryFee(store.getDeliveryFee())
+			.minOrderPrice(store.getMinOrderPrice())
+			.status(store.getStatus())
+			.build();
 	}
 }

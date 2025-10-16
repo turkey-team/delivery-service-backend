@@ -86,13 +86,11 @@ public class StoreController {
 	public PageResponse<ResGetListStoreDto> getStores(
 		@RequestParam(value = "page", required = false, defaultValue = "1") int page,
 		@RequestParam(value = "size", required = false, defaultValue = "10") int size,
-		@RequestParam(value = "sort", required = false, defaultValue = "createdAt") String sort,
-		@RequestParam(value = "keyword", required = false, defaultValue = "") String keyword,
-		@RequestParam(value = "category", defaultValue = "") String categoryId,
+		@RequestParam(value = "sort", required = false) String sort,
+		@RequestParam(value = "category", required = false) UUID categoryId,
 		@AuthenticationPrincipal UserDetailsImpl userDetails
 	){
-
-		return storeService.getStores(page, size, sort, keyword, categoryId, userDetails.getUser());
+		return storeService.getStores(page, size, sort, categoryId, userDetails.getUser());
 	}
 
 	@PatchMapping("/stores/{storeId}")
