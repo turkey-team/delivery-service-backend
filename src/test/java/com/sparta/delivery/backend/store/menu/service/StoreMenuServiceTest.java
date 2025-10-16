@@ -22,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sparta.delivery.backend.cart.repository.CartRepository;
 import com.sparta.delivery.backend.customer.entity.Customer;
 import com.sparta.delivery.backend.global.common.dto.PageResponse;
 import com.sparta.delivery.backend.image.entity.Image;
@@ -57,6 +58,9 @@ class StoreMenuServiceTest {
 
 	@InjectMocks
 	private StoreMenuService storeMenuService;
+
+	@Mock
+	private CartRepository cartRepository;
 
 	private User user;
 	private Owner owner;
