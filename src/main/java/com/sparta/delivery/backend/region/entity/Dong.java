@@ -43,7 +43,7 @@ public class Dong extends BaseEntity {
 		sigungu.getDongList().add(this);
 	}
 
-	public void update(Sigungu sigungu, String name, String code) {
+	public void update(Sigungu sigungu, String name, String code, Polygon polygon) {
 		if (sigungu != null) {
 			this.sigungu = sigungu;
 		}
@@ -52,6 +52,9 @@ public class Dong extends BaseEntity {
 		}
 		if (code != null) {
 			this.code = code;
+		}
+		if (polygon != null) {
+			this.polygon = polygon;
 		}
 	}
 

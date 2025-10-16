@@ -3,6 +3,8 @@ package com.sparta.delivery.backend.region.dto;
 import java.time.Instant;
 import java.util.UUID;
 
+import org.locationtech.jts.geom.Polygon;
+
 import com.sparta.delivery.backend.region.entity.Dong;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -27,6 +29,9 @@ public class ResUpdateDongDto {
 	@Schema(description = "동 코드", example = "010")
 	private String code;
 
+	@Schema(description = "동 폴리곤", example = "POLYGON((127.0276199 37.500705, 127.0276201 37.5007051, 127.0276202 37.5007052, 127.0276199 37.500705))")
+	private String polygon;
+
 	@Schema(description = "동 수정 시간", example = "2025-10-09T06:56:18.749259900Z")
 	private Instant updatedAt;
 
@@ -36,6 +41,7 @@ public class ResUpdateDongDto {
 			dong.getSigungu().getId(),
 			dong.getName(),
 			dong.getCode(),
+			dong.getPolygon().toString(),
 			dong.getUpdatedAt()
 		);
 	}
