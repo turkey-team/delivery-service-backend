@@ -62,9 +62,6 @@ public class Store extends BaseEntity {
 	@Column(name = "name")
 	private String name;
 
-	@Column(name = "address_details")
-	private String addressDetails;
-
 	@Column(name = "review_rate")
 	private double reviewRate;
 
