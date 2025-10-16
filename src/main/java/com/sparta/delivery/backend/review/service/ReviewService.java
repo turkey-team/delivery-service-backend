@@ -33,8 +33,6 @@ import com.sparta.delivery.backend.review.util.ReviewGenerationUtil;
 import com.sparta.delivery.backend.store.entity.Store;
 import com.sparta.delivery.backend.store.repository.StoreRepository;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -52,9 +50,6 @@ public class ReviewService {
 	private final ReplyRepository replyRepository;
 
 	private final ReviewGenerationUtil util;
-
-	@PersistenceContext
-	private EntityManager em;
 
 	private static final String REVIEW_CACHE_NAME = "reviewList";
 
@@ -127,8 +122,6 @@ public class ReviewService {
 		reviewRepository.save(review);
 
 		store.addReview(review.getRate());
-		em.flush();
-		em.clear();
 
 		util.increaseGeneration(storeId);
 

@@ -1,6 +1,7 @@
 package com.sparta.delivery.backend.review.repository;
 
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -32,6 +33,7 @@ public interface ReviewRepository extends JpaRepository<Review, UUID>, ReviewRep
 		Double avg = reviewRepository.findStoreWithAverageRating(store.getId());
 	}*/
 
+	Optional<Review> findByIdAndDeletedAtIsNull(UUID reviewId);
 
 	@Modifying(clearAutomatically = true, flushAutomatically = true)
 	@Query("UPDATE Review r SET r.deletedAt = :deletedAt, r.deletedBy = :deletedBy WHERE r.store.id = :storeId")

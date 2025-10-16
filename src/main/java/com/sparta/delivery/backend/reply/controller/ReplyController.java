@@ -89,7 +89,7 @@ public class ReplyController {
 		@ApiResponse(responseCode = "200", description = "답글 생성 성공"),
 		@ApiResponse(responseCode = "403", description = "권한 없음"),
 		@ApiResponse(responseCode = "404", description = "리뷰 또는 점주를 찾을 수 없음"),
-		@ApiResponse(responseCode = "500", description = "AI 답글 생성 실패")
+		@ApiResponse(responseCode = "504", description = "AI 답글 생성 실패")
 	})
 	@PreAuthorize("hasAnyRole('OWNER')")
 	@PostMapping("/review/{reviewId}/auto")

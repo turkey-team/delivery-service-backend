@@ -50,7 +50,7 @@ public class ReplyService {
 	public void createReplyTransactionalWithRetry(UUID reviewId, Long userId) {
 		int attempt = 0;
 
-		Review review = reviewRepository.findById(reviewId)
+		Review review = reviewRepository.findByIdAndDeletedAtIsNull(reviewId)
 			.orElseThrow(() -> new NoSuchElementException("리뷰 없음"));
 
 		Owner owner = ownerRepository.findByUserId(userId)
