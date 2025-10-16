@@ -117,7 +117,7 @@ public class OrderService {
 	// Customer, Owner: 전체 주문 내역 조회
 	@Transactional(readOnly = true)
 	public PageResponse<ResGetListOrderDto> getOrdersByUser(User user, int page, int size) {
-		Pageable pageable = PageRequest.of(page, size, Sort.by("createAt").ascending());
+		Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").ascending());
 
 		// DB에서 Role 기반 필터링 후 조회
 		Page<Order> orders = switch (user.getRole()) {
