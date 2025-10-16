@@ -18,7 +18,6 @@ spring:
         use_sql_comments: false
     database-platform: org.hibernate.dialect.PostgreSQLDialect
 
-
 logging:
   level:
     org.hibernate.SQL: debug
@@ -43,7 +42,7 @@ spring:
         format_sql: false
         show_sql: false
         use_sql_comments: false
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
+        database-platform: org.hibernate.spatial.dialect.postgis.PostgisPG10Dialect
 
 logging:
   level:
@@ -95,7 +94,7 @@ spring:
         format_sql: false
         show_sql: false
         use_sql_comments: false
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    database-platform: org.hibernate.spatial.dialect.postgis.PostgisPG10Dialect
 
 logging:
   level:
