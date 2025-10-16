@@ -3,7 +3,6 @@ package com.sparta.delivery.backend.review.controller;
 import java.util.UUID;
 
 import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -91,7 +90,7 @@ public class ReviewController {
 		@ApiResponse(responseCode = "404", description = "고객 또는 리뷰 없음")
 	})
 	@GetMapping("/customer/{customerId}/reviews")
-	public Page<ResViewReviewDto> getMyReviews(
+	public PageResponse<ResViewReviewDto> getMyReviews(
 		@Parameter(description = "리뷰를 조회할 고객의 UUID") @PathVariable UUID customerId,
 		@Parameter(description = "검색 조건 DTO") ReviewRepositorySearchConditionDto condition,
 		@Parameter(description = "페이지네이션 정보") Pageable pageable) {

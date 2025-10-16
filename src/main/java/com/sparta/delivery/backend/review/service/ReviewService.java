@@ -85,9 +85,10 @@ public class ReviewService {
 	}
 
 	// 내가 작성한 reviews list 조회
-	public Page<ResViewReviewDto> getMyReviews(UUID customerId, ReviewRepositorySearchConditionDto condition,
+	public PageResponse<ResViewReviewDto> getMyReviews(UUID customerId, ReviewRepositorySearchConditionDto condition,
 		Pageable pageable) {
-		return reviewRepository.findMyOwnReviews(customerId, condition, pageable);
+		Page<ResViewReviewDto> myOwnReviews = reviewRepository.findMyOwnReviews(customerId, condition, pageable);
+		return PageResponse.of(myOwnReviews);
 	}
 
 	@Transactional
