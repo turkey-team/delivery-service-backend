@@ -34,7 +34,7 @@ public class ReqCreateManagerDto {
 	@NotBlank(message = "매니저 이름은 필수입니다.")
 	private String name;
 
-	@Schema(description = "전화번호", example = "010-1234-5678")
+	@Schema(description = "전화번호", example = "01012345678")
 	@Size(max = 20, message = "전화번호는 최대 20자까지 가능합니다.")
 	@ValidPhoneNumber
 	private String phoneNumber;
