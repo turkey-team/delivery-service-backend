@@ -8,6 +8,7 @@ import org.hibernate.type.SqlTypes;
 
 import com.sparta.delivery.backend.address.entity.Address;
 import com.sparta.delivery.backend.global.common.BaseEntity;
+import com.sparta.delivery.backend.global.common.util.PhoneNumberFormatter;
 import com.sparta.delivery.backend.image.entity.Image;
 import com.sparta.delivery.backend.owner.entity.Owner;
 import com.sparta.delivery.backend.region.entity.Dong;
@@ -159,5 +160,9 @@ public class Store extends BaseEntity {
 
 		this.storeCategories.forEach(storeCategory -> storeCategory.softDelete(deletedBy));
 
+	}
+
+	public String getFormattedPhoneNumber() {
+		return PhoneNumberFormatter.formatPhoneNumber(phoneNumber);
 	}
 }

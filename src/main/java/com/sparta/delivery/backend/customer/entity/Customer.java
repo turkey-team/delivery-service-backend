@@ -1,6 +1,7 @@
 package com.sparta.delivery.backend.customer.entity;
 
 import com.sparta.delivery.backend.global.common.BaseEntity;
+import com.sparta.delivery.backend.global.common.util.PhoneNumberFormatter;
 import com.sparta.delivery.backend.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -64,5 +65,9 @@ public class Customer extends BaseEntity {
 		
 		this.softDelete(userId);
 		user.softDelete(userId);
+	}
+
+	public String getFormattedPhoneNumber() {
+		return PhoneNumberFormatter.formatPhoneNumber(phoneNumber);
 	}
 }

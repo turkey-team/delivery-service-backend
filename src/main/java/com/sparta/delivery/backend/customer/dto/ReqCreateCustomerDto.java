@@ -1,5 +1,6 @@
 package com.sparta.delivery.backend.customer.dto;
 
+import com.sparta.delivery.backend.global.validation.annotation.ValidMobileNumber;
 import com.sparta.delivery.backend.global.validation.annotation.ValidPassword;
 import com.sparta.delivery.backend.global.validation.annotation.ValidUsername;
 
@@ -36,6 +37,7 @@ public class ReqCreateCustomerDto {
 
 	@Schema(description = "전화번호", example = "010-1234-5678", maxLength = 20)
 	@Size(max = 20, message = "전화번호는 최대 20자까지 가능합니다.")
+	@ValidMobileNumber
 	private String phoneNumber;
 
 	@Schema(description = "이메일 인증 토큰", example = "abc123def456", requiredMode = Schema.RequiredMode.REQUIRED)

@@ -43,7 +43,7 @@ public class ResGetManagerDetailDto {
 			.username(manager.getUsername())
 			.name(manager.getName())
 			.email(manager.getEmail())
-			.phoneNumber(manager.getPhoneNumber())
+			.phoneNumber(manager.getFormattedPhoneNumber())
 			.role(manager.getUserRole().name())
 			.createdAt(manager.getCreatedAt())
 			.updatedAt(manager.getUpdatedAt())

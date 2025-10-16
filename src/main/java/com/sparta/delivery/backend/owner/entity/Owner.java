@@ -1,6 +1,7 @@
 package com.sparta.delivery.backend.owner.entity;
 
 import com.sparta.delivery.backend.global.common.BaseEntity;
+import com.sparta.delivery.backend.global.common.util.PhoneNumberFormatter;
 import com.sparta.delivery.backend.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -42,5 +43,9 @@ public class Owner extends BaseEntity {
 		this.email = this.email + "_deleted_" + getId();
 		this.softDelete(deletedBy);
 		user.softDelete(deletedBy); // 다른 PR(고객 탈퇴 기능)에 포함된 기능 추후 반영
+	}
+
+	public String getFormattedPhoneNumber() {
+		return PhoneNumberFormatter.formatPhoneNumber(phoneNumber);
 	}
 }
