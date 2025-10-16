@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import com.google.genai.Client;
 import com.google.genai.types.GenerateContentConfig;
 import com.google.genai.types.GenerateContentResponse;
+import com.sparta.delivery.backend.global.excpetion.ExternalApiTimeoutException;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -36,6 +37,7 @@ public class GoogleAiService {
 		try {
 			log.info("AI 프롬프트 생성");
 			String text = String.format("%s (%d글자 이내로)", reqMessage, maxLength);
+
 			GenerateContentConfig config = GenerateContentConfig.builder()
 				.temperature(temperature)
 				.maxOutputTokens(maxLength * 2)
@@ -45,7 +47,7 @@ public class GoogleAiService {
 			return response.text();
 		} catch (Exception e) {
 			log.error("AI 프롬프트 생성 실패 {}", e.getMessage());
-			throw new RuntimeException("AI 프롬프트 생성 중 오류가 발생했습니다.");
+			throw new ExternalApiTimeoutException("AI 프롬프트 생성 중 오류가 발생했습니다.");
 		}
 
 	}

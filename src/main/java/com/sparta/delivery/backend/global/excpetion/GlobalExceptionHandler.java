@@ -136,4 +136,18 @@ public class GlobalExceptionHandler {
 			HttpStatus.FORBIDDEN
 		);
 	}
+
+	@ExceptionHandler({ExternalApiTimeoutException.class})
+	public ResponseEntity<ApiException> handleException(ExternalApiTimeoutException ex, HttpServletRequest request) {
+		String errorMessage = ex.getMessage();
+		slackService.ifPresent(service ->
+			service.sendMessage(request.getRequestURI(), ex.getClass().getSimpleName(), errorMessage)
+		);
+
+		ApiException apiException = new ApiException(errorMessage, HttpStatus.GATEWAY_TIMEOUT.value());
+		return new ResponseEntity<>(
+			apiException,
+			HttpStatus.GATEWAY_TIMEOUT
+		);
+	}
 }
