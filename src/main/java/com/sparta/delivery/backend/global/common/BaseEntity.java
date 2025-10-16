@@ -57,8 +57,10 @@ public class BaseEntity {
 	}
 
 	public void softDelete(Long userId) {
-		this.deletedAt = Instant.now();
-		this.deletedBy = userId;
+		if (deletedAt == null) {
+			this.deletedAt = Instant.now();
+			this.deletedBy = userId;
+		}
 	}
 
 	public boolean isDeleted() {

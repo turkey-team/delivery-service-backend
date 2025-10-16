@@ -67,8 +67,10 @@ public class User {
 	}
 
 	public void softDelete(Long userId) {
-		this.username = username + "_deleted_" + this.id;
-		this.deletedAt = Instant.now();
-		this.deletedBy = userId;
+		if (this.deletedAt == null) {
+			this.username = username + "_deleted_" + this.id;
+			this.deletedAt = Instant.now();
+			this.deletedBy = userId;
+		}
 	}
 }

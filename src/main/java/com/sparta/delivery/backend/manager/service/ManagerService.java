@@ -31,7 +31,6 @@ public class ManagerService {
 
 	@Transactional
 	public void createManager(ReqCreateManagerDto requestDto) {
-		//같은 메일로 다른 사용자 요청 가능하도록 할지 정책 결정필요
 		userRepository.findByUsernameAndDeletedAtIsNull(requestDto.getUsername())
 			.ifPresent(user -> {
 				throw new DuplicateUsernameException("이미 존재하는 사용자명입니다.");
