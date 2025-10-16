@@ -17,12 +17,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sparta.delivery.backend.address.entity.Address;
 import com.sparta.delivery.backend.customer.entity.Customer;
 import com.sparta.delivery.backend.global.excpetion.UnauthorizedException;
 import com.sparta.delivery.backend.manager.entity.Manager;
 import com.sparta.delivery.backend.manager.repository.ManagerRepository;
 import com.sparta.delivery.backend.owner.entity.Owner;
 import com.sparta.delivery.backend.owner.repository.OwnerRepository;
+import com.sparta.delivery.backend.region.entity.Dong;
 import com.sparta.delivery.backend.reply.dto.ReqCreateReplyDto;
 import com.sparta.delivery.backend.reply.dto.ReqUpdateReplyDto;
 import com.sparta.delivery.backend.reply.dto.ResDeleteReplyDto;
@@ -126,11 +128,10 @@ class ReplyServiceTest {
 		testStore = Store.builder()
 			.owner(testOwner)
 			.name("테스트가게")
-			.addressDetails("서울시 테스트구 테스트동 123")
+			.address(Address.builder().dong(Dong.builder().code("123").build()).fullAddress("강남구").build())
 			.reviewRate(0.0)
 			.minOrderPrice(15000)
 			.deliveryFee(3000)
-			.regionDong(null)
 			.status(StoreStatusEnum.OPEN)
 			.phoneNumber("010-5555-6666")
 			.build();

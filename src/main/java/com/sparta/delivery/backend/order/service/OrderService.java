@@ -102,7 +102,7 @@ public class OrderService {
 				.order(order)
 				.storeMenu(cart.getMenu())
 				.build());
-			cart.softDelete();
+			cart.delete();
 		});
 
 		return order.getId(); // 생성된 Order ID 반환

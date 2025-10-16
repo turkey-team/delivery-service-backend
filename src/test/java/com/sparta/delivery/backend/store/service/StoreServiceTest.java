@@ -222,45 +222,45 @@ public class StoreServiceTest {
 		// ReqCreateStoreDto Builder 추가
 
 		// given
-		long userId = 1L;
-		UUID userPublicId = UUID.randomUUID();
-		UUID ownerId = UUID.randomUUID();
-
-		UUID storeId = UUID.randomUUID();
-		UUID imageId = UUID.randomUUID();
-		UUID categoryId = UUID.randomUUID();
-
-		// 테스트용 User Owner 생성
-		String usernae = "user01";
-		String password = "User01!wasd";
-		UserRoleEnum role = UserRoleEnum.OWNER;
-
-
-		User user = User.builder().username(usernae).password(password).role(role).build();
-		// user.setId(userId);
-		// user.setPublicId(userPublicId);
-
-		Owner owner = Owner.builder().nickname("ownerTest").email("abc@naver.com").phoneNumber("010147852369").user(user).build();
-		// owner.setId(ownerId);
-
-		Category category = Category.builder().name("한식").build();
-		// category.setId(categoryId);
-
-		List<UUID> categories = List.of(category.getId());
-		List<Category> categoriesList = List.of(category);
-
-		Dong dong = Dong.builder().code("123").name("테스트동").build();
-		String fullAddress = "광화문로123로 456길";
-
-
-
-		List<String> storeImageUrls = List.of("store1.jpg", "store2.jpg");
-		List<String> businessImageUrls = List.of("biz1.jpg");
-
-		Map<String, List<String>> images = Map.of(
-			"store", storeImageUrls,
-			"business", businessImageUrls
-		);
+		// long userId = 1L;
+		// UUID userPublicId = UUID.randomUUID();
+		// UUID ownerId = UUID.randomUUID();
+		//
+		// UUID storeId = UUID.randomUUID();
+		// UUID imageId = UUID.randomUUID();
+		// UUID categoryId = UUID.randomUUID();
+		//
+		// // 테스트용 User Owner 생성
+		// String usernae = "user01";
+		// String password = "User01!wasd";
+		// UserRoleEnum role = UserRoleEnum.OWNER;
+		//
+		//
+		// User user = User.builder().username(usernae).password(password).role(role).build();
+		// // user.setId(userId);
+		// // user.setPublicId(userPublicId);
+		//
+		// Owner owner = Owner.builder().nickname("ownerTest").email("abc@naver.com").phoneNumber("010147852369").user(user).build();
+		// // owner.setId(ownerId);
+		//
+		// Category category = Category.builder().name("한식").build();
+		// // category.setId(categoryId);
+		//
+		// List<UUID> categories = List.of(category.getId());
+		// List<Category> categoriesList = List.of(category);
+		//
+		// Dong dong = Dong.builder().code("123").name("테스트동").build();
+		// String fullAddress = "광화문로123로 456길";
+		//
+		//
+		//
+		// List<String> storeImageUrls = List.of("store1.jpg", "store2.jpg");
+		// List<String> businessImageUrls = List.of("biz1.jpg");
+		//
+		// Map<String, List<String>> images = Map.of(
+		// 	"store", storeImageUrls,
+		// 	"business", businessImageUrls
+		// );
 
 		// ReqCreateStoreDto requestDto = ReqCreateStoreDto.builder()
 		// 	.name("김밥천국")
@@ -292,28 +292,28 @@ public class StoreServiceTest {
 		// store.setId(storeId);
 
 		// when
-		when(ownerRepository.findByUserPublicIdAndDeletedAtIsNull(userPublicId)).thenReturn(Optional.of(owner));
-		when(dongRepository.findByCode("123")).thenReturn(Optional.of(dong));
-		when(categoryRepository.findAllById(List.of(categoryId))).thenReturn(categoriesList);
-
-		Address address = Address.builder().dong(dong).fullAddress(fullAddress).build();
-
-		List<Image> storeImages = storeImageUrls.stream()
-			.map(url -> Image.builder().imageUrl(url).build())
-			.collect(Collectors.toList());
-		List<Image> businessImages = businessImageUrls.stream()
-			.map(url -> Image.builder().imageUrl(url).build())
-			.collect(Collectors.toList());
-
-
-		// then
-		when(imageRepository.save(any(Image.class))).thenAnswer(inv -> inv.getArgument(0));
-		when(storeRepository.save(any(Store.class))).thenAnswer(invocation -> {
-			Store saved = invocation.getArgument(0);
-			//saved.setId(storeId); // ID 강제 세팅
-			return saved;
-		});
-		when(storeImageRepository.save(any(StoreImage.class))).thenAnswer(inv -> inv.getArgument(0));
+		// when(ownerRepository.findByUserPublicIdAndDeletedAtIsNull(userPublicId)).thenReturn(Optional.of(owner));
+		// when(dongRepository.findByCode("123")).thenReturn(Optional.of(dong));
+		// when(categoryRepository.findAllById(List.of(categoryId))).thenReturn(categoriesList);
+		//
+		// Address address = Address.builder().dong(dong).fullAddress(fullAddress).build();
+		//
+		// List<Image> storeImages = storeImageUrls.stream()
+		// 	.map(url -> Image.builder().imageUrl(url).build())
+		// 	.collect(Collectors.toList());
+		// List<Image> businessImages = businessImageUrls.stream()
+		// 	.map(url -> Image.builder().imageUrl(url).build())
+		// 	.collect(Collectors.toList());
+		//
+		//
+		// // then
+		// when(imageRepository.save(any(Image.class))).thenAnswer(inv -> inv.getArgument(0));
+		// when(storeRepository.save(any(Store.class))).thenAnswer(invocation -> {
+		// 	Store saved = invocation.getArgument(0);
+		// 	//saved.setId(storeId); // ID 강제 세팅
+		// 	return saved;
+		// });
+		// when(storeImageRepository.save(any(StoreImage.class))).thenAnswer(inv -> inv.getArgument(0));
 
 		// when
 		//ResCreateStoreDto result = storeService.createStore(requestDto, user);

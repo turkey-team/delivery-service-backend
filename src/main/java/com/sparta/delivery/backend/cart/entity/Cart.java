@@ -56,7 +56,7 @@ public class Cart {
 		this.createAt = Instant.now();
 	}
 
-	public void softDelete() {
+	public void delete() {
 		this.deletedAt = Instant.now();
 	}
 

@@ -154,7 +154,7 @@ class OrderServiceTest {
 		store = Store.builder()
 			.owner(owner)
 			.name("테스트가게")
-			.regionDong(dong)
+			.address(Address.builder().dong(dong).fullAddress("강남").build())
 			.deliveryFee(2000)
 			.minOrderPrice(10000)
 			.build();

@@ -197,8 +197,8 @@ public class CartServiceTest {
 		assertEquals("테스트 가게", result.getStoreName()); // mockStore.getName() 반환
 
 		// 검증
-		verify(mockCart1, times(1)).softDelete();
-		verify(mockCart2, times(1)).softDelete();
+		verify(mockCart1, times(1)).delete();
+		verify(mockCart2, times(1)).delete();
 		verify(cartRepository, times(1)).saveAll(mockCarts);
 	}
 }
