@@ -1,5 +1,7 @@
 package com.sparta.delivery.backend.region.entity;
 
+import org.locationtech.jts.geom.Polygon;
+
 import com.sparta.delivery.backend.global.common.BaseEntity;
 
 import jakarta.persistence.Column;
@@ -29,11 +31,15 @@ public class Dong extends BaseEntity {
 	@Column(name = "code", length = 3, nullable = false)
 	private String code;
 
+	@Column(name = "polygon", columnDefinition = "geometry(Polygon, 4326)", nullable = false)
+	private Polygon polygon;
+
 	@Builder
-	private Dong(Sigungu sigungu, String name, String code) {
+	private Dong(Sigungu sigungu, String name, String code, Polygon polygon) {
 		this.sigungu = sigungu;
 		this.name = name;
 		this.code = code;
+		this.polygon = polygon;
 		sigungu.getDongList().add(this);
 	}
 
