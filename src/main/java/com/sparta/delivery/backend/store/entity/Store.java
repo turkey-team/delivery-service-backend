@@ -3,6 +3,9 @@ package com.sparta.delivery.backend.store.entity;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import com.sparta.delivery.backend.address.entity.Address;
 import com.sparta.delivery.backend.global.common.BaseEntity;
 import com.sparta.delivery.backend.image.entity.Image;
@@ -75,12 +78,12 @@ public class Store extends BaseEntity {
 	private int deliveryFee;
 
 	@Enumerated(EnumType.STRING)
+	@JdbcTypeCode(SqlTypes.NAMED_ENUM)
 	@Column(name = "status")
 	private StoreStatusEnum status;
 
 	@Column(name = "phone_number")
 	private String phoneNumber;
-
 
 	public void addReview(int rate) {
 		this.reviewRate = (this.reviewRate * this.reviewCnt + rate) / (this.reviewCnt + 1);
