@@ -85,7 +85,6 @@ class ReplyServiceTest {
 			.nickname("테스트닉네임")
 			.email("owner@test.com")
 			.phoneNumber("010-1111-2222")
-			.businessNumber("123-45-67890")
 			.build();
 		ReflectionTestUtils.setField(testOwner, "id", UUID.randomUUID());
 
@@ -185,7 +184,6 @@ class ReplyServiceTest {
 			.nickname("다른점주")
 			.email("other@test.com")
 			.phoneNumber("010-9999-8888")
-			.businessNumber("987-65-43210")
 			.build();
 		ReflectionTestUtils.setField(otherOwner.getUser(), "id", 999L);
 		ReflectionTestUtils.setField(otherOwner, "id", UUID.randomUUID());
@@ -249,7 +247,6 @@ class ReplyServiceTest {
 			.nickname("다른점주")
 			.email("other@test.com")
 			.phoneNumber("010-9999-8888")
-			.businessNumber("987-65-43210")
 			.build();
 		ReflectionTestUtils.setField(otherOwner.getUser(), "id", 999L);
 		ReflectionTestUtils.setField(otherOwner, "id", UUID.randomUUID());
@@ -322,7 +319,6 @@ class ReplyServiceTest {
 			.nickname("다른점주")
 			.email("other@test.com")
 			.phoneNumber("010-9999-8888")
-			.businessNumber("987-65-43210")
 			.build();
 		ReflectionTestUtils.setField(otherOwner.getUser(), "id", 999L);
 		ReflectionTestUtils.setField(otherOwner, "id", UUID.randomUUID());

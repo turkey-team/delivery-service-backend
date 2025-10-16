@@ -19,6 +19,8 @@ import com.sparta.delivery.backend.order.entity.Order;
 import com.sparta.delivery.backend.order.enums.OrderStatus;
 import com.sparta.delivery.backend.order.repository.OrderRepository;
 import com.sparta.delivery.backend.owner.entity.Owner;
+import com.sparta.delivery.backend.reply.entity.Reply;
+import com.sparta.delivery.backend.reply.repository.ReplyRepository;
 import com.sparta.delivery.backend.reply.service.ReplyService;
 import com.sparta.delivery.backend.review.dto.ReqCreateReviewDto;
 import com.sparta.delivery.backend.review.dto.ReqUpdateReviewDto;
@@ -48,6 +50,7 @@ public class ReviewService {
 	private final OrderRepository orderRepository;
 	private final CacheManager cacheManager;
 	private final ReplyService replyService;
+	private final ReplyRepository replyRepository;
 
 	private final ReviewGenerationUtil util;
 
@@ -203,6 +206,11 @@ public class ReviewService {
 		}
 
 		review.softDelete(userId);
+
+		List<Reply> replies = replyRepository.findAllByReviewIdAndDeletedAtIsNull(reviewId);
+		for (Reply reply : replies) {
+			reply.softDelete(userId);
+		}
 
 		Store store = review.getStore();
 		store.deleteReview(review.getRate());
