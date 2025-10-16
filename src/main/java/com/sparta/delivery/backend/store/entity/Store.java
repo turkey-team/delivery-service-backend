@@ -5,12 +5,12 @@ import java.util.List;
 
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import org.locationtech.jts.geom.MultiPolygon;
 
 import com.sparta.delivery.backend.address.entity.Address;
 import com.sparta.delivery.backend.global.common.BaseEntity;
 import com.sparta.delivery.backend.image.entity.Image;
 import com.sparta.delivery.backend.owner.entity.Owner;
-import com.sparta.delivery.backend.region.entity.Dong;
 import com.sparta.delivery.backend.review.entity.Review;
 import com.sparta.delivery.backend.store.dto.ReqUpdateStoreInfoDto;
 import com.sparta.delivery.backend.store.menu.entity.StoreMenu;
@@ -55,6 +55,9 @@ public class Store extends BaseEntity {
 	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	@JoinColumn(name = "p_address_id", nullable = false)
 	private Address address;
+
+	@Column(name = "delivery_zone", columnDefinition = "geometry(MultiPolygon, 4326)", nullable = false)
+	private MultiPolygon deliveryZone;
 
 	@OneToMany(mappedBy = "store", fetch = FetchType.LAZY)
 	private List<StoreCategory> storeCategories = new ArrayList<>();
@@ -102,13 +105,9 @@ public class Store extends BaseEntity {
 	}
 
 	@Builder
-	public Store(Owner owner, String name
-		, double reviewRate
-		, Integer minOrderPrice
-		, int deliveryFee
-		, Address address
-		, StoreStatusEnum status
-		, String phoneNumber) {
+	public Store(Owner owner, String name, double reviewRate, Integer minOrderPrice, int deliveryFee, Address address,
+		StoreStatusEnum status, String phoneNumber, MultiPolygon deliveryZone
+	) {
 		this.owner = owner;
 		this.name = name;
 		this.address = address;
@@ -117,6 +116,7 @@ public class Store extends BaseEntity {
 		this.deliveryFee = deliveryFee;
 		this.status = status;
 		this.phoneNumber = phoneNumber;
+		this.deliveryZone = deliveryZone;
 	}
 
 	public StoreImage addImage(Store store, Image image, StoreImageStatusEnum status) {

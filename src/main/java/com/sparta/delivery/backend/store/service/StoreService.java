@@ -11,6 +11,12 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.MultiPolygon;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -72,6 +78,9 @@ public class StoreService {
 	private final StoreCategoryRepository storeCategoryRepository;
 	private final StoreImageRepository storeImageRepository;
 
+	private static final int WGS84_SRID = 4326;
+	private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory(new PrecisionModel(), WGS84_SRID);
+
 	@Transactional
 	public ResCreateStoreDto createStore(ReqCreateStoreDto requestDto , User user) {
 
@@ -91,6 +100,10 @@ public class StoreService {
 
 		// Region Dong 조회
 		Dong dong = dongRepository.findByCode(requestDto.getRegionCode()).orElseThrow(()->new ResponseStatusException(HttpStatus.BAD_REQUEST,"존재하지 않는 주소지입니다."));
+
+		// 배달가능지역 설정
+		List<Dong> findDongs = dongRepository.findAllByCodeIn(requestDto.getDeliveryRegions());
+		MultiPolygon deliveryZone = createMultiPolygon(findDongs);
 
 		// 카테고리 조회
 
@@ -113,14 +126,18 @@ public class StoreService {
 			List<Image> storeImages = saveImages(storeImageUrls);
 			List<Image> businessImage = saveImages(businessImageUrls);
 
-
 		// 3. store insert
 
 		// store 생성
 		Store store = Store.builder()
 			.owner(owner)
 			.name(requestDto.getName())
-			.address(Address.builder().dong(dong).fullAddress(requestDto.getAddressDetail()).build())
+			.address(Address.builder()
+				.dong(dong)
+				.fullAddress(requestDto.getAddressDetail())
+				.location(createPoint(requestDto.getLongitude(), requestDto.getLatitude()))
+				.build())
+			.deliveryZone(deliveryZone)
 			.deliveryFee(requestDto.getDeliveryFee())
 			.minOrderPrice(requestDto.getMinOrderPrice())
 			.reviewRate(5.0)
@@ -604,6 +621,19 @@ public class StoreService {
 			throw new AccessDeniedException("가게의 소유주가 아닙니다.");
 		}
 
+	}
+
+	// 경도, 위도 좌표로 Point 객체 생성 (SRID 4326 사용)
+	private Point createPoint(Double longitude, Double latitude) {
+		return GEOMETRY_FACTORY.createPoint(new Coordinate(longitude, latitude));
+	}
+
+	private MultiPolygon createMultiPolygon(List<Dong> dongs) {
+		Polygon[] polygons = dongs.stream()
+			.map(Dong::getPolygon)
+			.toArray(Polygon[]::new);
+
+		return GEOMETRY_FACTORY.createMultiPolygon(polygons);
 	}
 
 }

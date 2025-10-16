@@ -1,5 +1,6 @@
 package com.sparta.delivery.backend.region.repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -57,6 +58,18 @@ public interface DongRepository extends JpaRepository<Dong, UUID> {
 		""")
 	Optional<Dong> findByIdAndSigunguCustom(@Param("dongId") UUID dongId, @Param("sigungu") Sigungu sigungu);
 
-	Optional<Dong> findByCode(String code);
+	@Query("""
+		SELECT d
+		FROM Dong d
+		WHERE d.code = :code AND d.deletedAt IS NULL
+		""")
+	Optional<Dong> findByCode(@Param("code") String code);
+
+	@Query("""
+		SELECT d
+		FROM Dong d
+		WHERE d.code IN :codes AND d.deletedAt IS NULL
+		""")
+	List<Dong> findAllByCodeIn(@Param("codes") Collection<String> codes);
 
 }
