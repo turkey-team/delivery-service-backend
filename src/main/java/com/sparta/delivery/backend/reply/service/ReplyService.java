@@ -9,6 +9,7 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sparta.delivery.backend.global.excpetion.ExternalApiTimeoutException;
 import com.sparta.delivery.backend.global.excpetion.UnauthorizedException;
 import com.sparta.delivery.backend.manager.entity.Manager;
 import com.sparta.delivery.backend.manager.repository.ManagerRepository;
@@ -98,6 +99,7 @@ public class ReplyService {
 					} catch (InterruptedException ie) {
 						Thread.currentThread().interrupt();
 						log.error("재시도 중 인터럽트 발생", ie);
+						throw new ExternalApiTimeoutException("타임아웃되었습니다.");
 					}
 				}
 			}
