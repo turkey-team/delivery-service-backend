@@ -2,7 +2,7 @@ package com.sparta.delivery.backend.reply.entity;
 
 import java.util.UUID;
 
-import com.sparta.delivery.backend.common.BaseEntity;
+import com.sparta.delivery.backend.global.common.BaseEntity;
 import com.sparta.delivery.backend.manager.entity.Manager;
 import com.sparta.delivery.backend.owner.entity.Owner;
 import com.sparta.delivery.backend.review.entity.Review;

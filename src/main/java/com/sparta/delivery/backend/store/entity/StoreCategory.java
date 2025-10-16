@@ -1,17 +1,10 @@
 package com.sparta.delivery.backend.store.entity;
 
-import java.time.Instant;
-import java.util.UUID;
-
-import org.hibernate.annotations.UuidGenerator;
-
 import com.sparta.delivery.backend.category.entity.Category;
-import com.sparta.delivery.backend.common.BaseEntity;
+import com.sparta.delivery.backend.global.common.BaseEntity;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -27,11 +20,11 @@ import lombok.NoArgsConstructor;
 public class StoreCategory extends BaseEntity {
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="store_id")
+	@JoinColumn(name="p_store_id")
 	private Store store;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "category_id")
+	@JoinColumn(name = "p_category_id")
 	private Category category;
 
 	@Builder

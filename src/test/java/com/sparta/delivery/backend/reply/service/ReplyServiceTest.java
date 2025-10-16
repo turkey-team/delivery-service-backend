@@ -17,12 +17,16 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sparta.delivery.backend.address.entity.Address;
 import com.sparta.delivery.backend.customer.entity.Customer;
 import com.sparta.delivery.backend.global.excpetion.UnauthorizedException;
 import com.sparta.delivery.backend.manager.entity.Manager;
 import com.sparta.delivery.backend.manager.repository.ManagerRepository;
 import com.sparta.delivery.backend.owner.entity.Owner;
 import com.sparta.delivery.backend.owner.repository.OwnerRepository;
+import com.sparta.delivery.backend.region.entity.Dong;
+import com.sparta.delivery.backend.region.entity.Sido;
+import com.sparta.delivery.backend.region.entity.Sigungu;
 import com.sparta.delivery.backend.reply.dto.ReqCreateReplyDto;
 import com.sparta.delivery.backend.reply.dto.ReqUpdateReplyDto;
 import com.sparta.delivery.backend.reply.dto.ResDeleteReplyDto;
@@ -69,8 +73,34 @@ class ReplyServiceTest {
 	private Long testManagerId = 2L;
 	private Long testCustomerId = 3L;
 
+	private Sido testSido;
+	private Sigungu testSigungu;
+	private Dong testDong;
+
 	@BeforeEach
 	void setUp() {
+		// ===== 0️⃣ Region - Sido, Sigungu, Dong =====
+		testSido = Sido.builder()
+			.name("테스트시도")
+			.code("01")
+			.build();
+		ReflectionTestUtils.setField(testSido, "id", UUID.randomUUID());
+
+		testSigungu = Sigungu.builder()
+			.sido(testSido)
+			.name("테스트시군구")
+			.code("001")
+			.build();
+		ReflectionTestUtils.setField(testSigungu, "id", UUID.randomUUID());
+
+		testDong = Dong.builder()
+			.sigungu(testSigungu)
+			.name("테스트동")
+			.code("123")
+			.build();
+		ReflectionTestUtils.setField(testDong, "id", UUID.randomUUID());
+		testSigungu.getDongList().add(testDong);
+
 		// ===== 1️⃣ Owner User & Owner =====
 		ownerUser = User.builder()
 			.username("testOwner")
@@ -85,7 +115,6 @@ class ReplyServiceTest {
 			.nickname("테스트닉네임")
 			.email("owner@test.com")
 			.phoneNumber("010-1111-2222")
-			.businessNumber("123-45-67890")
 			.build();
 		ReflectionTestUtils.setField(testOwner, "id", UUID.randomUUID());
 
@@ -127,11 +156,10 @@ class ReplyServiceTest {
 		testStore = Store.builder()
 			.owner(testOwner)
 			.name("테스트가게")
-			.addressDetails("서울시 테스트구 테스트동 123")
+			.address(Address.builder().dong(testDong).fullAddress("강남구").build())
 			.reviewRate(0.0)
 			.minOrderPrice(15000)
 			.deliveryFee(3000)
-			.regionDong(null)
 			.status(StoreStatusEnum.OPEN)
 			.phoneNumber("010-5555-6666")
 			.build();
@@ -185,7 +213,6 @@ class ReplyServiceTest {
 			.nickname("다른점주")
 			.email("other@test.com")
 			.phoneNumber("010-9999-8888")
-			.businessNumber("987-65-43210")
 			.build();
 		ReflectionTestUtils.setField(otherOwner.getUser(), "id", 999L);
 		ReflectionTestUtils.setField(otherOwner, "id", UUID.randomUUID());
@@ -249,7 +276,6 @@ class ReplyServiceTest {
 			.nickname("다른점주")
 			.email("other@test.com")
 			.phoneNumber("010-9999-8888")
-			.businessNumber("987-65-43210")
 			.build();
 		ReflectionTestUtils.setField(otherOwner.getUser(), "id", 999L);
 		ReflectionTestUtils.setField(otherOwner, "id", UUID.randomUUID());
@@ -322,7 +348,6 @@ class ReplyServiceTest {
 			.nickname("다른점주")
 			.email("other@test.com")
 			.phoneNumber("010-9999-8888")
-			.businessNumber("987-65-43210")
 			.build();
 		ReflectionTestUtils.setField(otherOwner.getUser(), "id", 999L);
 		ReflectionTestUtils.setField(otherOwner, "id", UUID.randomUUID());

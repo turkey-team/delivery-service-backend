@@ -1,10 +1,12 @@
 package com.sparta.delivery.backend.customer.entity;
 
-import com.sparta.delivery.backend.common.BaseEntity;
+import com.sparta.delivery.backend.global.common.BaseEntity;
 import com.sparta.delivery.backend.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -24,6 +26,9 @@ public class Customer extends BaseEntity {
 
     @Column(name = "phone_number", length = 20)
     private String phoneNumber;
+
+	@OneToMany(mappedBy = "customer", cascade = {CascadeType.PERSIST})
+	private List<CustomerAddress> customerAddresses = new ArrayList<>();
 
     @Builder
     private Customer(User user, String nickname, String email, String phoneNumber) {
@@ -45,8 +50,18 @@ public class Customer extends BaseEntity {
 		this.nickname = nickname;
 	}
 
+	public void addCustomerAddress(CustomerAddress customerAddress) {
+		this.customerAddresses.add(customerAddress);
+		customerAddress.updateCustomer(this);
+	}
+
 	public void delete(Long userId) {
 		this.email = email + "_deleted_" + getId();
+		
+		customerAddresses.forEach(customerAddress -> {
+			customerAddress.delete(userId);
+		});
+		
 		this.softDelete(userId);
 		user.softDelete(userId);
 	}

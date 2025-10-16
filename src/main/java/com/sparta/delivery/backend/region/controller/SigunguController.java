@@ -47,7 +47,7 @@ public class SigunguController {
 
 	private final SigunguService sigunguService;
 
-	@Operation(summary = "시·군·구 생성", description = "새로운 시·군·구를 등록합니다. MANAGER만 사용 가능합니다.")
+	@Operation(summary = "시·군·구 생성", description = "새로운 시·군·구를 등록합니다. MASTER와 MANAGER만 사용 가능합니다.")
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "201", description = "시·군·구가 생성되었습니다.",
 			content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResCreateSigunguDto.class))),
@@ -86,7 +86,7 @@ public class SigunguController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(responseDtoList);
 	}
 
-	@Operation(summary = "시·군·구 목록 조회", description = "등록된 시·군·구 목록을 조회합니다. MANAGER, OWNER, CUSTOMER가 사용가능합니다.")
+	@Operation(summary = "시·군·구 목록 조회", description = "등록된 시·군·구 목록을 조회합니다. MASTER, MANAGER, OWNER, CUSTOMER가 사용가능합니다.")
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "200", description = "시·군·구 목록을 조회했습니다.",
 			content = @Content(mediaType = "application/json",
@@ -111,7 +111,7 @@ public class SigunguController {
 		return ResponseEntity.ok(responseDtoList);
 	}
 
-	@Operation(summary = "시·군·구 수정", description = "기존의 시·군·구를 수정합니다. MANAGER만 사용 가능합니다.")
+	@Operation(summary = "시·군·구 수정", description = "기존의 시·군·구를 수정합니다. MASTER와 MANAGER만 사용 가능합니다.")
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "200", description = "시·군·구가 수정되었습니다.",
 			content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResUpdateSigunguDto.class))),
@@ -150,7 +150,7 @@ public class SigunguController {
 		return ResponseEntity.ok(responseDto);
 	}
 
-	@Operation(summary = "시·군·구 삭제", description = "기존의 시·군·구를 삭제합니다. MANAGER만 사용 가능합니다.")
+	@Operation(summary = "시·군·구 삭제", description = "기존의 시·군·구를 삭제합니다. MASTER와 MANAGER만 사용 가능합니다.")
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "204", description = "시·군·구가 삭제되었습니다.",
 			content = @Content()),

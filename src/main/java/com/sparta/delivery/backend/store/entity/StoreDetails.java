@@ -1,7 +1,6 @@
 package com.sparta.delivery.backend.store.entity;
 
-import com.sparta.delivery.backend.common.BaseEntity;
-import com.sparta.delivery.backend.store.dto.ReqUpdateStoreInfoDto;
+import com.sparta.delivery.backend.global.common.BaseEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -28,7 +27,7 @@ public class StoreDetails extends BaseEntity {
 	@Column(name = "holiday")
 	private String holiday;
 
-	@Column(name = "description")
+	@Column(name = "description", length = 500)
 	private String description;
 
 	@Column(name = "business_number", length = 12)

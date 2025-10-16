@@ -27,7 +27,10 @@ import com.sparta.delivery.backend.address.repository.AddressRepository;
 import com.sparta.delivery.backend.cart.entity.Cart;
 import com.sparta.delivery.backend.cart.repository.CartRepository;
 import com.sparta.delivery.backend.customer.entity.Customer;
+import com.sparta.delivery.backend.customer.entity.CustomerAddress;
+import com.sparta.delivery.backend.customer.repository.CustomerAddressRepository;
 import com.sparta.delivery.backend.customer.repository.CustomerRepository;
+import com.sparta.delivery.backend.global.common.dto.PageResponse;
 import com.sparta.delivery.backend.image.entity.Image;
 import com.sparta.delivery.backend.order.dto.ReqCreateOrderDto;
 import com.sparta.delivery.backend.order.dto.ReqUpdateOrderStatusDto;
@@ -65,7 +68,7 @@ class OrderServiceTest {
 	@Mock
 	private OwnerRepository ownerRepository;
 	@Mock
-	private AddressRepository addressRepository;
+	private CustomerAddressRepository customerAddressRepository;
 	@Mock
 	private OrderMenuRepository orderMenuRepository;
 
@@ -77,6 +80,7 @@ class OrderServiceTest {
 	private StoreMenu storeMenu;
 	private Order order;
 	private Address address;
+	private CustomerAddress customerAddress;
 	private Cart cart;
 	private Dong dong;
 	private Sigungu sigungu;
@@ -135,16 +139,23 @@ class OrderServiceTest {
 			.build();
 		
 		address = Address.builder()
-			.user(customerUser)
 			.dong(dong)
 			.build();
 		ReflectionTestUtils.setField(address, "id", UUID.randomUUID());
-		
+
+		customerAddress = CustomerAddress.builder()
+			.isDefault(true)
+			.address(address)
+			.nickname("우리집")
+			.customer(customer)
+			.build();
+		ReflectionTestUtils.setField(customerAddress, "id", UUID.randomUUID());
+
 		// 테스트 가게
 		store = Store.builder()
 			.owner(owner)
 			.name("테스트가게")
-			.regionDong(dong)
+			.address(Address.builder().dong(dong).fullAddress("강남").build())
 			.deliveryFee(2000)
 			.minOrderPrice(10000)
 			.build();
@@ -216,8 +227,8 @@ class OrderServiceTest {
 			req.setRequestMessage("문앞에 두세요");
 
 			when(customerRepository.findByUserId(any())).thenReturn(Optional.of(customer));
-			when(addressRepository.findByUserIdAndIsDefaultTrueAndDeletedAtIsNull(any()))
-				.thenReturn(Optional.of(address));
+			when(customerAddressRepository.findByCustomerAndIsDefaultTrueAndDeletedAtIsNull(any()))
+				.thenReturn(Optional.of(customerAddress));
 			when(cartRepository.findAllByCustomerIdAndDeletedAtIsNull(any()))
 				.thenReturn(List.of(cart));
 
@@ -244,7 +255,7 @@ class OrderServiceTest {
 		void failure_noAddress() {
 			/* given */
 			lenient().when(customerRepository.findByUserId(any())).thenReturn(Optional.of(customer));
-			lenient().when(addressRepository.findByUserIdAndIsDefaultTrueAndDeletedAtIsNull(any()))
+			lenient().when(customerAddressRepository.findByCustomerAndIsDefaultTrueAndDeletedAtIsNull(any()))
 				.thenReturn(Optional.empty());
 
 			/* when & then */
@@ -278,8 +289,8 @@ class OrderServiceTest {
 				.build();
 
 			when(customerRepository.findByUserId(any())).thenReturn(Optional.of(customer));
-			when(addressRepository.findByUserIdAndIsDefaultTrueAndDeletedAtIsNull(any()))
-				.thenReturn(Optional.of(address));
+			when(customerAddressRepository.findByCustomerAndIsDefaultTrueAndDeletedAtIsNull(any()))
+				.thenReturn(Optional.of(customerAddress));
 			when(cartRepository.findAllByCustomerIdAndDeletedAtIsNull(any()))
 				.thenReturn(List.of(foreignCart));
 
@@ -307,7 +318,7 @@ class OrderServiceTest {
 			when(orderRepository.findByCustomerId(any(), any(Pageable.class))).thenReturn(mockPage);
 
 			/* when */
-			Page<?> result = orderService.getOrdersByUser(customerUser, 0, 10);
+			PageResponse<?> result = orderService.getOrdersByUser(customerUser, 0, 10);
 
 			/* then */
 			assertEquals(1, result.getTotalElements());
@@ -323,7 +334,7 @@ class OrderServiceTest {
 			when(orderRepository.findByStoreOwnerId(any(), any(Pageable.class))).thenReturn(mockPage);
 
 			/* when */
-			Page<?> result = orderService.getOrdersByUser(ownerUser, 0, 10);
+			PageResponse<?> result = orderService.getOrdersByUser(ownerUser, 0, 10);
 
 			/* then */
 			assertEquals(1, result.getContent().size());

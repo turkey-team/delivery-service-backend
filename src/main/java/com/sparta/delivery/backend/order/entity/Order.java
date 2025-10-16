@@ -4,7 +4,10 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sparta.delivery.backend.common.BaseEntity;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import com.sparta.delivery.backend.global.common.BaseEntity;
 import com.sparta.delivery.backend.customer.entity.Customer;
 import com.sparta.delivery.backend.order.dto.ReqUpdateOrderStatusDto;
 import com.sparta.delivery.backend.order.enums.OrderStatus;
@@ -58,13 +61,15 @@ public class Order extends BaseEntity {
 	private String addressDetails;
 
 	@Enumerated(EnumType.STRING)
-	@Column(length = 20, nullable = false)
+	@JdbcTypeCode(SqlTypes.NAMED_ENUM)
+	@Column(nullable = false)
 	private OrderStatus orderStatus;
 
 	@Column(name = "request_message")
 	private String requestMessage;
 
 	@Enumerated(EnumType.STRING)
+	@JdbcTypeCode(SqlTypes.NAMED_ENUM)
 	@Column(name = "pay_method", nullable = false)
 	private PayMethod payMethod;
 
@@ -82,7 +87,8 @@ public class Order extends BaseEntity {
 
 	@Builder
 	private Order(Store store, Customer customer, Dong dongEntity, String gu, String dong,
-		String addressDetails, OrderStatus orderStatus, String requestMessage, PayMethod payMethod, Instant cancelledAt, Long cancelledBy,
+		String addressDetails, OrderStatus orderStatus, String requestMessage, PayMethod payMethod, Instant cancelledAt,
+		Long cancelledBy,
 		String cancelledReason) {
 		this.store = store;
 		this.customer = customer;
@@ -91,7 +97,7 @@ public class Order extends BaseEntity {
 		this.dong = dong;
 		this.addressDetails = addressDetails;
 		this.orderStatus = orderStatus;
-		this.requestMessage =  requestMessage;
+		this.requestMessage = requestMessage;
 		this.payMethod = payMethod;
 		this.cancelledAt = cancelledAt;
 		this.cancelledBy = cancelledBy;

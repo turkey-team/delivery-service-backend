@@ -1,6 +1,9 @@
 package com.sparta.delivery.backend.store.entity;
 
-import com.sparta.delivery.backend.common.BaseEntity;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import com.sparta.delivery.backend.global.common.BaseEntity;
 import com.sparta.delivery.backend.image.entity.Image;
 
 import jakarta.persistence.Column;
@@ -22,14 +25,15 @@ import lombok.NoArgsConstructor;
 @Getter
 public class StoreImage extends BaseEntity {
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "store_id")
+	@JoinColumn(name = "p_store_id")
 	private Store store;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "image_id")
+	@JoinColumn(name = "p_image_id")
 	private Image image;
 
 	@Enumerated(EnumType.STRING)
+	@JdbcTypeCode(SqlTypes.NAMED_ENUM)
 	@Column(name = "status")
 	private StoreImageStatusEnum status;
 
@@ -38,5 +42,10 @@ public class StoreImage extends BaseEntity {
 		this.store = store;
 		this.image = image;
 		this.status = status;
+	}
+
+	public void delete(Long deletedBy) {
+		this.softDelete(deletedBy);
+		this.image.softDelete(deletedBy);
 	}
 }

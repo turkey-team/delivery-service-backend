@@ -11,3 +11,4 @@ spring:
       - mail
       - s3
       - openai
+      - slack

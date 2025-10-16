@@ -1,11 +1,10 @@
 package com.sparta.delivery.backend.review.controller;
 
-import java.util.List;
 import java.util.UUID;
 
 import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.sparta.delivery.backend.global.common.dto.PageResponse;
 import com.sparta.delivery.backend.review.dto.ReqCreateReviewDto;
 import com.sparta.delivery.backend.review.dto.ReqUpdateReviewDto;
 import com.sparta.delivery.backend.review.dto.ResDeleteReviewDto;
@@ -53,11 +53,14 @@ public class ReviewController {
 		@ApiResponse(responseCode = "401", description = "인증 실패"),
 		@ApiResponse(responseCode = "404", description = "리뷰 또는 매장 없음")
 	})
+	// default 추가
 	@GetMapping("/stores/{storeId}/reviews")
-	public List<ResViewReviewDto> getReviews(
+	public PageResponse<ResViewReviewDto> getReviews(
 		@Parameter(description = "리뷰를 조회할 매장의 UUID") @PathVariable UUID storeId,
 		@ParameterObject @ModelAttribute ReviewRepositorySearchConditionDto condition,
-		@Parameter(description = "페이지네이션 정보") @ParameterObject Pageable pageable) {
+		@Parameter(description = "페이지네이션 정보") @ParameterObject
+		@PageableDefault(page = 0, size = 10)
+		Pageable pageable) {
 		return reviewService.getReviews(storeId, condition, pageable);
 	}
 
@@ -87,7 +90,7 @@ public class ReviewController {
 		@ApiResponse(responseCode = "404", description = "고객 또는 리뷰 없음")
 	})
 	@GetMapping("/customer/{customerId}/reviews")
-	public Page<ResViewReviewDto> getMyReviews(
+	public PageResponse<ResViewReviewDto> getMyReviews(
 		@Parameter(description = "리뷰를 조회할 고객의 UUID") @PathVariable UUID customerId,
 		@Parameter(description = "검색 조건 DTO") ReviewRepositorySearchConditionDto condition,
 		@Parameter(description = "페이지네이션 정보") Pageable pageable) {

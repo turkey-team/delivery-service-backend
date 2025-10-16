@@ -13,12 +13,13 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.sparta.delivery.backend.address.entity.Address;
-import com.sparta.delivery.backend.address.repository.AddressRepository;
 import com.sparta.delivery.backend.cart.entity.Cart;
 import com.sparta.delivery.backend.cart.repository.CartRepository;
 import com.sparta.delivery.backend.customer.entity.Customer;
+import com.sparta.delivery.backend.customer.entity.CustomerAddress;
+import com.sparta.delivery.backend.customer.repository.CustomerAddressRepository;
 import com.sparta.delivery.backend.customer.repository.CustomerRepository;
+import com.sparta.delivery.backend.global.common.dto.PageResponse;
 import com.sparta.delivery.backend.order.dto.ReqCreateOrderDto;
 import com.sparta.delivery.backend.order.dto.ReqUpdateOrderStatusDto;
 import com.sparta.delivery.backend.order.dto.ResCheckOutOrderDto;
@@ -45,7 +46,7 @@ public class OrderService {
 	private final OrderRepository orderRepository;
 	private final CustomerRepository customerRepository;
 	private final OwnerRepository ownerRepository;
-	private final AddressRepository addressRepository;
+	private final CustomerAddressRepository customerAddressRepository;
 	private final OrderMenuRepository orderMenuRepository;
 
 	/** 생성 **/
@@ -72,12 +73,12 @@ public class OrderService {
 			throw new SecurityException("본인 장바구니가 아닙니다.");
 		}
 
-		// Address 엔티티에서 Dong 객체 가져오기
-		Address defaultAddressEntity = addressRepository.findByUserIdAndIsDefaultTrueAndDeletedAtIsNull(user.getId())
-			.orElseThrow(() -> new IllegalStateException("기본 주소 정보가 없습니다."));
-
 		// 주문할 고객 customer 조회
 		Customer customer = getCustomerOrThrow(user);
+
+		// Address 엔티티에서 Dong 객체 가져오기
+		CustomerAddress defaultAddressEntity = customerAddressRepository.findByCustomerAndIsDefaultTrueAndDeletedAtIsNull(customer)
+			.orElseThrow(() -> new IllegalStateException("기본 주소 정보가 없습니다."));
 
 		// Order 엔티티 생성 및 저장
 		Order order = Order.builder()
@@ -100,7 +101,7 @@ public class OrderService {
 				.order(order)
 				.storeMenu(cart.getMenu())
 				.build());
-			cart.softDelete();
+			cart.delete(user.getId());
 		});
 
 		return order.getId(); // 생성된 Order ID 반환
@@ -115,8 +116,8 @@ public class OrderService {
 
 	// Customer, Owner: 전체 주문 내역 조회
 	@Transactional(readOnly = true)
-	public Page<ResGetListOrderDto> getOrdersByUser(User user, int page, int size) {
-		Pageable pageable = PageRequest.of(page, size, Sort.by("sortOrder").ascending());
+	public PageResponse<ResGetListOrderDto> getOrdersByUser(User user, int page, int size) {
+		Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").ascending());
 
 		// DB에서 Role 기반 필터링 후 조회
 		Page<Order> orders = switch (user.getRole()) {
@@ -133,10 +134,12 @@ public class OrderService {
 			default -> throw new IllegalArgumentException("지원하지 않는 사용자 유형입니다.");
 		};
 
-		return orders.map(order -> {
+		Page<ResGetListOrderDto> mappedPage = orders.map(order -> {
 			int totalPrice = calculateTotalPrice(order);
 			return ResGetListOrderDto.from(order, totalPrice);
 		});
+
+		return PageResponse.of(mappedPage);
 	}
 
 	// 주문 상세 조회
@@ -160,28 +163,25 @@ public class OrderService {
 	public void updateOrderStatus(User user, UUID orderId, ReqUpdateOrderStatusDto reqUpdateOrderStatusDto) {
 		// 단건 주문 조회
 		Order order = findOrderOrThrow(orderId);
+		
+		// 권한도 있고
+		validateRoleAccess(user, order);
 
-		// 고객 취소 허용: 주문 생성 후 5분 이내 && 요청 상태가 주문 중(취소 가능)
-		boolean isCustomer = user.getRole() == UserRoleEnum.CUSTOMER;
+		// 주문 생성 후 5분 이내 && 요청 상태가 주문 중(취소 가능) 이라면
 		boolean isCancelRequest = reqUpdateOrderStatusDto.getOrderStatus() == OrderStatus.CANCELLED;
-
-		if (isCustomer && isCancelRequest) {
+		if (isCancelRequest) {
 			if (order.getOrderStatus() != OrderStatus.ORDERED) {
 				throw new IllegalStateException("주문중 상태에만 주문을 취소할 수 있습니다.");
 			}
 			long minutesSinceOrder = ChronoUnit.MINUTES.between(order.getCreatedAt(), Instant.now());
 			if (minutesSinceOrder <= 5) {
 				order.updateOrderStatus(user, reqUpdateOrderStatusDto);
+				// 고객 취소 허용
 				orderRepository.save(order);
 				return;
 			} else {
 				throw new IllegalStateException("주문 5분 이내에만 주문을 취소할 수 있습니다.");
 			}
-		}
-
-		// 권한 확인: 이 주문의 가게 주인인지 확인
-		if (!order.getStore().getOwner().getUser().getId().equals(user.getId())) {
-			throw new IllegalStateException("Owner만 주문 상태를 변경할 수 있습니다.");
 		}
 
 		order.updateOrderStatus(user, reqUpdateOrderStatusDto);
@@ -211,13 +211,14 @@ public class OrderService {
 	}
 
 	/** --------------------- Helper --------------------- **/
-	// Owner 본인 확인 || Manager 검증
+	// Customer, Owner 본인 확인 || Manager 검증
 	private void validateRoleAccess(User user, Order order) {
+		boolean isCustomer = order.getCustomer().getUser().getId().equals(user.getId());
 		boolean isOwner = order.getStore().getOwner().getUser().getId().equals(user.getId());
 		boolean isManager = user.getRole() == UserRoleEnum.MANAGER;
 		boolean isMaster = user.getRole() == UserRoleEnum.MASTER;
 
-		if (!(isOwner || isManager || isMaster)) {
+		if (!(isCustomer || isOwner || isManager || isMaster)) {
 			throw new IllegalStateException("접근 권한이 없습니다.");
 		}
 	}
@@ -233,7 +234,7 @@ public class OrderService {
 		boolean isSingleStore = carts.stream().allMatch(c -> c.getMenu().getStore().getId().equals(storeId));
 		if (!isSingleStore) throw new IllegalStateException("여러 매장 메뉴 혼합 불가");
 
-		Address defaultAddress = addressRepository.findByUserIdAndIsDefaultTrueAndDeletedAtIsNull(user.getId())
+		CustomerAddress defaultAddress = customerAddressRepository.findByCustomerAndIsDefaultTrueAndDeletedAtIsNull(customer)
 			.orElseThrow(() -> new IllegalStateException("기본 주소 정보가 없습니다."));
 
 		int menusPrice = carts.stream().mapToInt(c -> c.getMenu().getPrice()).sum();

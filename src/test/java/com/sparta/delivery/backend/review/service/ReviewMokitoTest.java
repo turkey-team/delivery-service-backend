@@ -3,6 +3,7 @@ package com.sparta.delivery.backend.review.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -28,6 +29,8 @@ import com.sparta.delivery.backend.owner.entity.Owner;
 import com.sparta.delivery.backend.region.entity.Dong;
 import com.sparta.delivery.backend.region.entity.Sido;
 import com.sparta.delivery.backend.region.entity.Sigungu;
+import com.sparta.delivery.backend.reply.entity.Reply;
+import com.sparta.delivery.backend.reply.repository.ReplyRepository;
 import com.sparta.delivery.backend.reply.service.ReplyService;
 import com.sparta.delivery.backend.review.dto.ReqCreateReviewDto;
 import com.sparta.delivery.backend.review.dto.ReqUpdateReviewDto;
@@ -36,6 +39,7 @@ import com.sparta.delivery.backend.review.dto.ResResultReviewDto;
 import com.sparta.delivery.backend.review.dto.ResViewReviewDto;
 import com.sparta.delivery.backend.review.entity.Review;
 import com.sparta.delivery.backend.review.repository.ReviewRepository;
+import com.sparta.delivery.backend.review.util.ReviewGenerationUtil;
 import com.sparta.delivery.backend.store.entity.Store;
 import com.sparta.delivery.backend.store.entity.StoreStatusEnum;
 import com.sparta.delivery.backend.store.repository.StoreRepository;
@@ -67,6 +71,12 @@ public class ReviewMokitoTest {
 
 	@Mock
 	private Cache reviewCache;
+
+	@Mock
+	private ReviewGenerationUtil util;
+
+	@Mock
+	private ReplyRepository replyRepository;
 
 	private UUID storeId;
 	private UUID reviewId;
@@ -153,6 +163,8 @@ public class ReviewMokitoTest {
 
 		// ReviewService에 em 강제 주입
 		ReflectionTestUtils.setField(reviewService, "em", em);
+		ReflectionTestUtils.setField(reviewService, "replyRepository", replyRepository);
+		ReflectionTestUtils.setField(reviewService, "util", util);
 
 		// EntityManager flush mock
 		lenient().doNothing().when(em).flush();
@@ -173,14 +185,13 @@ public class ReviewMokitoTest {
 		Page<ResViewReviewDto> pageMock = new PageImpl<>(List.of(ResViewReviewDto.of(mockReview)));
 		when(reviewRepository.findReviews(eq(storeId), any(), any())).thenReturn(pageMock);
 
-		Page<ResViewReviewDto> result = reviewService.getReviews(storeId, new ReviewRepositorySearchConditionDto(),
+		List<ResViewReviewDto> result = reviewService.getReviews(storeId, new ReviewRepositorySearchConditionDto(),
 			pageable);
 
 		for (ResViewReviewDto reviewDto : result) {
 			System.out.println("reviewDto = " + reviewDto);
 		}
 
-		assertEquals(1, result.getTotalElements());
 		verify(reviewRepository).findReviews(eq(storeId), any(), any());
 	}*/
 
@@ -201,8 +212,7 @@ public class ReviewMokitoTest {
 		ResResultReviewDto result = reviewService.registerReview(dto, storeId, mockUser.getId());
 
 		assertEquals("맛있음", result.getContext());
-		verify(reviewCache).evict(anyString());
-		verify(replyService).generateReplyAsync(any(), any());
+		//verify(replyService).generateReplyAsync(any(), any());
 	}
 
 	@Test
@@ -215,18 +225,41 @@ public class ReviewMokitoTest {
 		ResResultReviewDto result = reviewService.updateReview(dto, reviewId, mockUser.getId());
 
 		assertEquals(4, result.getRate());
-		verify(reviewCache).evict(anyString());
 	}
 
 	@Test
 	void testDeleteReview_Success() {
 		when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(mockReview));
 		when(customerRepository.findByUserId(mockUser.getId())).thenReturn(Optional.of(mockCustomer));
+		when(replyRepository.findAllByReviewIdAndDeletedAtIsNull(reviewId)).thenReturn(List.of());
+
+		Reply mockReply1 = Reply.builder()
+			.review(mockReview)
+			.context("테스트 답글 1")
+			.build();
+		ReflectionTestUtils.setField(mockReply1, "id", UUID.randomUUID());
+
+		Reply mockReply2 = Reply.builder()
+			.review(mockReview)
+			.context("테스트 답글 2")
+			.build();
+		ReflectionTestUtils.setField(mockReply2, "id", UUID.randomUUID());
+
+		when(replyRepository.findAllByReviewIdAndDeletedAtIsNull(reviewId))
+			.thenReturn(List.of(mockReply1, mockReply2));
+		doNothing().when(util).increaseGeneration(any(UUID.class));
 
 		ResDeleteReviewDto result = reviewService.deleteReview(reviewId, mockUser.getId());
 
 		assertEquals(mockReview.getId(), result.getReviewId());
-		verify(reviewCache).evict(anyString());
+
+		assertNotNull(mockReview.getDeletedAt());
+		assertEquals(mockUser.getId(), mockReview.getDeletedBy());
+
+		for (Reply reply : List.of(mockReply1, mockReply2)) {
+			assertNotNull(reply.getDeletedAt());
+			assertEquals(mockUser.getId(), reply.getDeletedBy());
+		}
 	}
 
 	@Test

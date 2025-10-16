@@ -94,7 +94,6 @@ public class StoreRepositoryTest {
 
 		owner = Owner.builder()
 			.nickname("사장님")
-			.businessNumber("1234567890")
 			.user(ownerUser)
 			.email("owner@test.net")
 			.phoneNumber("01098745632")

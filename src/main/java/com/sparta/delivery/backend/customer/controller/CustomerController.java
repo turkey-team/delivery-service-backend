@@ -1,7 +1,13 @@
 package com.sparta.delivery.backend.customer.controller;
 
+import java.util.List;
 import java.util.UUID;
 
+import org.springdoc.core.annotations.ParameterObject;
+import org.springdoc.core.converters.models.PageableAsQueryParam;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
@@ -14,6 +20,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sparta.delivery.backend.customer.dto.ReqChangePasswordDto;
@@ -22,9 +29,11 @@ import com.sparta.delivery.backend.customer.dto.ReqPasswordResetDto;
 import com.sparta.delivery.backend.customer.dto.ReqPasswordResetRequestDto;
 import com.sparta.delivery.backend.customer.dto.ReqUpdateCustomerDto;
 import com.sparta.delivery.backend.customer.dto.ResGetCustomerDto;
+import com.sparta.delivery.backend.customer.dto.ResGetCustomersDto;
 import com.sparta.delivery.backend.customer.dto.ResGetMyCustomerDto;
 import com.sparta.delivery.backend.customer.dto.ResPasswordResetRequestDto;
 import com.sparta.delivery.backend.customer.service.CustomerService;
+import com.sparta.delivery.backend.global.common.dto.PageResponse;
 import com.sparta.delivery.backend.security.UserDetailsImpl;
 import com.sparta.delivery.backend.user.entity.UserRoleEnum;
 
@@ -80,6 +89,22 @@ public class CustomerController {
 	@GetMapping("/{customerUserPublicId}")
 	public ResponseEntity<ResGetCustomerDto> getCustomerByUserPublicId(@PathVariable UUID customerUserPublicId) {
 		ResGetCustomerDto response = customerService.getCustomerByUserPublicId(customerUserPublicId);
+		return ResponseEntity.ok(response);
+	}
+
+	@Operation(summary = "고객 목록 조회 (관리자용)", description = "관리자가 고객 목록을 이름으로 검색합니다")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "조회 성공"),
+		@ApiResponse(responseCode = "403", description = "권한 없음", content = @Content(schema = @Schema(hidden = true)))
+	})
+	@PageableAsQueryParam
+	@PreAuthorize("hasAnyRole('MANAGER', 'MASTER')")
+	@GetMapping
+	public ResponseEntity<PageResponse<ResGetCustomersDto>> getCustomers(
+		@RequestParam(required = false) String nickName,
+		@ParameterObject @PageableDefault Pageable pageable
+	) {
+		PageResponse<ResGetCustomersDto> response = customerService.getCustomers(nickName, pageable);
 		return ResponseEntity.ok(response);
 	}
 

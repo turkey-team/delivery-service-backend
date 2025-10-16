@@ -1,13 +1,9 @@
 package com.sparta.delivery.backend.owner.entity;
 
-import com.sparta.delivery.backend.common.BaseEntity;
+import com.sparta.delivery.backend.global.common.BaseEntity;
 import com.sparta.delivery.backend.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.util.UUID;
-
-import org.hibernate.annotations.UuidGenerator;
 
 @Entity
 @Table(name = "p_owner")

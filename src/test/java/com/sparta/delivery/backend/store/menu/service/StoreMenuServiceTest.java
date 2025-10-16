@@ -22,7 +22,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sparta.delivery.backend.cart.repository.CartRepository;
 import com.sparta.delivery.backend.customer.entity.Customer;
+import com.sparta.delivery.backend.global.common.dto.PageResponse;
 import com.sparta.delivery.backend.image.entity.Image;
 import com.sparta.delivery.backend.image.repository.ImageRepository;
 import com.sparta.delivery.backend.owner.entity.Owner;
@@ -57,6 +59,9 @@ class StoreMenuServiceTest {
 	@InjectMocks
 	private StoreMenuService storeMenuService;
 
+	@Mock
+	private CartRepository cartRepository;
+
 	private User user;
 	private Owner owner;
 	private Customer customer;
@@ -89,11 +94,11 @@ class StoreMenuServiceTest {
 		store = Store.builder()
 			.owner(owner) // 더미 Owner
 			.name("테스트용 햄버거 가게")
-			.addressDetails("고양시 덕양구 화정동 백양로 65")
+			//.addressDetails("고양시 덕양구 화정동 백양로 65")
 			.reviewRate(0.0)
 			.minOrderPrice(13000)
 			.deliveryFee(1500)
-			.regionDong(null) // 추후 필요하면 더미 Dong 생성
+			//.regionDong(null) // 추후 필요하면 더미 Dong 생성
 			.status(StoreStatusEnum.OPEN)
 			.phoneNumber("01012345678")
 			.build();
@@ -423,7 +428,7 @@ class StoreMenuServiceTest {
 				.thenReturn(pageResult);
 
 			/* when */
-			Page<ResGetListStoreMenuDto> resGetListStoreMenuDto = storeMenuService.getStoreMenusByStoreId(customerUser, storeId, 0,
+			PageResponse<ResGetListStoreMenuDto> resGetListStoreMenuDto = storeMenuService.getStoreMenusByStoreId(customerUser, storeId, 0,
 				10);
 
 			/* then */
@@ -472,7 +477,7 @@ class StoreMenuServiceTest {
 				.thenReturn(pageResult);
 
 			/* when */
-			Page<ResGetListStoreMenuDto> resGetListStoreMenuDto = storeMenuService.getStoreMenusByStoreId(differentOwner, storeId, 0,
+			PageResponse<ResGetListStoreMenuDto> resGetListStoreMenuDto = storeMenuService.getStoreMenusByStoreId(differentOwner, storeId, 0,
 				10);
 
 			/* then */
@@ -511,7 +516,7 @@ class StoreMenuServiceTest {
 				.thenReturn(pageResult);
 
 			/* when */
-			Page<ResGetListStoreMenuDto> resGetListStoreMenuDto = storeMenuService.getStoreMenusByStoreId(user, storeId, 0,
+			PageResponse<ResGetListStoreMenuDto> resGetListStoreMenuDto = storeMenuService.getStoreMenusByStoreId(user, storeId, 0,
 				10);
 
 			/* then */
@@ -601,7 +606,7 @@ class StoreMenuServiceTest {
 				.thenReturn(pageResult);
 
 			/* when */
-			Page<ResGetListStoreMenuDto> resGetListStoreMenuDto = storeMenuService.getStoreMenusByStoreId(user, storeId, 0,
+			PageResponse<ResGetListStoreMenuDto> resGetListStoreMenuDto = storeMenuService.getStoreMenusByStoreId(user, storeId, 0,
 				10);
 
 			/* then */
@@ -627,12 +632,12 @@ class StoreMenuServiceTest {
 				.thenReturn(Page.empty(pageable));
 
 			/* when */
-			Page<ResGetListStoreMenuDto> result =
+			PageResponse<ResGetListStoreMenuDto> result =
 				storeMenuService.getStoreMenusByStoreId(user, storeId, page, size);
 
 			/* then */
 			assertNotNull(result);
-			assertTrue(result.isEmpty());
+			assertTrue(result.getContent().isEmpty());
 			verify(storeRepository, times(1)).findById(storeId);
 			verify(storeMenuRepository, times(1))
 				.findAllByStoreIdAndDeletedAtIsNull(storeId, pageable);

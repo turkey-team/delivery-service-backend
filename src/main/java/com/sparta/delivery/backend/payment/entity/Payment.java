@@ -2,12 +2,19 @@ package com.sparta.delivery.backend.payment.entity;
 
 import java.time.Instant;
 
-import com.sparta.delivery.backend.common.BaseEntity;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import com.sparta.delivery.backend.global.common.BaseEntity;
+import com.sparta.delivery.backend.order.entity.Order;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -21,6 +28,9 @@ import lombok.NoArgsConstructor;
 public class Payment extends BaseEntity {
 
 	// order
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "p_order_id", nullable = false)
+	private Order order;
 
 	@Column(name = "payment_gateway", nullable = false)
 	private String paymentGateway;
@@ -44,14 +54,17 @@ public class Payment extends BaseEntity {
 	private String acquirerCode; // 카드 매입사 코드
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "payment_status", length = 16, nullable = false)
+	@JdbcTypeCode(SqlTypes.NAMED_ENUM)
+	@Column(name = "payment_status", nullable = false)
 	private PaymentStatus paymentStatus;
 
 	private Instant approvedAt; // 결제 승인 시간
 
 	@Builder
-	private Payment(String paymentGateway, String paymentKey, String paymentMethod, int amount, String cardNumber,
+	private Payment(Order order, String paymentGateway, String paymentKey, String paymentMethod, int amount,
+		String cardNumber,
 		String issuerCode, String acquirerCode, PaymentStatus paymentStatus, Instant approvedAt) {
+		this.order = order;
 		this.paymentGateway = paymentGateway;
 		this.paymentKey = paymentKey;
 		this.paymentMethod = paymentMethod;

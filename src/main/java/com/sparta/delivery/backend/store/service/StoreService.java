@@ -21,8 +21,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.sparta.delivery.backend.address.entity.Address;
 import com.sparta.delivery.backend.category.entity.Category;
 import com.sparta.delivery.backend.category.repository.CategoryRepository;
+import com.sparta.delivery.backend.global.common.dto.PageResponse;
 import com.sparta.delivery.backend.image.entity.Image;
 import com.sparta.delivery.backend.image.repository.ImageRepository;
 import com.sparta.delivery.backend.owner.entity.Owner;
@@ -118,8 +120,7 @@ public class StoreService {
 		Store store = Store.builder()
 			.owner(owner)
 			.name(requestDto.getName())
-			.regionDong(dong)
-			.addressDetails(requestDto.getAddressDetail())
+			.address(Address.builder().dong(dong).fullAddress(requestDto.getAddressDetail()).build())
 			.deliveryFee(requestDto.getDeliveryFee())
 			.minOrderPrice(requestDto.getMinOrderPrice())
 			.reviewRate(5.0)
@@ -209,6 +210,7 @@ public class StoreService {
 		}
 
 		Dong dong = dongRepository.findByCode(requestDto.getRegionDong()).orElseThrow(()->new ResponseStatusException(HttpStatus.BAD_REQUEST,"존재하지 않는 주소지입니다."));
+		Address address = Address.builder().dong(dong).fullAddress(requestDto.getAddressDetails()).build();
 
 		// 현재 등록된 카테고리 조회
 		List<StoreCategory> currentCategories = store.getStoreCategories();
@@ -356,15 +358,14 @@ public class StoreService {
 		storeImageRepository.saveAll(toAddStoreImages);
 
 		// Update
-		store.updateStoreInfo(requestDto, dong);
+		store.updateStoreInfo(requestDto, address);
 		storeRepository.save(store);
 
 		ResUpdateStoreInfoDto resUpdateStoreInfoDto = ResUpdateStoreInfoDto.builder()
 			.storeId(store.getId())
 			.storeName(store.getName())
-			.addressDetails(store.getAddressDetails())
+			.fullAddress(store.getAddress().getFullAddress())
 			.phoneNumber(store.getPhoneNumber())
-			.regionDong(store.getRegionDong().getCode())
 			.build();
 
 		return resUpdateStoreInfoDto;
@@ -410,7 +411,7 @@ public class StoreService {
 	}
 
 	@Transactional(readOnly = true)
-	public Page<ResGetListStoreDto> getStores(int page, int size, String sort, String keyword, String categoryId, User user) {
+	public PageResponse<ResGetListStoreDto> getStores(int page, int size, String sort, String keyword, String categoryId, User user) {
 
 		// 허용 사이즈
 		List<Integer> sizeList = List.of(10,30,50);
@@ -435,7 +436,9 @@ public class StoreService {
 
 		Pageable pageable = PageRequest.of(page, size);
 
-		return storeRepository.getStores(pageable, sort, keyword, categoryUUID);
+		Page<ResGetListStoreDto> dtoList = storeRepository.getStores(pageable, sort, keyword, categoryUUID);
+
+		return PageResponse.of(dtoList);
 
 	}
 
@@ -507,8 +510,7 @@ public class StoreService {
 		}
 
 		if (!store.isDeleted() && !storeDetails.isDeleted()){
-			store.softDelete(user.getId());
-			storeDetails.softDelete(user.getId());
+			store.delete(user.getId());
 		}else{
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"이미 삭제된 가게입니다.");
 		}

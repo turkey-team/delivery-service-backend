@@ -15,6 +15,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sparta.delivery.backend.address.entity.Address;
 import com.sparta.delivery.backend.customer.entity.Customer;
 import com.sparta.delivery.backend.image.entity.Image;
 import com.sparta.delivery.backend.order.dto.ReqUpdateOrderStatusDto;
@@ -122,11 +123,10 @@ class OrderRepositoryTest {
 		store = Store.builder()
 			.owner(owner)
 			.name("테스트가게")
-			.addressDetails("서울시 강남구 어디인가입니다")
+			.address(Address.builder().fullAddress("서울시 강남구 어디인가입니다").dong(dong).build())
 			.reviewRate(4.5)
 			.minOrderPrice(10000)
 			.deliveryFee(2000)
-			.regionDong(dong)
 			.status(StoreStatusEnum.OPEN)
 			.phoneNumber("03111112222")
 			.build();

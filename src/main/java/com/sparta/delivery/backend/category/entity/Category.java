@@ -3,7 +3,7 @@ package com.sparta.delivery.backend.category.entity;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sparta.delivery.backend.common.BaseEntity;
+import com.sparta.delivery.backend.global.common.BaseEntity;
 import com.sparta.delivery.backend.store.entity.StoreCategory;
 
 import jakarta.persistence.Column;
@@ -21,7 +21,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class Category extends BaseEntity {
-	@Column(name = "name", nullable = false, unique = true)
+	@Column(name = "name", length = 100, nullable = false, unique = true)
 	private String name;
 
 	@OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
@@ -32,7 +32,7 @@ public class Category extends BaseEntity {
 		this.name = name;
 	}
 
-	public void updateCategoryName(String name){
-		this.name=name;
+	public void updateCategoryName(String name) {
+		this.name = name;
 	}
 }

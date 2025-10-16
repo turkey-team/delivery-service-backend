@@ -1,6 +1,6 @@
 package com.sparta.delivery.backend.region.entity;
 
-import com.sparta.delivery.backend.common.BaseEntity;
+import com.sparta.delivery.backend.global.common.BaseEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
