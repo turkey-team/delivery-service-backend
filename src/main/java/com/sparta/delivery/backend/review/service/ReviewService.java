@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
-import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
@@ -19,7 +18,6 @@ import com.sparta.delivery.backend.global.excpetion.UnauthorizedException;
 import com.sparta.delivery.backend.order.entity.Order;
 import com.sparta.delivery.backend.order.enums.OrderStatus;
 import com.sparta.delivery.backend.order.repository.OrderRepository;
-import com.sparta.delivery.backend.owner.entity.Owner;
 import com.sparta.delivery.backend.reply.entity.Reply;
 import com.sparta.delivery.backend.reply.repository.ReplyRepository;
 import com.sparta.delivery.backend.reply.service.ReplyService;
@@ -92,21 +90,6 @@ public class ReviewService {
 		return reviewRepository.findMyOwnReviews(customerId, condition, pageable);
 	}
 
-	private void evictReviewCache(UUID storeId) {
-		Cache cache = cacheManager.getCache(REVIEW_CACHE_NAME);
-		if (cache != null) {
-			String key = "review:store:" + storeId + ":page:0";
-			cache.evict(key);
-			System.out.println("Redis 첫 페이지 캐시 삭제됨 -> key : " + key);
-		}
-	}
-
-	// review 등록
-	/*@CacheEvict(
-		value = "reviewList",
-		key = "'review:store:' + #storeId",
-		cacheManager = "reviewCacheManager"
-	)*/
 	@Transactional
 	public ResResultReviewDto registerReview(ReqCreateReviewDto registerDto, UUID storeId, Long userId) {
 
@@ -146,22 +129,15 @@ public class ReviewService {
 		em.flush();
 		em.clear();
 
-		//evictReviewCache(storeId);
 		util.increaseGeneration(storeId);
 
-		Owner owner = store.getOwner();
+		/*Owner owner = store.getOwner();
 		log.info("registerReview 완료 - 비동기 호출 직전 thread: {}", Thread.currentThread().getName());
-		replyService.generateReplyAsync(review.getId(), owner.getId());
+		replyService.generateReplyAsync(review.getId(), owner.getId());*/
 
 		return ResResultReviewDto.of(review);
 	}
 
-	// review 수정
-	/*@CacheEvict(
-		value = "reviewList",
-		key = "'review:store:' + #review.store.id",
-		cacheManager = "reviewCacheManager"
-	)*/
 	@Transactional
 	public ResResultReviewDto updateReview(ReqUpdateReviewDto dto, UUID reviewId,
 		Long userId) {
@@ -182,18 +158,12 @@ public class ReviewService {
 
 		Store store = review.getStore();
 		store.updateReview(oldRate, dto.getRate());
-		//evictReviewCache(store.getId());
+
 		util.increaseGeneration(store.getId());
 
 		return ResResultReviewDto.of(review);
 	}
 
-	// review 삭제
-	/*@CacheEvict(
-		value = "reviewList",
-		key = "'review:store:' + #review.store.id",
-		cacheManager = "reviewCacheManager"
-	)*/
 	@Transactional
 	public ResDeleteReviewDto deleteReview(UUID reviewId, Long userId) {
 		Review review = reviewRepository.findById(reviewId)
@@ -216,7 +186,7 @@ public class ReviewService {
 
 		Store store = review.getStore();
 		store.deleteReview(review.getRate());
-		//evictReviewCache(store.getId());
+
 		util.increaseGeneration(store.getId());
 
 		return ResDeleteReviewDto.of(review);
