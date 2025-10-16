@@ -9,6 +9,8 @@ import com.sparta.delivery.backend.global.validation.annotation.ValidPhoneNumber
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
@@ -56,6 +58,20 @@ public class ReqCreateStoreDto {
 		, required = true)
 	@Valid
 	private List<ImageDto> images;
+
+	@NotEmpty(message = "배달 가능 지역을 최소 1개 이상 선택해주세요.")
+	@Schema(description = "배달 가능 지역(법정동) 리스트", example = "[114, 115]", requiredMode = Schema.RequiredMode.REQUIRED)
+	private List<String> deliveryRegions;
+
+	@DecimalMin(value = "-180.0", message = "경도는 -180 이상 ~ 180 이하이어야 합니다.")
+	@DecimalMax(value = "180.0", message = "경도는 -180 이상 ~ 180 이하이어야 합니다.")
+	@Schema(description = "경도", example = "126.970335", requiredMode = Schema.RequiredMode.REQUIRED)
+	private double longitude;
+
+	@DecimalMin(value = "-90.0", message = "위도는 -90 이상 ~ 90 이하이어야 합니다.")
+	@DecimalMax(value = "90.0", message = "위도는 -90 이상 ~ 90 이하이어야 합니다.")
+	@Schema(description = "위도", example = "37.574352", requiredMode = Schema.RequiredMode.REQUIRED)
+	private double latitude;
 
 	@Getter
 	@AllArgsConstructor
