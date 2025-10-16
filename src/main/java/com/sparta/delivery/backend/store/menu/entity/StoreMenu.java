@@ -126,9 +126,11 @@ public class StoreMenu extends BaseEntity {
 
 	public void delete(Long deletedBy) {
 		this.softDelete(deletedBy);
-		this.image.softDelete(deletedBy);
-		this.carts.forEach(cart -> {
-			cart.delete(deletedBy);
-		});
+		if (image != null) {
+			image.softDelete(deletedBy);
+		}
+		this.carts.stream()
+			.filter(cart -> cart.getDeletedAt() == null)
+			.forEach(cart -> cart.delete(deletedBy));
 	}
 }
