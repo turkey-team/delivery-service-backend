@@ -32,7 +32,7 @@ public class ResGetMyCustomerDto {
 			.username(customer.getUsername())
 			.nickname(customer.getNickname())
 			.email(customer.getEmail())
-			.phoneNumber(customer.getPhoneNumber())
+			.phoneNumber(customer.getFormattedPhoneNumber())
 			.createdAt(customer.getCreatedAt())
 			.build();
 	}

@@ -40,7 +40,7 @@ public class ResGetCustomersDto {
 			.username(customer.getUsername())
 			.nickname(customer.getNickname())
 			.email(customer.getEmail())
-			.phoneNumber(customer.getPhoneNumber())
+			.phoneNumber(customer.getFormattedPhoneNumber())
 			.createdAt(customer.getCreatedAt())
 			.updatedAt(customer.getUpdatedAt())
 			.build();

@@ -1,6 +1,7 @@
 package com.sparta.delivery.backend.owner.dto;
 
 import com.sparta.delivery.backend.global.validation.annotation.ValidPassword;
+import com.sparta.delivery.backend.global.validation.annotation.ValidPhoneNumber;
 import com.sparta.delivery.backend.global.validation.annotation.ValidUsername;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -36,6 +37,7 @@ public class ReqCreateOwnerDto {
 
 	@Schema(description = "전화번호", example = "010-1234-5678")
 	@Size(max = 20, message = "전화번호는 최대 20자까지 가능합니다.")
+	@ValidPhoneNumber
 	private String phoneNumber;
 
 	@Schema(description = "이메일 인증 토큰", example = "550e8400-e29b-41d4-a716-446655440000")

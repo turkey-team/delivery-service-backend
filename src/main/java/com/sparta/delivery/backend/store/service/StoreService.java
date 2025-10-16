@@ -175,7 +175,7 @@ public class StoreService {
 		}
 
 		ResGetStoreDto resGetStoreDto = ResGetStoreDto.builder()
-			.storeid(store.getId())
+			.storeId(store.getId())
 			.name(store.getName())
 			.reviewRate(store.getReviewRate())
 			.reviewCnt(store.getReviewCnt())
@@ -186,6 +186,7 @@ public class StoreService {
 			.holiday(details.getHoliday())
 			.operationHours(details.getOperationHours())
 			.imageUrl(imgUrl)
+			.phoneNumber(store.getFormattedPhoneNumber())
 			.build();
 
 		return resGetStoreDto;

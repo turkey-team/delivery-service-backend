@@ -3,6 +3,7 @@ package com.sparta.delivery.backend.manager.entity;
 import java.util.UUID;
 
 import com.sparta.delivery.backend.global.common.BaseEntity;
+import com.sparta.delivery.backend.global.common.util.PhoneNumberFormatter;
 import com.sparta.delivery.backend.user.entity.User;
 import com.sparta.delivery.backend.user.entity.UserRoleEnum;
 
@@ -65,6 +66,10 @@ public class Manager extends BaseEntity {
 		this.email = email + "_deleted_" + getId();
 		this.softDelete(userId);
 		user.softDelete(userId);
+	}
+
+	public String getFormattedPhoneNumber() {
+		return PhoneNumberFormatter.formatPhoneNumber(phoneNumber);
 	}
 
 }

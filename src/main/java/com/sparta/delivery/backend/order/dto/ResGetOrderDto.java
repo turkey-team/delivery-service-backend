@@ -70,7 +70,7 @@ public class ResGetOrderDto {
 			.sigunguName(order.getDong())
 			.dongName(order.getDongEntity().getName())
 			.addressDetail(order.getAddressDetails())
-			.phoneNumber(order.getStore().getPhoneNumber())
+			.phoneNumber(order.getStore().getFormattedPhoneNumber())
 			.createdAt(order.getCreatedAt())
 			.totalPrice(totalPrice)
 			.cancelledAt(order.getCancelledAt())

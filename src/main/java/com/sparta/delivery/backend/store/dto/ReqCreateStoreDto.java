@@ -5,6 +5,8 @@ import java.util.UUID;
 
 import org.hibernate.validator.constraints.Length;
 
+import com.sparta.delivery.backend.global.validation.annotation.ValidPhoneNumber;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -33,6 +35,7 @@ public class ReqCreateStoreDto {
 
 	@NotBlank(message = "가게 연락처는 필수로 입력해주세요.")
 	@Schema(description = "가게 연락처", example = "02-1234-5678", required = true)
+	@ValidPhoneNumber
 	private String phoneNumber;
 
 	@Schema(description = "배달료", example = "15000")

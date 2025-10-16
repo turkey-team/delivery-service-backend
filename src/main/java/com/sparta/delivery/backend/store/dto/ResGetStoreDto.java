@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Schema(name = "ResGetStoreDto", description = "가게 상세조회 응답 DTO")
 public class ResGetStoreDto {
 	@Schema(description = "가게 UUID", example = "123e4567-e89b-12d3-a456-426614174000")
-	private UUID storeid;
+	private UUID storeId;
 	@Schema(description = "가게명", example = "김밥천국")
 	private String name;
 	@Schema(description = "리뷰평균점수", example = "4.5")
@@ -37,11 +37,12 @@ public class ResGetStoreDto {
 	private String holiday;
 	@Schema(description = "가게 운영시간", example = "08:00 ~ 20:00")
 	private String operationHours;
-
+	@Schema(description = "가게 전화번호", example = "02-352-3333")
+	private String phoneNumber;
 
 	@Builder
-	public ResGetStoreDto(UUID storeid, String name, double reviewRate, int reviewCnt, StoreStatusEnum status, String description, String holiday, String operationHours, String imageUrl, int deliveryFee, Integer minOrderPrice) {
-		this.storeid = storeid;
+	public ResGetStoreDto(UUID storeId, String name, double reviewRate, int reviewCnt, StoreStatusEnum status, String description, String holiday, String operationHours, String imageUrl, int deliveryFee, Integer minOrderPrice, String phoneNumber) {
+		this.storeId = storeId;
 		this.name = name;
 		this.reviewRate = reviewRate;
 		this.reviewCnt = reviewCnt;
@@ -52,5 +53,6 @@ public class ResGetStoreDto {
 		this.operationHours = operationHours;
 		this.deliveryFee = deliveryFee;
 		this.minOrderPrice = minOrderPrice;
+		this.phoneNumber = phoneNumber;
 	}
 }

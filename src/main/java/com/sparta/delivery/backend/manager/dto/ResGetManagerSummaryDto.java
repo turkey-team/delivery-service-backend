@@ -36,7 +36,7 @@ public class ResGetManagerSummaryDto {
 			.username(manager.getUsername())
 			.name(manager.getName())
 			.email(manager.getEmail())
-			.phoneNumber(manager.getPhoneNumber())
+			.phoneNumber(manager.getFormattedPhoneNumber())
 			.role(manager.getUserRole().name())
 			.build();
 	}
