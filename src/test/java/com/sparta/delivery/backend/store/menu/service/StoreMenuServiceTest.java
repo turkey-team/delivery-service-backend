@@ -23,6 +23,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sparta.delivery.backend.customer.entity.Customer;
+import com.sparta.delivery.backend.global.common.dto.PageResponse;
 import com.sparta.delivery.backend.image.entity.Image;
 import com.sparta.delivery.backend.image.repository.ImageRepository;
 import com.sparta.delivery.backend.owner.entity.Owner;
@@ -423,7 +424,7 @@ class StoreMenuServiceTest {
 				.thenReturn(pageResult);
 
 			/* when */
-			Page<ResGetListStoreMenuDto> resGetListStoreMenuDto = storeMenuService.getStoreMenusByStoreId(customerUser, storeId, 0,
+			PageResponse<ResGetListStoreMenuDto> resGetListStoreMenuDto = storeMenuService.getStoreMenusByStoreId(customerUser, storeId, 0,
 				10);
 
 			/* then */
@@ -472,7 +473,7 @@ class StoreMenuServiceTest {
 				.thenReturn(pageResult);
 
 			/* when */
-			Page<ResGetListStoreMenuDto> resGetListStoreMenuDto = storeMenuService.getStoreMenusByStoreId(differentOwner, storeId, 0,
+			PageResponse<ResGetListStoreMenuDto> resGetListStoreMenuDto = storeMenuService.getStoreMenusByStoreId(differentOwner, storeId, 0,
 				10);
 
 			/* then */
@@ -511,7 +512,7 @@ class StoreMenuServiceTest {
 				.thenReturn(pageResult);
 
 			/* when */
-			Page<ResGetListStoreMenuDto> resGetListStoreMenuDto = storeMenuService.getStoreMenusByStoreId(user, storeId, 0,
+			PageResponse<ResGetListStoreMenuDto> resGetListStoreMenuDto = storeMenuService.getStoreMenusByStoreId(user, storeId, 0,
 				10);
 
 			/* then */
@@ -601,7 +602,7 @@ class StoreMenuServiceTest {
 				.thenReturn(pageResult);
 
 			/* when */
-			Page<ResGetListStoreMenuDto> resGetListStoreMenuDto = storeMenuService.getStoreMenusByStoreId(user, storeId, 0,
+			PageResponse<ResGetListStoreMenuDto> resGetListStoreMenuDto = storeMenuService.getStoreMenusByStoreId(user, storeId, 0,
 				10);
 
 			/* then */
@@ -627,12 +628,12 @@ class StoreMenuServiceTest {
 				.thenReturn(Page.empty(pageable));
 
 			/* when */
-			Page<ResGetListStoreMenuDto> result =
+			PageResponse<ResGetListStoreMenuDto> result =
 				storeMenuService.getStoreMenusByStoreId(user, storeId, page, size);
 
 			/* then */
 			assertNotNull(result);
-			assertTrue(result.isEmpty());
+			assertTrue(result.getContent().isEmpty());
 			verify(storeRepository, times(1)).findById(storeId);
 			verify(storeMenuRepository, times(1))
 				.findAllByStoreIdAndDeletedAtIsNull(storeId, pageable);

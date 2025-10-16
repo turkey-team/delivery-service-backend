@@ -21,6 +21,7 @@ import com.sparta.delivery.backend.customer.entity.Customer;
 import com.sparta.delivery.backend.customer.entity.CustomerAddress;
 import com.sparta.delivery.backend.customer.repository.CustomerAddressRepository;
 import com.sparta.delivery.backend.customer.repository.CustomerRepository;
+import com.sparta.delivery.backend.global.common.dto.PageResponse;
 import com.sparta.delivery.backend.order.dto.ReqCreateOrderDto;
 import com.sparta.delivery.backend.order.dto.ReqUpdateOrderStatusDto;
 import com.sparta.delivery.backend.order.dto.ResCheckOutOrderDto;
@@ -117,7 +118,7 @@ public class OrderService {
 
 	// Customer, Owner: 전체 주문 내역 조회
 	@Transactional(readOnly = true)
-	public Page<ResGetListOrderDto> getOrdersByUser(User user, int page, int size) {
+	public PageResponse<ResGetListOrderDto> getOrdersByUser(User user, int page, int size) {
 		Pageable pageable = PageRequest.of(page, size, Sort.by("sortOrder").ascending());
 
 		// DB에서 Role 기반 필터링 후 조회
@@ -135,10 +136,12 @@ public class OrderService {
 			default -> throw new IllegalArgumentException("지원하지 않는 사용자 유형입니다.");
 		};
 
-		return orders.map(order -> {
+		Page<ResGetListOrderDto> mappedPage = orders.map(order -> {
 			int totalPrice = calculateTotalPrice(order);
 			return ResGetListOrderDto.from(order, totalPrice);
 		});
+
+		return PageResponse.of(mappedPage);
 	}
 
 	// 주문 상세 조회

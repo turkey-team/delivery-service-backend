@@ -1,5 +1,6 @@
 package com.sparta.delivery.backend.order.controller;
 
+import com.sparta.delivery.backend.global.common.dto.PageResponse;
 import com.sparta.delivery.backend.order.dto.*;
 import com.sparta.delivery.backend.order.service.OrderService;
 import com.sparta.delivery.backend.security.UserDetailsImpl;
@@ -61,7 +62,7 @@ public class OrderController {
 		@ApiResponse(responseCode = "200", description = "주문 내역 조회 성공", content = @Content(schema = @Schema(implementation = ResGetListOrderDto.class))),
 		@ApiResponse(responseCode = "400", description = "유효하지 않은 사용자 정보")
 	})
-	public ResponseEntity<Page<ResGetListOrderDto>> getOrdersByUserId(
+	public ResponseEntity<PageResponse<ResGetListOrderDto>> getOrdersByUserId(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@RequestParam("page") int page,
 		@RequestParam("size") int size
@@ -73,7 +74,7 @@ public class OrderController {
 		@RequestParam(required = false) String endDate        // 조회 종료일
 		*/
 	) {
-		Page<ResGetListOrderDto> orders = orderService.getOrdersByUser(userDetails.getUser(), page - 1, size);
+		PageResponse<ResGetListOrderDto> orders = orderService.getOrdersByUser(userDetails.getUser(), page - 1, size);
 		return ResponseEntity.ok(orders);
 	}
 
