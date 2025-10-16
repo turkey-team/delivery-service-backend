@@ -4,6 +4,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -15,9 +17,11 @@ import com.sparta.delivery.backend.customer.dto.ReqPasswordResetDto;
 import com.sparta.delivery.backend.customer.dto.ReqPasswordResetRequestDto;
 import com.sparta.delivery.backend.customer.dto.ReqUpdateCustomerDto;
 import com.sparta.delivery.backend.customer.dto.ResGetCustomerDto;
+import com.sparta.delivery.backend.customer.dto.ResGetCustomersDto;
 import com.sparta.delivery.backend.customer.dto.ResGetMyCustomerDto;
 import com.sparta.delivery.backend.customer.entity.Customer;
 import com.sparta.delivery.backend.customer.repository.CustomerRepository;
+import com.sparta.delivery.backend.global.common.dto.PageResponse;
 import com.sparta.delivery.backend.global.excpetion.DuplicateUsernameException;
 import com.sparta.delivery.backend.global.infra.email.EmailSender;
 import com.sparta.delivery.backend.global.infra.redis.RedisKeyConstants;
@@ -79,6 +83,18 @@ public class CustomerService {
 			.orElseThrow(() -> new IllegalArgumentException("잘못된 유저 아이디 입니다."));
 
 		return ResGetCustomerDto.from(customer);
+	}
+
+	public PageResponse<ResGetCustomersDto> getCustomers(String nickname, Pageable pageable) {
+		Page<Customer> customers;
+
+		if (nickname != null && !nickname.isBlank()) {
+			customers = customerRepository.findByNicknameContainingAndDeletedAtIsNull(nickname, pageable);
+		} else {
+			customers = customerRepository.findAllByDeletedAtIsNull(pageable);
+		}
+
+		return PageResponse.of(customers.map(ResGetCustomersDto::from));
 	}
 
 	@Transactional

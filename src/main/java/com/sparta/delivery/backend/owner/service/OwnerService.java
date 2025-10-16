@@ -5,11 +5,16 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sparta.delivery.backend.customer.dto.ResGetCustomersDto;
+import com.sparta.delivery.backend.customer.entity.Customer;
+import com.sparta.delivery.backend.global.common.dto.PageResponse;
 import com.sparta.delivery.backend.global.excpetion.DuplicateUsernameException;
 import com.sparta.delivery.backend.global.infra.email.EmailSender;
 import com.sparta.delivery.backend.global.infra.redis.RedisKeyConstants;
@@ -21,6 +26,7 @@ import com.sparta.delivery.backend.owner.dto.ReqPasswordResetRequestDto;
 import com.sparta.delivery.backend.owner.dto.ReqUpdateOwnerDto;
 import com.sparta.delivery.backend.owner.dto.ResGetMyOwnerDto;
 import com.sparta.delivery.backend.owner.dto.ResGetOwnerDto;
+import com.sparta.delivery.backend.owner.dto.ResGetOwnersDto;
 import com.sparta.delivery.backend.owner.entity.Owner;
 import com.sparta.delivery.backend.owner.repository.OwnerRepository;
 import com.sparta.delivery.backend.security.UserDetailsImpl;
@@ -52,7 +58,8 @@ public class OwnerService {
 			.ifPresent(user -> {
 				throw new DuplicateUsernameException("이미 존재하는 사용자명입니다.");
 			});
-		emailVerificationTokenValidator.validateAndConsumeToken(requestDto.getEmail(), requestDto.getEmailVerificationToken());
+		emailVerificationTokenValidator.validateAndConsumeToken(requestDto.getEmail(),
+			requestDto.getEmailVerificationToken());
 
 		User user = User.builder()
 			.username(requestDto.getUsername())
@@ -120,26 +127,26 @@ public class OwnerService {
 
 		//TODO: 프론트 존재시 프론트의 링크에 parameter를 포함시켜 해당 링크로 이동하도록 구성
 		String emailBody = String.format("""
-        비밀번호 재설정 요청이 접수되었습니다.
-        
-        아래 정보를 사용하여 비밀번호를 재설정하세요:
-        
-        이메일: %s
-        토큰: %s
-        
-        [Swagger 또는 Postman에서 테스트]
-        POST /v1/owners/password-reset/confirm
-        
-        요청 본문:
-        {
-          "email": "%s",
-          "token": "%s",
-          "newPassword": "새비밀번호",
-          "newPasswordConfirm": "새비밀번호"
-        }
-        
-        이 토큰은 30분간 유효합니다.
-        """,
+				비밀번호 재설정 요청이 접수되었습니다.
+				
+				아래 정보를 사용하여 비밀번호를 재설정하세요:
+				
+				이메일: %s
+				토큰: %s
+				
+				[Swagger 또는 Postman에서 테스트]
+				POST /v1/owners/password-reset/confirm
+				
+				요청 본문:
+				{
+				  "email": "%s",
+				  "token": "%s",
+				  "newPassword": "새비밀번호",
+				  "newPasswordConfirm": "새비밀번호"
+				}
+				
+				이 토큰은 30분간 유효합니다.
+				""",
 			owner.getEmail(),
 			resetToken,
 			owner.getEmail(),
@@ -192,5 +199,17 @@ public class OwnerService {
 	private Owner getOwnerByUserId(UserDetailsImpl userDetails) {
 		return ownerRepository.findByUserIdAndDeletedAtIsNull(userDetails.getId())
 			.orElseThrow(() -> new IllegalArgumentException("잘못된 유저 아이디 입니다."));
+	}
+
+	public PageResponse<ResGetOwnersDto> getOwners(String nickname, Pageable pageable) {
+		Page<Owner> owners;
+
+		if (nickname != null && !nickname.isBlank()) {
+			owners = ownerRepository.findByNicknameContainingAndDeletedAtIsNull(nickname, pageable);
+		} else {
+			owners = ownerRepository.findAllByDeletedAtIsNull(pageable);
+		}
+
+		return PageResponse.of(owners.map(ResGetOwnersDto::from));
 	}
 }
