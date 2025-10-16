@@ -1,9 +1,9 @@
 package com.sparta.delivery.backend.customer.dto;
 
+import com.sparta.delivery.backend.global.validation.annotation.ValidEmail;
 import com.sparta.delivery.backend.global.validation.annotation.ValidPassword;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,7 +15,7 @@ public class ReqPasswordResetDto {
 
 	@Schema(description = "이메일", example = "customer@example.com")
 	@NotBlank(message = "이메일은 필수입니다.")
-	@Email(message = "올바른 이메일 형식이 아닙니다.")
+	@ValidEmail
 	private String email;
 
 	@Schema(description = "재설정 토큰", example = "abc123-def456-ghi789")
