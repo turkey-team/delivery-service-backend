@@ -1,13 +1,19 @@
 package com.sparta.delivery.backend.global.config;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springdoc.core.customizers.OpenApiCustomizer;
+import org.springdoc.core.customizers.OperationCustomizer;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.web.FilterChainProxy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.context.AbstractSecurityWebApplicationInitializer;
@@ -21,6 +27,8 @@ import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.Content;
@@ -60,8 +68,75 @@ public class SwaggerConfig {
 		return GroupedOpenApi.builder()
 			.group("전체 API")
 			.pathsToMatch("/v1/**")
-			.addOpenApiCustomizer(jwtLoginEndpointCustomizer(applicationContext, jwtAuthenticationFilter)) // v1으로 시작하는 모든 경로
+			.addOpenApiCustomizer(jwtLoginEndpointCustomizer(applicationContext, jwtAuthenticationFilter))
+			.addOperationCustomizer(operationCustomizer())
 			.build();
+	}
+
+	@Bean
+	public OperationCustomizer operationCustomizer() {
+		return (operation, handlerMethod) -> {
+			PreAuthorize preAuthorize = handlerMethod.getMethodAnnotation(PreAuthorize.class);
+
+			if (preAuthorize == null) {
+				preAuthorize = handlerMethod.getBeanType().getAnnotation(PreAuthorize.class);
+			}
+
+			StringBuilder authInfo = new StringBuilder("\n\n---\n");
+
+			if (preAuthorize != null) {
+				String expression = preAuthorize.value();
+				List<String> roles = extractRoles(expression);
+
+				authInfo.append("### 🔒 인증 요구사항\n");
+
+				if (!roles.isEmpty()) {
+					authInfo.append("- 👤 필요한 권한: ");
+					authInfo.append(String.join(", ", roles));
+					authInfo.append("\n");
+				} else if (expression.contains("isAuthenticated()")) {
+					authInfo.append("- ✅ 로그인 필수\n");
+				}
+			} else {
+				// PreAuthorize가 없는 경우 - 인증 불필요
+				authInfo.append("### 🌐 인증 요구사항\n");
+				authInfo.append("- 🔓 로그인 불필요 (Public API)\n");
+			}
+
+			String currentDescription = operation.getDescription() != null
+				? operation.getDescription()
+				: "";
+
+			operation.setDescription(currentDescription + authInfo);
+
+			return operation;
+		};
+	}
+
+	private List<String> extractRoles(String expression) {
+		List<String> roles = new ArrayList<>();
+
+		// hasRole('ROLE') 패턴 찾기
+		Pattern pattern = Pattern.compile("hasRole\\('([^']+)'\\)");
+		Matcher matcher = pattern.matcher(expression);
+
+		while (matcher.find()) {
+			roles.add(matcher.group(1));
+		}
+
+		// hasAnyRole('ROLE1', 'ROLE2') 패턴 찾기
+		pattern = Pattern.compile("hasAnyRole\\(([^)]+)\\)");
+		matcher = pattern.matcher(expression);
+
+		if (matcher.find()) {
+			String rolesStr = matcher.group(1);
+			String[] roleArray = rolesStr.split(",");
+			for (String role : roleArray) {
+				roles.add(role.trim().replace("'", ""));
+			}
+		}
+
+		return roles;
 	}
 
 	@Bean

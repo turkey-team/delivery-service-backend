@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -48,7 +49,7 @@ public class CustomerAddressController {
 		@ApiResponse(responseCode = "400", description = "잘못된 요청 데이터"),
 		@ApiResponse(responseCode = "403", description = "권한 없음", content = @Content(schema = @Schema(hidden = true)))
 	})
-	@Secured(UserRoleEnum.Authority.CUSTOMER)
+	@PreAuthorize("hasRole('CUSTOMER')")
 	@PostMapping
 	public ResponseEntity<Void> registerAddress(
 		@Valid @RequestBody ReqCreateCustomerAddressDto requestDto,
@@ -62,7 +63,7 @@ public class CustomerAddressController {
 		@ApiResponse(responseCode = "200", description = "조회 성공"),
 		@ApiResponse(responseCode = "403", description = "권한 없음", content = @Content(schema = @Schema(hidden = true)))
 	})
-	@Secured(UserRoleEnum.Authority.CUSTOMER)
+	@PreAuthorize("hasRole('CUSTOMER')")
 	@GetMapping
 	public ResponseEntity<List<ResCustomerAddressDto>> getMyAddresses(
 		@AuthenticationPrincipal UserDetailsImpl userDetails) {
@@ -76,7 +77,7 @@ public class CustomerAddressController {
 		@ApiResponse(responseCode = "403", description = "권한 없음", content = @Content(schema = @Schema(hidden = true))),
 		@ApiResponse(responseCode = "404", description = "기본 배송지가 설정되지 않음", content = @Content(schema = @Schema(hidden = true)))
 	})
-	@Secured(UserRoleEnum.Authority.CUSTOMER)
+	@PreAuthorize("hasRole('CUSTOMER')")
 	@GetMapping("/default")
 	public ResponseEntity<ResDefaultAddressDto> getDefaultAddress(
 		@AuthenticationPrincipal UserDetailsImpl userDetails) {
@@ -90,7 +91,7 @@ public class CustomerAddressController {
 		@ApiResponse(responseCode = "403", description = "권한 없음", content = @Content(schema = @Schema(hidden = true))),
 		@ApiResponse(responseCode = "404", description = "배송지를 찾을 수 없음", content = @Content(schema = @Schema(hidden = true)))
 	})
-	@Secured(UserRoleEnum.Authority.CUSTOMER)
+	@PreAuthorize("hasRole('CUSTOMER')")
 	@PatchMapping("/{customerAddressId}/default")
 	public ResponseEntity<Void> setDefaultAddress(
 		@PathVariable UUID customerAddressId,
@@ -106,7 +107,7 @@ public class CustomerAddressController {
 		@ApiResponse(responseCode = "403", description = "권한 없음", content = @Content(schema = @Schema(hidden = true))),
 		@ApiResponse(responseCode = "404", description = "배송지를 찾을 수 없음", content = @Content(schema = @Schema(hidden = true)))
 	})
-	@Secured(UserRoleEnum.Authority.CUSTOMER)
+	@PreAuthorize("hasRole('CUSTOMER')")
 	@PutMapping("/{customerAddressId}")
 	public ResponseEntity<Void> updateAddress(
 		@PathVariable UUID customerAddressId,
@@ -123,7 +124,7 @@ public class CustomerAddressController {
 		@ApiResponse(responseCode = "403", description = "권한 없음", content = @Content(schema = @Schema(hidden = true))),
 		@ApiResponse(responseCode = "404", description = "배송지를 찾을 수 없음", content = @Content(schema = @Schema(hidden = true)))
 	})
-	@Secured(UserRoleEnum.Authority.CUSTOMER)
+	@PreAuthorize("hasRole('CUSTOMER')")
 	@DeleteMapping("/{customerAddressId}")
 	public ResponseEntity<Void> deleteAddress(
 		@PathVariable UUID customerAddressId,
