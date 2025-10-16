@@ -2,7 +2,8 @@ package com.sparta.delivery.backend.global.infra.slack;
 
 import static com.slack.api.webhook.WebhookPayloads.*;
 
-import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -43,7 +44,8 @@ public class SlackService {
 	}
 
 	private Attachment createAttachment(String requestUrl, String exception, String message) {
-		String requestTime = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(LocalDateTime.now());
+		ZonedDateTime seoulTime = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
+		String requestTime = seoulTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 		return Attachment.builder()
 			.color("#ff0000")
 			.fields(List.of(
