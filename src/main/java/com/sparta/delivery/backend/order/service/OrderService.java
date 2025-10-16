@@ -18,6 +18,8 @@ import com.sparta.delivery.backend.address.repository.AddressRepository;
 import com.sparta.delivery.backend.cart.entity.Cart;
 import com.sparta.delivery.backend.cart.repository.CartRepository;
 import com.sparta.delivery.backend.customer.entity.Customer;
+import com.sparta.delivery.backend.customer.entity.CustomerAddress;
+import com.sparta.delivery.backend.customer.repository.CustomerAddressRepository;
 import com.sparta.delivery.backend.customer.repository.CustomerRepository;
 import com.sparta.delivery.backend.order.dto.ReqCreateOrderDto;
 import com.sparta.delivery.backend.order.dto.ReqUpdateOrderStatusDto;
@@ -45,7 +47,7 @@ public class OrderService {
 	private final OrderRepository orderRepository;
 	private final CustomerRepository customerRepository;
 	private final OwnerRepository ownerRepository;
-	private final AddressRepository addressRepository;
+	private final CustomerAddressRepository customerAddressRepository;
 	private final OrderMenuRepository orderMenuRepository;
 
 	/** 생성 **/
@@ -72,12 +74,12 @@ public class OrderService {
 			throw new SecurityException("본인 장바구니가 아닙니다.");
 		}
 
-		// Address 엔티티에서 Dong 객체 가져오기
-		Address defaultAddressEntity = addressRepository.findByUserIdAndIsDefaultTrueAndDeletedAtIsNull(user.getId())
-			.orElseThrow(() -> new IllegalStateException("기본 주소 정보가 없습니다."));
-
 		// 주문할 고객 customer 조회
 		Customer customer = getCustomerOrThrow(user);
+
+		// Address 엔티티에서 Dong 객체 가져오기
+		CustomerAddress defaultAddressEntity = customerAddressRepository.findByCustomerAndIsDefaultTrueAndDeletedAtIsNull(customer)
+			.orElseThrow(() -> new IllegalStateException("기본 주소 정보가 없습니다."));
 
 		// Order 엔티티 생성 및 저장
 		Order order = Order.builder()
@@ -233,7 +235,7 @@ public class OrderService {
 		boolean isSingleStore = carts.stream().allMatch(c -> c.getMenu().getStore().getId().equals(storeId));
 		if (!isSingleStore) throw new IllegalStateException("여러 매장 메뉴 혼합 불가");
 
-		Address defaultAddress = addressRepository.findByUserIdAndIsDefaultTrueAndDeletedAtIsNull(user.getId())
+		CustomerAddress defaultAddress = customerAddressRepository.findByCustomerAndIsDefaultTrueAndDeletedAtIsNull(customer)
 			.orElseThrow(() -> new IllegalStateException("기본 주소 정보가 없습니다."));
 
 		int menusPrice = carts.stream().mapToInt(c -> c.getMenu().getPrice()).sum();

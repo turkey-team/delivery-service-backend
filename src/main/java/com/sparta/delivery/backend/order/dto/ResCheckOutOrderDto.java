@@ -2,13 +2,13 @@ package com.sparta.delivery.backend.order.dto;
 
 import com.sparta.delivery.backend.address.entity.Address;
 import com.sparta.delivery.backend.customer.entity.Customer;
+import com.sparta.delivery.backend.customer.entity.CustomerAddress;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Getter
 @Builder
@@ -37,12 +37,12 @@ public class ResCheckOutOrderDto {
 	@Schema(description = "배달비", example = "1500")
 	private int deliveryFee;
 
-	public static ResCheckOutOrderDto from(Customer customer, Address address, int menusPrice, int deliveryFee) {
+	public static ResCheckOutOrderDto from(Customer customer, CustomerAddress address, int menusPrice, int deliveryFee) {
 		return ResCheckOutOrderDto.builder()
 			.sidoName(address.getDong().getSigungu().getSido().getName())  // 시/도
 			.sigunguName(address.getDong().getSigungu().getName())         // 시/군/구
 			.dongName(address.getDong().getName())                         // 동
-			.addressDetail(address.getAddress())                           // 상세주소
+			.addressDetail(address.getFullAddress())                           // 상세주소
 			.phoneNumber(customer.getPhoneNumber())                        // 연락처
 			.menusPrice(menusPrice)
 			.deliveryFee(deliveryFee)

@@ -27,6 +27,8 @@ import com.sparta.delivery.backend.address.repository.AddressRepository;
 import com.sparta.delivery.backend.cart.entity.Cart;
 import com.sparta.delivery.backend.cart.repository.CartRepository;
 import com.sparta.delivery.backend.customer.entity.Customer;
+import com.sparta.delivery.backend.customer.entity.CustomerAddress;
+import com.sparta.delivery.backend.customer.repository.CustomerAddressRepository;
 import com.sparta.delivery.backend.customer.repository.CustomerRepository;
 import com.sparta.delivery.backend.image.entity.Image;
 import com.sparta.delivery.backend.order.dto.ReqCreateOrderDto;
@@ -65,7 +67,7 @@ class OrderServiceTest {
 	@Mock
 	private OwnerRepository ownerRepository;
 	@Mock
-	private AddressRepository addressRepository;
+	private CustomerAddressRepository customerAddressRepository;
 	@Mock
 	private OrderMenuRepository orderMenuRepository;
 
@@ -77,6 +79,7 @@ class OrderServiceTest {
 	private StoreMenu storeMenu;
 	private Order order;
 	private Address address;
+	private CustomerAddress customerAddress;
 	private Cart cart;
 	private Dong dong;
 	private Sigungu sigungu;
@@ -135,11 +138,18 @@ class OrderServiceTest {
 			.build();
 		
 		address = Address.builder()
-			.user(customerUser)
 			.dong(dong)
 			.build();
 		ReflectionTestUtils.setField(address, "id", UUID.randomUUID());
-		
+
+		customerAddress = CustomerAddress.builder()
+			.isDefault(true)
+			.address(address)
+			.nickname("우리집")
+			.customer(customer)
+			.build();
+		ReflectionTestUtils.setField(customerAddress, "id", UUID.randomUUID());
+
 		// 테스트 가게
 		store = Store.builder()
 			.owner(owner)
@@ -216,8 +226,8 @@ class OrderServiceTest {
 			req.setRequestMessage("문앞에 두세요");
 
 			when(customerRepository.findByUserId(any())).thenReturn(Optional.of(customer));
-			when(addressRepository.findByUserIdAndIsDefaultTrueAndDeletedAtIsNull(any()))
-				.thenReturn(Optional.of(address));
+			when(customerAddressRepository.findByCustomerAndIsDefaultTrueAndDeletedAtIsNull(any()))
+				.thenReturn(Optional.of(customerAddress));
 			when(cartRepository.findAllByCustomerIdAndDeletedAtIsNull(any()))
 				.thenReturn(List.of(cart));
 
@@ -244,7 +254,7 @@ class OrderServiceTest {
 		void failure_noAddress() {
 			/* given */
 			lenient().when(customerRepository.findByUserId(any())).thenReturn(Optional.of(customer));
-			lenient().when(addressRepository.findByUserIdAndIsDefaultTrueAndDeletedAtIsNull(any()))
+			lenient().when(customerAddressRepository.findByCustomerAndIsDefaultTrueAndDeletedAtIsNull(any()))
 				.thenReturn(Optional.empty());
 
 			/* when & then */
@@ -278,8 +288,8 @@ class OrderServiceTest {
 				.build();
 
 			when(customerRepository.findByUserId(any())).thenReturn(Optional.of(customer));
-			when(addressRepository.findByUserIdAndIsDefaultTrueAndDeletedAtIsNull(any()))
-				.thenReturn(Optional.of(address));
+			when(customerAddressRepository.findByCustomerAndIsDefaultTrueAndDeletedAtIsNull(any()))
+				.thenReturn(Optional.of(customerAddress));
 			when(cartRepository.findAllByCustomerIdAndDeletedAtIsNull(any()))
 				.thenReturn(List.of(foreignCart));
 
