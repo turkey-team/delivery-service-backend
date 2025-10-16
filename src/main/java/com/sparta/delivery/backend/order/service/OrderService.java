@@ -13,8 +13,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.sparta.delivery.backend.address.entity.Address;
-import com.sparta.delivery.backend.address.repository.AddressRepository;
 import com.sparta.delivery.backend.cart.entity.Cart;
 import com.sparta.delivery.backend.cart.repository.CartRepository;
 import com.sparta.delivery.backend.customer.entity.Customer;
@@ -119,7 +117,7 @@ public class OrderService {
 	// Customer, Owner: 전체 주문 내역 조회
 	@Transactional(readOnly = true)
 	public PageResponse<ResGetListOrderDto> getOrdersByUser(User user, int page, int size) {
-		Pageable pageable = PageRequest.of(page, size, Sort.by("sortOrder").ascending());
+		Pageable pageable = PageRequest.of(page, size, Sort.by("createAt").ascending());
 
 		// DB에서 Role 기반 필터링 후 조회
 		Page<Order> orders = switch (user.getRole()) {
