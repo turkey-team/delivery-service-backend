@@ -2,6 +2,9 @@ package com.sparta.delivery.backend.payment.entity;
 
 import java.time.Instant;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import com.sparta.delivery.backend.global.common.BaseEntity;
 import com.sparta.delivery.backend.order.entity.Order;
 
@@ -51,13 +54,15 @@ public class Payment extends BaseEntity {
 	private String acquirerCode; // 카드 매입사 코드
 
 	@Enumerated(EnumType.STRING)
+	@JdbcTypeCode(SqlTypes.NAMED_ENUM)
 	@Column(name = "payment_status", nullable = false)
 	private PaymentStatus paymentStatus;
 
 	private Instant approvedAt; // 결제 승인 시간
 
 	@Builder
-	private Payment(Order order, String paymentGateway, String paymentKey, String paymentMethod, int amount, String cardNumber,
+	private Payment(Order order, String paymentGateway, String paymentKey, String paymentMethod, int amount,
+		String cardNumber,
 		String issuerCode, String acquirerCode, PaymentStatus paymentStatus, Instant approvedAt) {
 		this.order = order;
 		this.paymentGateway = paymentGateway;

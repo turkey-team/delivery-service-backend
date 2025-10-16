@@ -1,5 +1,8 @@
 package com.sparta.delivery.backend.store.entity;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import com.sparta.delivery.backend.global.common.BaseEntity;
 import com.sparta.delivery.backend.image.entity.Image;
 
@@ -30,6 +33,7 @@ public class StoreImage extends BaseEntity {
 	private Image image;
 
 	@Enumerated(EnumType.STRING)
+	@JdbcTypeCode(SqlTypes.NAMED_ENUM)
 	@Column(name = "status")
 	private StoreImageStatusEnum status;
 
