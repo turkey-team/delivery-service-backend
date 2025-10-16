@@ -3,6 +3,11 @@ package com.sparta.delivery.backend.region.service;
 import java.util.List;
 import java.util.UUID;
 
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.geom.PrecisionModel;
+import org.locationtech.jts.io.WKTReader;
+import org.locationtech.jts.io.ParseException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -73,6 +78,7 @@ public class DongService {
 				.sigungu(sigungu)
 				.name(requestDto.getName())
 				.code(requestDto.getCode())
+				.polygon(getPolygon(requestDto.getPolygonWkt()))
 				.build()
 			)
 			.toList();
@@ -136,6 +142,22 @@ public class DongService {
 		});
 
 		dong.softDelete(loginUserId);
+	}
+
+	private Polygon getPolygon(String wkt) {
+		try {
+			GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+			WKTReader reader = new WKTReader(geometryFactory);
+			Polygon polygon = (Polygon) reader.read(wkt);
+
+			if (!polygon.isValid()) {
+				throw new IllegalArgumentException("유효하지 않은 폴리곤입니다.");
+			}
+
+			return polygon;
+		} catch (ParseException e) {
+			throw new IllegalArgumentException("폴리곤 WKT 파싱에 실패했습니다.", e);
+		}
 	}
 
 }
