@@ -22,11 +22,11 @@ import lombok.NoArgsConstructor;
 @Getter
 public class StoreImage extends BaseEntity {
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "store_id")
+	@JoinColumn(name = "p_store_id")
 	private Store store;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "image_id")
+	@JoinColumn(name = "p_image_id")
 	private Image image;
 
 	@Enumerated(EnumType.STRING)

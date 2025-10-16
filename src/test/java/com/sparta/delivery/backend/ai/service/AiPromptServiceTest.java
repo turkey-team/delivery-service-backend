@@ -22,6 +22,7 @@ import com.sparta.delivery.backend.ai.dto.ResCreateAiPromptDto;
 import com.sparta.delivery.backend.ai.dto.ResReadAiPromptDto;
 import com.sparta.delivery.backend.ai.entity.AiPrompt;
 import com.sparta.delivery.backend.ai.repository.AiPromptRepository;
+import com.sparta.delivery.backend.global.common.dto.PageResponse;
 
 @ExtendWith(MockitoExtension.class)
 public class AiPromptServiceTest {
@@ -81,10 +82,10 @@ public class AiPromptServiceTest {
 			given(aiPromptRepository.findAll(pageable)).willReturn(page);
 
 			// when
-			Page<ResReadAiPromptDto> responseDto = aiPromptService.getAllAiPrompts(pageable);
+			PageResponse<ResReadAiPromptDto> responseDto = aiPromptService.getAllAiPrompts(pageable);
 
 			// then
-			assertThat(responseDto).hasSize(1);
+			assertThat(responseDto.getContent()).hasSize(1);
 			assertThat(responseDto.getContent().get(0).getReqMessage()).isEqualTo("요청");
 			assertThat(responseDto.getContent().get(0).getResMessage()).isEqualTo("응답");
 			then(aiPromptRepository).should(times(1)).findAll(pageable);

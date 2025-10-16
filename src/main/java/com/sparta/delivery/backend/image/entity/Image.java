@@ -27,8 +27,6 @@ public class Image extends BaseEntity {
 	@Column(length = 2048, unique = true)
 	private String imageUrl;
 
-	private String imageName;
-
 	@OneToMany(mappedBy = "image", fetch = FetchType.LAZY)
 	private List<StoreImage> storeImages = new ArrayList<>();
 

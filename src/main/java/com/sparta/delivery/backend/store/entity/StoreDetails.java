@@ -27,7 +27,7 @@ public class StoreDetails extends BaseEntity {
 	@Column(name = "holiday")
 	private String holiday;
 
-	@Column(name = "description")
+	@Column(name = "description", length = 500)
 	private String description;
 
 	@Column(name = "business_number", length = 12)

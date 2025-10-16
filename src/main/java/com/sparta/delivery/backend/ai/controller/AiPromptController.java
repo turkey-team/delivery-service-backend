@@ -4,7 +4,6 @@ import static com.sparta.delivery.backend.ai.internal.AiSwaggerMessage.*;
 
 import org.springdoc.core.annotations.ParameterObject;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
@@ -20,6 +19,7 @@ import com.sparta.delivery.backend.ai.dto.ReqCreateAiPromptDto;
 import com.sparta.delivery.backend.ai.dto.ResCreateAiPromptDto;
 import com.sparta.delivery.backend.ai.dto.ResReadAiPromptDto;
 import com.sparta.delivery.backend.ai.service.AiPromptService;
+import com.sparta.delivery.backend.global.common.dto.PageResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -40,7 +40,7 @@ public class AiPromptController {
 	private final AiPromptService aiPromptService;
 
 	@Operation(summary = "AI 프롬프트 생성",
-		description = "요청한 메세지에 따라 AI 프롬프트를 작성합니다. MANAGER와 OWNER만 사용 가능합니다.")
+		description = "요청한 메세지에 따라 AI 프롬프트를 작성합니다. MASTER, MANAGER, OWNER만 사용 가능합니다.")
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "201", description = "AI 프롬프트가 생성되었습니다.",
 			content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResCreateAiPromptDto.class))),
@@ -64,7 +64,7 @@ public class AiPromptController {
 	}
 
 	@Operation(summary = "AI 프롬프트 목록 조회",
-		description = "AI 프롬프트 요청 목록을 확인합니다. MANAGER만 사용 가능합니다.")
+		description = "AI 프롬프트 요청 목록을 확인합니다. MASTER와 MANAGER만 사용 가능합니다.")
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "200", description = "AI 프롬프트 요청 목록을 조회했습니다.",
 			content = @Content(mediaType = "application/json", examples = {
@@ -78,9 +78,9 @@ public class AiPromptController {
 	@PageableAsQueryParam
 	@GetMapping
 	@PreAuthorize("isAuthenticated() && hasAnyRole('MASTER', 'MANAGER')")
-	public ResponseEntity<Page<ResReadAiPromptDto>> getAllAiPrompt(
+	public ResponseEntity<PageResponse<ResReadAiPromptDto>> getAllAiPrompt(
 		@ParameterObject @PageableDefault Pageable pageable) {
-		Page<ResReadAiPromptDto> responseDtoList = aiPromptService.getAllAiPrompts(pageable);
+		PageResponse<ResReadAiPromptDto> responseDtoList = aiPromptService.getAllAiPrompts(pageable);
 
 		return ResponseEntity.ok(responseDtoList);
 	}

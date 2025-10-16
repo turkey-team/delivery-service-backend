@@ -46,7 +46,7 @@ public class SidoController {
 
 	private final SidoService sidoService;
 
-	@Operation(summary = "시·도 생성", description = "새로운 시·도를 등록합니다. MANAGER만 사용 가능합니다.")
+	@Operation(summary = "시·도 생성", description = "새로운 시·도를 등록합니다. MASTER와 MANAGER만 사용 가능합니다.")
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "201", description = "시·도가 생성되었습니다.",
 			content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResCreateSidoDto.class))),
@@ -80,7 +80,7 @@ public class SidoController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(responseDtoList);
 	}
 
-	@Operation(summary = "시·도 목록 조회", description = "등록된 시·도 목록을 조회합니다. MANAGER, OWNER, CUSTOMER가 사용가능합니다.")
+	@Operation(summary = "시·도 목록 조회", description = "등록된 시·도 목록을 조회합니다. MASTER, MANAGER, OWNER, CUSTOMER가 사용가능합니다.")
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "200", description = "시·도 목록을 조회했습니다.",
 			content = @Content(mediaType = "application/json",
@@ -99,7 +99,7 @@ public class SidoController {
 		return ResponseEntity.ok(responseDtoList);
 	}
 
-	@Operation(summary = "시·도 수정", description = "기존의 시·도를 수정합니다. MANAGER만 사용 가능합니다.")
+	@Operation(summary = "시·도 수정", description = "기존의 시·도를 수정합니다. MASTER와 MANAGER만 사용 가능합니다.")
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "200", description = "시·도가 수정되었습니다.",
 			content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResUpdateSidoDto.class))),
@@ -136,7 +136,7 @@ public class SidoController {
 		return ResponseEntity.ok(responseDto);
 	}
 
-	@Operation(summary = "시·도 삭제", description = "기존의 시·도를 삭제합니다. MANAGER만 사용 가능합니다.")
+	@Operation(summary = "시·도 삭제", description = "기존의 시·도를 삭제합니다. MASTER와 MANAGER만 사용 가능합니다.")
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "204", description = "시·도가 삭제되었습니다.",
 			content = @Content()),

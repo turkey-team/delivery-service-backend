@@ -29,4 +29,6 @@ public interface CartRepository extends JpaRepository<Cart, UUID>, CartRepositor
 	@Query("UPDATE Cart c SET c.deletedAt = :deletedAt " +
 		"WHERE c.menu.id IN (SELECT sm.id FROM StoreMenu sm WHERE sm.store.id = :storeId)")
 	void bulkSoftDeleteCartByStoreId(Long storeId, Instant deletedAt);
+  
+	List<Cart> findAllByMenuIdAndDeletedAtIsNull(UUID menuId);
 }
