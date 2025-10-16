@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,6 +35,7 @@ public class StoreMenuController {
 			@ApiResponse(responseCode = "400", description = "가게가 존재하지 않거나 메뉴 이름 중복"),
 			@ApiResponse(responseCode = "403", description = "권한 없음")
 	})
+	@PreAuthorize("hasAnyRole('OWNER', 'MASTER', 'MANAGER')")
 	public ResponseEntity<Void> createStoreMenu(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable UUID storeId,
@@ -49,6 +51,7 @@ public class StoreMenuController {
 			@ApiResponse(responseCode = "200", description = "메뉴 목록 조회 성공"),
 			@ApiResponse(responseCode = "400", description = "가게 없음")
 	})
+	@PreAuthorize("hasAnyRole(isAuthenticated())")
 	public ResponseEntity<PageResponse<ResGetListStoreMenuDto>> getAllStoreMenusByStoreId(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable UUID storeId,
@@ -65,6 +68,7 @@ public class StoreMenuController {
 			@ApiResponse(responseCode = "200", description = "메뉴 조회 성공", content = @Content(schema = @Schema(implementation = ResGetStoreMenuDto.class))),
 			@ApiResponse(responseCode = "400", description = "가게 또는 메뉴 없음")
 	})
+	@PreAuthorize("hasAnyRole(isAuthenticated())")
 	public ResponseEntity<ResGetStoreMenuDto> getStoreMenuByStoreMenuId(
 		@PathVariable UUID storeId,
 		@PathVariable UUID menuId
@@ -81,6 +85,7 @@ public class StoreMenuController {
 			@ApiResponse(responseCode = "400", description = "가게 또는 메뉴 없음"),
 			@ApiResponse(responseCode = "403", description = "권한 없음")
 	})
+	@PreAuthorize("hasAnyRole('OWNER', 'MASTER', 'MANAGER')")
 	public ResponseEntity<Void> updateStoreMenu(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable UUID storeId,
@@ -99,6 +104,7 @@ public class StoreMenuController {
 			@ApiResponse(responseCode = "400", description = "가게 또는 메뉴 없음"),
 			@ApiResponse(responseCode = "403", description = "권한 없음")
 	})
+	@PreAuthorize("hasAnyRole('OWNER', 'MASTER', 'MANAGER')")
 	public ResponseEntity<Void> updateSortOrder(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable UUID storeId,
@@ -117,6 +123,7 @@ public class StoreMenuController {
 			@ApiResponse(responseCode = "400", description = "가게 또는 메뉴 없음"),
 			@ApiResponse(responseCode = "403", description = "권한 없음")
 	})
+	@PreAuthorize("hasAnyRole('OWNER', 'MASTER', 'MANAGER')")
 	public ResponseEntity<Void> updateVisibility(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable UUID storeId,
@@ -134,6 +141,7 @@ public class StoreMenuController {
 			@ApiResponse(responseCode = "400", description = "가게 또는 메뉴 없음"),
 			@ApiResponse(responseCode = "403", description = "권한 없음")
 	})
+	@PreAuthorize("hasAnyRole('OWNER', 'MASTER', 'MANAGER')")
 	public ResponseEntity<Void> deleteStoreMenu(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable UUID storeId,

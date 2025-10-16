@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,6 +36,7 @@ public class OrderController {
 		@ApiResponse(responseCode = "200", description = "주문 정보 조회 성공", content = @Content(schema = @Schema(implementation = ResCheckOutOrderDto.class))),
 		@ApiResponse(responseCode = "400", description = "장바구니가 비어있거나 주소 정보 없음")
 	})
+	@PreAuthorize("hasRole('CUSTOMER')")
 	public ResCheckOutOrderDto getCheckoutOrder(@AuthenticationPrincipal UserDetailsImpl userDetails) {
 		return orderService.getCheckoutOrder(userDetails.getUser());
 	}
@@ -47,6 +49,7 @@ public class OrderController {
 		@ApiResponse(responseCode = "400", description = "주소 정보나 장바구니 정보 없음"),
 		@ApiResponse(responseCode = "403", description = "본인 장바구니가 아님")
 	})
+	@PreAuthorize("hasRole('CUSTOMER')")
 	public ResponseEntity<UUID> createOrder(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@RequestBody ReqCreateOrderDto reqCreateOrderDto
@@ -62,6 +65,7 @@ public class OrderController {
 		@ApiResponse(responseCode = "200", description = "주문 내역 조회 성공", content = @Content(schema = @Schema(implementation = ResGetListOrderDto.class))),
 		@ApiResponse(responseCode = "400", description = "유효하지 않은 사용자 정보")
 	})
+	@PreAuthorize("hasAnyRole('CUSTOMER', 'OWNER')")
 	public ResponseEntity<PageResponse<ResGetListOrderDto>> getOrdersByUserId(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@RequestParam("page") int page,
@@ -85,6 +89,7 @@ public class OrderController {
 		@ApiResponse(responseCode = "200", description = "주문 내역 조회 성공", content = @Content(schema = @Schema(implementation = ResGetOrderDto.class))),
 		@ApiResponse(responseCode = "400", description = "유효하지 않은 사용자 정보")
 	})
+	@PreAuthorize("hasAnyRole(isAuthenticated())")
 	public ResponseEntity<ResGetOrderDto> getOrderById(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable UUID orderId
@@ -101,6 +106,7 @@ public class OrderController {
 		@ApiResponse(responseCode = "400", description = "주문이 존재하지 않음 또는 잘못된 상태 변경 요청"),
 		@ApiResponse(responseCode = "403", description = "Owner 또는 고객 권한 없음")
 	})
+	@PreAuthorize("hasAnyRole(isAuthenticated())")
 	public ResponseEntity<Void> updateOrderStatusDto(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable UUID orderId,
@@ -112,12 +118,13 @@ public class OrderController {
 
 	// Customer 가 주문 내역 삭제
 	@DeleteMapping("/{orderId}")
-	@Operation(summary = "주문 내역 삭제", description = "Customer가 자신의 주문 내역을 삭제합니다. 진행 중인 주문은 삭제할 수 없습니다.")
+	@Operation(summary = "주문 내역 삭제", description = "자신의 주문 내역을 삭제합니다. 진행 중인 주문은 삭제할 수 없습니다.")
 	@ApiResponses({
 		@ApiResponse(responseCode = "204", description = "주문 삭제 성공"),
 		@ApiResponse(responseCode = "400", description = "주문이 존재하지 않거나 진행 중인 주문"),
 		@ApiResponse(responseCode = "403", description = "본인 주문이 아님")
 	})
+	@PreAuthorize("hasAnyRole(isAuthenticated())")
 	public ResponseEntity<Void> deleteOrder(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable UUID orderId
