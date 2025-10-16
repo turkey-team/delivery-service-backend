@@ -3,6 +3,10 @@ package com.sparta.delivery.backend.customer.service;
 import java.util.List;
 import java.util.UUID;
 
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,6 +51,7 @@ public class CustomerAddressService {
 		Address address = Address.builder()
 			.dong(dong)
 			.fullAddress(requestDto.getFullAddress())
+			.location(createPoint(requestDto.getLongitude(), requestDto.getLatitude()))
 			.build();
 
 		CustomerAddress customerAddress = CustomerAddress.builder()
@@ -156,5 +161,11 @@ public class CustomerAddressService {
 		String dongCode = code.substring(5, 8);
 		return dongRepository.findByCode(dongCode)
 			.orElseThrow(() -> new IllegalArgumentException("해당 지역을 찾을 수 없습니다."));
+	}
+
+	// 경도, 위도 좌표로 Point 객체 생성 (SRID 4326 사용)
+	private Point createPoint(Double longitude, Double latitude) {
+		GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+		return geometryFactory.createPoint(new Coordinate(longitude, latitude));
 	}
 }
