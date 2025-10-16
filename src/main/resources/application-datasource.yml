@@ -3,15 +3,10 @@ spring:
     activate:
       on-profile: test
   datasource:
-    url: jdbc:h2:mem:deliverydb;MODE=PostgreSQL
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-
-  h2:
-    console:
-      enabled: true
-      path: /h2
+    url: jdbc:postgresql://localhost:5432/deliverydb
+    driver-class-name: org.postgresql.Driver
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
 
   jpa:
     hibernate:
@@ -21,7 +16,7 @@ spring:
         format_sql: true
         show_sql: true
         use_sql_comments: true
-    database-platform: org.hibernate.dialect.H2Dialect
+    database-platform: org.hibernate.spatial.dialect.postgis.PostgisPG10Dialect
 
 logging:
   level:
@@ -34,15 +29,10 @@ spring:
     activate:
       on-profile: local
   datasource:
-    url: jdbc:h2:mem:deliverydb;MODE=PostgreSQL
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-
-  h2:
-    console:
-      enabled: true
-      path: /h2
+    url: jdbc:postgresql://localhost:5432/deliverydb
+    driver-class-name: org.postgresql.Driver
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
 
   jpa:
     hibernate:
@@ -52,7 +42,7 @@ spring:
         format_sql: true
         show_sql: true
         use_sql_comments: true
-    database-platform: org.hibernate.dialect.H2Dialect
+    database-platform: org.hibernate.spatial.dialect.postgis.PostgisPG10Dialect
 
 logging:
   level:
@@ -65,15 +55,10 @@ spring:
     activate:
       on-profile: dev
   datasource:
-    url: jdbc:h2:mem:deliverydb;MODE=PostgreSQL
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-
-  h2:
-    console:
-      enabled: true
-      path: /h2
+    url: jdbc:postgresql://localhost:5432/deliverydb
+    driver-class-name: org.postgresql.Driver
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
 
   jpa:
     hibernate:
@@ -83,7 +68,7 @@ spring:
         format_sql: true
         show_sql: true
         use_sql_comments: true
-    database-platform: org.hibernate.dialect.H2Dialect
+    database-platform: org.hibernate.spatial.dialect.postgis.PostgisPG10Dialect
 
 logging:
   level:
@@ -103,13 +88,13 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
     properties:
       hibernate:
         format_sql: false
         show_sql: false
         use_sql_comments: false
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    database-platform: org.hibernate.spatial.dialect.postgis.PostgisPG10Dialect
 
 logging:
   level:
