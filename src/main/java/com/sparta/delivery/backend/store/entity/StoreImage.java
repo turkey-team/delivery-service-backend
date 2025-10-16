@@ -39,4 +39,9 @@ public class StoreImage extends BaseEntity {
 		this.image = image;
 		this.status = status;
 	}
+
+	public void delete(Long deletedBy) {
+		this.softDelete(deletedBy);
+		this.image.softDelete(deletedBy);
+	}
 }

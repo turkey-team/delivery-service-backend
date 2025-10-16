@@ -1,10 +1,12 @@
 package com.sparta.delivery.backend.store.menu.entity;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import com.sparta.delivery.backend.global.common.BaseEntity;
+import com.sparta.delivery.backend.cart.entity.Cart;
 import com.sparta.delivery.backend.image.entity.Image;
 import com.sparta.delivery.backend.order.entity.OrderMenu;
 import com.sparta.delivery.backend.store.entity.Store;
@@ -72,6 +74,10 @@ public class StoreMenu extends BaseEntity {
 	@OneToMany(mappedBy = "storeMenu")
 	private List<OrderMenu> orderMenus;
 
+	@OneToMany(mappedBy = "menu")
+	private List<Cart> carts = new ArrayList<>();
+
+
 	@Builder
 	private StoreMenu(ReqCreateStoreMenuDto reqCreateStoreMenuDto, Store store, Image image) {
 		this.store = store;
@@ -113,5 +119,11 @@ public class StoreMenu extends BaseEntity {
 	public void softDelete(Long deletedByUserId, int minSortOrder) {
 		this.softDelete(deletedByUserId);
 		this.sortOrder = minSortOrder - 1;
+	}
+
+	public void delete(Long deletedBy){
+		this.softDelete(deletedBy);
+		this.image.softDelete(deletedBy);
+		this.carts.forEach(cart -> {cart.softDelete();});
 	}
 }

@@ -29,9 +29,11 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.sparta.delivery.backend.address.entity.Address;
 import com.sparta.delivery.backend.category.entity.Category;
 import com.sparta.delivery.backend.category.repository.CategoryRepository;
 import com.sparta.delivery.backend.customer.entity.Customer;
+import com.sparta.delivery.backend.global.common.dto.PageResponse;
 import com.sparta.delivery.backend.image.entity.Image;
 import com.sparta.delivery.backend.image.repository.ImageRepository;
 import com.sparta.delivery.backend.manager.entity.Manager;
@@ -209,7 +211,6 @@ public class StoreServiceTest {
 
 	@Test
 	@DisplayName("Store 생성 : 생성 성공")
-	@Disabled
 	void storeCreateTestSuccess() {
 		//Owner, User Setter 설정
 
@@ -249,7 +250,9 @@ public class StoreServiceTest {
 		List<Category> categoriesList = List.of(category);
 
 		Dong dong = Dong.builder().code("123").name("테스트동").build();
-		// dong.setId(UUID.randomUUID());
+		String fullAddress = "광화문로123로 456길";
+
+
 
 		List<String> storeImageUrls = List.of("store1.jpg", "store2.jpg");
 		List<String> businessImageUrls = List.of("biz1.jpg");
@@ -292,6 +295,8 @@ public class StoreServiceTest {
 		when(ownerRepository.findByUserPublicIdAndDeletedAtIsNull(userPublicId)).thenReturn(Optional.of(owner));
 		when(dongRepository.findByCode("123")).thenReturn(Optional.of(dong));
 		when(categoryRepository.findAllById(List.of(categoryId))).thenReturn(categoriesList);
+
+		Address address = Address.builder().dong(dong).fullAddress(fullAddress).build();
 
 		List<Image> storeImages = storeImageUrls.stream()
 			.map(url -> Image.builder().imageUrl(url).build())
@@ -354,11 +359,11 @@ public class StoreServiceTest {
 		);
 
 		// when & then
-		AccessDeniedException exception = assertThrows(AccessDeniedException.class, () -> {
+		ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
 			storeService.createStore(requestDto, mockUser);
 		});
 
-		assertEquals("가게 생성 권한이 없습니다", exception.getMessage());
+		assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
 
 	}
 
@@ -416,7 +421,10 @@ public class StoreServiceTest {
 		when(dongRepository.findByCode("123")).thenReturn(Optional.of(dong));
 
 		when(mockStore.getOwner()).thenReturn(mockOwner);
-		when(mockStore.getRegionDong()).thenReturn(dong);
+
+		Address address = Address.builder().fullAddress(requestDto.getAddressDetails()).dong(dong).build();
+		when(mockStore.getAddress()).thenReturn(address);
+
 
 		when(mockOwner.getUser()).thenReturn(mockOwnerUser);
 
@@ -563,7 +571,7 @@ public class StoreServiceTest {
 			.thenReturn(mockPage);
 
 		// when
-		Page<ResGetListStoreDto> result = storeService.getStores(page, size, sort, keyword, categoryId, mockUser);
+		PageResponse<ResGetListStoreDto> result = storeService.getStores(page, size, sort, keyword, categoryId, mockUser);
 
 		// then
 		assertNotNull(result);
@@ -680,5 +688,7 @@ public class StoreServiceTest {
 		assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
 		assertEquals("존재하지 않는 가게입니다.", exception.getReason());
 	}
+
+
 
 }

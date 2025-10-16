@@ -29,6 +29,7 @@ import com.sparta.delivery.backend.category.dto.ResGetListCategoryDto;
 import com.sparta.delivery.backend.category.dto.ResUpdateCategoryDto;
 import com.sparta.delivery.backend.category.entity.Category;
 import com.sparta.delivery.backend.category.repository.CategoryRepository;
+import com.sparta.delivery.backend.global.common.dto.PageResponse;
 import com.sparta.delivery.backend.store.repository.StoreCategoryRepository;
 import com.sparta.delivery.backend.user.entity.User;
 import com.sparta.delivery.backend.user.entity.UserRoleEnum;
@@ -216,7 +217,7 @@ public class CategoryServiceTest {
 			.thenReturn(pageResult);
 
 		// when
-		Page<ResGetListCategoryDto> result = categoryService.getCategories(mockManagerUser, keyword, page, size, sort);
+		PageResponse<ResGetListCategoryDto> result = categoryService.getCategories(mockManagerUser, keyword, page, size, sort);
 
 		// then
 		assertEquals(2, result.getContent().size());
@@ -237,10 +238,10 @@ public class CategoryServiceTest {
 			.thenReturn(emptyPage);
 
 		// when
-		Page<ResGetListCategoryDto> result = categoryService.getCategories(mockManagerUser, keyword, page, size, sort);
+		PageResponse<ResGetListCategoryDto> result = categoryService.getCategories(mockManagerUser, keyword, page, size, sort);
 
 		// then
-		assertTrue(result.isEmpty());
+		assertTrue(result.getContent().isEmpty());
 	}
 
 }

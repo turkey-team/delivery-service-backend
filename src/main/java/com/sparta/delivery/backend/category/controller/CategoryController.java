@@ -23,6 +23,7 @@ import com.sparta.delivery.backend.category.dto.ResGetCategoryDto;
 import com.sparta.delivery.backend.category.dto.ResGetListCategoryDto;
 import com.sparta.delivery.backend.category.dto.ResUpdateCategoryDto;
 import com.sparta.delivery.backend.category.service.CategoryService;
+import com.sparta.delivery.backend.global.common.dto.PageResponse;
 import com.sparta.delivery.backend.security.UserDetailsImpl;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -74,7 +75,7 @@ public class CategoryController {
 			,content = @Content(schema = @Schema(implementation = ResGetListCategoryDto.class)))
 	})
 	@PreAuthorize("isAuthenticated() && hasAnyRole('MANAGER')")
-	public Page<ResGetListCategoryDto> getCategories(@AuthenticationPrincipal UserDetailsImpl userDetails,
+	public PageResponse<ResGetListCategoryDto> getCategories(@AuthenticationPrincipal UserDetailsImpl userDetails,
 														@RequestParam(required = false, defaultValue = "") String keyword,
 														@RequestParam(defaultValue = "10") int size,
 														@RequestParam(defaultValue = "createdAtAsc") String sort,

@@ -3,12 +3,16 @@ package com.sparta.delivery.backend.store.entity;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sparta.delivery.backend.address.entity.Address;
 import com.sparta.delivery.backend.global.common.BaseEntity;
 import com.sparta.delivery.backend.image.entity.Image;
 import com.sparta.delivery.backend.owner.entity.Owner;
 import com.sparta.delivery.backend.region.entity.Dong;
+import com.sparta.delivery.backend.review.entity.Review;
 import com.sparta.delivery.backend.store.dto.ReqUpdateStoreInfoDto;
+import com.sparta.delivery.backend.store.menu.entity.StoreMenu;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -17,6 +21,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -32,12 +37,21 @@ public class Store extends BaseEntity {
 	@JoinColumn(name = "p_owner_id", nullable = false)
 	private Owner owner;
 
+	@OneToOne(mappedBy = "store", fetch = FetchType.LAZY)
+	private StoreDetails storeDetails;
+
+	@OneToMany(mappedBy = "store")
+	private List<StoreMenu> storeMenus = new ArrayList<>();
+
+	@OneToMany(mappedBy = "store")
+	private List<Review> reviews = new ArrayList<>();
+
 	@OneToMany(mappedBy = "store")
 	private List<StoreImage> storeImages = new ArrayList<>();
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "p_region_dong_id", nullable = false)
-	private Dong regionDong;
+	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+	@JoinColumn(name = "p_address_id", nullable = false)
+	private Address address;
 
 	@OneToMany(mappedBy = "store", fetch = FetchType.LAZY)
 	private List<StoreCategory> storeCategories = new ArrayList<>();
@@ -67,6 +81,7 @@ public class Store extends BaseEntity {
 	@Column(name = "phone_number")
 	private String phoneNumber;
 
+
 	public void addReview(int rate) {
 		this.reviewRate = (this.reviewRate * this.reviewCnt + rate) / (this.reviewCnt + 1);
 		this.reviewCnt++;
@@ -88,20 +103,18 @@ public class Store extends BaseEntity {
 
 	@Builder
 	public Store(Owner owner, String name
-		, String addressDetails
 		, double reviewRate
 		, Integer minOrderPrice
 		, int deliveryFee
-		, Dong regionDong
+		, Address address
 		, StoreStatusEnum status
 		, String phoneNumber) {
 		this.owner = owner;
 		this.name = name;
-		this.addressDetails = addressDetails;
+		this.address = address;
 		this.reviewRate = reviewRate;
 		this.minOrderPrice = minOrderPrice;
 		this.deliveryFee = deliveryFee;
-		this.regionDong = regionDong;
 		this.status = status;
 		this.phoneNumber = phoneNumber;
 	}
@@ -110,12 +123,11 @@ public class Store extends BaseEntity {
 		return StoreImage.builder().store(store).image(image).status(status).build();
 	}
 
-	public void updateStoreInfo(ReqUpdateStoreInfoDto requestDto, Dong dong) {
+	public void updateStoreInfo(ReqUpdateStoreInfoDto requestDto, Address address) {
 		this.name = requestDto.getStoreName();
-		this.addressDetails = requestDto.getAddressDetails();
+		this.address = address;
 		this.phoneNumber = requestDto.getPhoneNumber();
-		this.addressDetails = requestDto.getAddressDetails();
-		this.regionDong = dong;
+
 	}
 
 	public void updateStoreDetails(int deliveryFee, Integer minOrderPrice) {
@@ -128,7 +140,24 @@ public class Store extends BaseEntity {
 	}
 
 	public void delete(Long deletedBy) {
+
 		this.softDelete(deletedBy);
-		//추가적으로 지워져야 하는 부분 고민해보기
+
+		if (this.storeDetails != null) {
+			storeDetails.softDelete(deletedBy);
+		}
+
+		this.storeImages.forEach(storeImage -> {
+			storeImage.delete(deletedBy);
+		});
+
+		this.storeMenus.forEach(storeMenu -> {
+			storeMenu.delete(deletedBy);
+		});
+
+		this.reviews.forEach(review -> review.deleteWithReply(deletedBy));
+
+		this.storeCategories.forEach(storeCategory -> storeCategory.softDelete(deletedBy));
+
 	}
 }

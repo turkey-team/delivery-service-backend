@@ -39,9 +39,9 @@ public class CartService {
 	@Transactional
 	public ResCreateCartDto createCart(User user, ReqCreateCartDto requestDto) {
 
-		StoreMenu menu = storeMenuRepository.findById(requestDto.getMenuId()).orElseThrow(()-> new ResponseStatusException(HttpStatus.BAD_REQUEST, "해당 메뉴가 존재하지 않습니다."));
-		Store store = storeRepository.findById(menu.getStore().getId()).orElseThrow(()->new ResponseStatusException(HttpStatus.BAD_REQUEST,"가게가 존재하지 않습니다."));
-		Customer customer = customerRepository.findByUserId(user.getId()).orElseThrow(()->new AccessDeniedException("로그인 후 사용해주세요"));
+		StoreMenu menu = storeMenuRepository.findByIdAndDeletedAtIsNull(requestDto.getMenuId()).orElseThrow(()-> new ResponseStatusException(HttpStatus.BAD_REQUEST, "해당 메뉴가 존재하지 않습니다."));
+		Store store = storeRepository.findByIdAndDeletedAtIsNull(menu.getStore().getId()).orElseThrow(()->new ResponseStatusException(HttpStatus.BAD_REQUEST,"가게가 존재하지 않습니다."));
+		Customer customer = customerRepository.findByUserIdAndDeletedAtIsNull(user.getId()).orElseThrow(()->new AccessDeniedException("로그인 후 사용해주세요"));
 
 		// cart 비었는지 확인
 		boolean isNotEmpty = checkIsNotEmpty(customer);
@@ -65,7 +65,7 @@ public class CartService {
 
 	@Transactional(readOnly = true)
 	public ResGetCartDto getCarts(User user) {
-		Customer customer = customerRepository.findByUserId(user.getId()).orElseThrow(()->new AccessDeniedException("로그인 후 사용해주세요"));
+		Customer customer = customerRepository.findByUserIdAndDeletedAtIsNull(user.getId()).orElseThrow(()->new AccessDeniedException("로그인 후 사용해주세요"));
 
 		ResGetCartDto responseDto = cartRepository.findCartGroupByMenu(customer.getId());
 
@@ -90,7 +90,7 @@ public class CartService {
 
 	@Transactional
 	public ResDeleteCartsDto deleteCarts(User user) {
-		Customer customer = customerRepository.findByUserId(user.getId()).orElseThrow(()->new AccessDeniedException("로그인 후 사용해주세요"));
+		Customer customer = customerRepository.findByUserIdAndDeletedAtIsNull(user.getId()).orElseThrow(()->new AccessDeniedException("로그인 후 사용해주세요"));
 
 		List<Cart> carts = cartRepository.findAllByCustomerIdAndDeletedAtIsNull(customer.getId());
 

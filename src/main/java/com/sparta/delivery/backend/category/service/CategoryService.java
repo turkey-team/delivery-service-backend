@@ -21,6 +21,7 @@ import com.sparta.delivery.backend.category.dto.ResGetListCategoryDto;
 import com.sparta.delivery.backend.category.dto.ResUpdateCategoryDto;
 import com.sparta.delivery.backend.category.entity.Category;
 import com.sparta.delivery.backend.category.repository.CategoryRepository;
+import com.sparta.delivery.backend.global.common.dto.PageResponse;
 import com.sparta.delivery.backend.store.repository.StoreCategoryRepository;
 import com.sparta.delivery.backend.user.entity.User;
 import com.sparta.delivery.backend.user.entity.UserRoleEnum;
@@ -71,7 +72,7 @@ public class CategoryService {
 	}
 
 	@Transactional(readOnly = true)
-	public Page<ResGetListCategoryDto> getCategories(User user, String keyword, int page, int size, String sort) {
+	public PageResponse<ResGetListCategoryDto> getCategories(User user, String keyword, int page, int size, String sort) {
 
 		if (size != 10 && size != 30 && size != 50){
 			size = 10;
@@ -89,7 +90,9 @@ public class CategoryService {
 			categoryList = categoryRepository.findAllByDeletedAtIsNull(pageable);
 		}
 
-		return  categoryList.map(ResGetListCategoryDto::new);
+		Page<ResGetListCategoryDto> dtoPage = categoryList.map(res -> new ResGetListCategoryDto(res));
+
+		return PageResponse.of(dtoPage);
 	}
 
 
