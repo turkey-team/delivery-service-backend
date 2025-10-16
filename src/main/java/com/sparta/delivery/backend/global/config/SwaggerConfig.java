@@ -27,8 +27,6 @@ import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
-import io.swagger.v3.oas.models.Components;
-import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.Content;
@@ -43,7 +41,7 @@ import io.swagger.v3.oas.models.responses.ApiResponses;
 	info = @Info(title = "Delivery Backend Service API",
 		description = "Delivery Backend Service의 REST API 명세서입니다.",
 		version = "v1.0.0"),
-	security = { @SecurityRequirement(name = "Authentication") }
+	security = {@SecurityRequirement(name = "Authentication")}
 )
 @SecurityScheme(
 	name = "Authentication",
@@ -89,6 +87,10 @@ public class SwaggerConfig {
 				List<String> roles = extractRoles(expression);
 
 				authInfo.append("### 🔒 인증 요구사항\n");
+
+				if (expression.contains("isAuthenticated()")) {
+					authInfo.append("- ✅ 로그인 필수\n");
+				}
 
 				if (!roles.isEmpty()) {
 					authInfo.append("- 👤 필요한 권한: ");
@@ -140,7 +142,8 @@ public class SwaggerConfig {
 	}
 
 	@Bean
-	public OpenApiCustomizer jwtLoginEndpointCustomizer(ApplicationContext applicationContext, JwtAuthenticationFilter jwtAuthenticationFilter) {
+	public OpenApiCustomizer jwtLoginEndpointCustomizer(ApplicationContext applicationContext,
+		JwtAuthenticationFilter jwtAuthenticationFilter) {
 		FilterChainProxy filterChainProxy = applicationContext.getBean(
 			AbstractSecurityWebApplicationInitializer.DEFAULT_FILTER_NAME,
 			FilterChainProxy.class

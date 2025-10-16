@@ -5,6 +5,7 @@ import java.util.UUID;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -53,7 +54,7 @@ public class ReviewController {
 		@ApiResponse(responseCode = "401", description = "인증 실패"),
 		@ApiResponse(responseCode = "404", description = "리뷰 또는 매장 없음")
 	})
-	// default 추가
+	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/stores/{storeId}/reviews")
 	public PageResponse<ResViewReviewDto> getReviews(
 		@Parameter(description = "리뷰를 조회할 매장의 UUID") @PathVariable UUID storeId,
@@ -72,6 +73,7 @@ public class ReviewController {
 		@ApiResponse(responseCode = "401", description = "인증 실패"),
 		@ApiResponse(responseCode = "404", description = "리뷰 또는 매장 없음")
 	})
+	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/stores/{storeId}/reviews/{reviewId}")
 	public ResViewReviewDto getReview(
 		@Parameter(description = "리뷰가 속한 매장의 UUID") @PathVariable UUID storeId,
@@ -89,6 +91,7 @@ public class ReviewController {
 		@ApiResponse(responseCode = "401", description = "인증 실패"),
 		@ApiResponse(responseCode = "404", description = "고객 또는 리뷰 없음")
 	})
+	@PreAuthorize("hasAnyRole('CUSTOMER')")
 	@GetMapping("/customer/{customerId}/reviews")
 	public PageResponse<ResViewReviewDto> getMyReviews(
 		@Parameter(description = "리뷰를 조회할 고객의 UUID") @PathVariable UUID customerId,
@@ -108,6 +111,7 @@ public class ReviewController {
 		@ApiResponse(responseCode = "401", description = "인증 실패"),
 		@ApiResponse(responseCode = "404", description = "매장 또는 주문 없음")
 	})
+	@PreAuthorize("hasAnyRole('CUSTOMER')")
 	@PostMapping("/stores/{storeId}/review")
 	public ResResultReviewDto writeReview(
 		@Parameter(description = "리뷰를 작성할 매장의 UUID") @PathVariable UUID storeId,
@@ -126,6 +130,7 @@ public class ReviewController {
 		@ApiResponse(responseCode = "401", description = "인증 실패"),
 		@ApiResponse(responseCode = "404", description = "리뷰 또는 매장 없음")
 	})
+	@PreAuthorize("hasAnyRole('CUSTOMER','MANAGER', 'MASTER')")
 	@PutMapping("/stores/{storeId}/reviews/{reviewId}")
 	public ResResultReviewDto updateReview(
 		@Parameter(description = "리뷰가 속한 매장의 UUID") @PathVariable UUID storeId,
@@ -144,6 +149,7 @@ public class ReviewController {
 		@ApiResponse(responseCode = "401", description = "인증 실패"),
 		@ApiResponse(responseCode = "404", description = "리뷰 또는 매장 없음")
 	})
+	@PreAuthorize("hasAnyRole('CUSTOMER','MANAGER', 'MASTER')")
 	@DeleteMapping("/stores/{storeId}/reviews/{reviewId}")
 	public ResDeleteReviewDto deleteReview(
 		@Parameter(description = "리뷰가 속한 매장의 UUID") @PathVariable UUID storeId,
