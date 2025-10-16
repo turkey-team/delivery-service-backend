@@ -37,7 +37,7 @@ public class User {
 	private String password;
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "role", length = 20, nullable = false)
+	@Column(name = "role", nullable = false)
 	private UserRoleEnum role;
 
 	private Instant deletedAt;
