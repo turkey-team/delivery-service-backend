@@ -92,8 +92,9 @@ public class ReviewController {
 	@GetMapping("/customer/{customerId}/reviews")
 	public PageResponse<ResViewReviewDto> getMyReviews(
 		@Parameter(description = "리뷰를 조회할 고객의 UUID") @PathVariable UUID customerId,
-		@Parameter(description = "검색 조건 DTO") ReviewRepositorySearchConditionDto condition,
-		@Parameter(description = "페이지네이션 정보") Pageable pageable) {
+		@ParameterObject @ModelAttribute ReviewRepositorySearchConditionDto condition,
+		@Parameter(description = "페이지네이션 정보") @ParameterObject
+		@PageableDefault(page = 0, size = 10) Pageable pageable) {
 		// UserDetails를 통해 customerId와 UserDetails 객체 안의 customerId 일치하는지 확인
 		return reviewService.getMyReviews(customerId, condition, pageable);
 	}
