@@ -66,10 +66,6 @@ public class User {
 		password = encodedPassword;
 	}
 
-	public void updateRole(UserRoleEnum role) {
-		this.role = role;
-	}
-
 	public void softDelete(Long userId) {
 		this.username = username + "_deleted_" + this.id;
 		this.deletedAt = Instant.now();

@@ -1,8 +1,5 @@
 package com.sparta.delivery.backend.manager.dto;
 
-import com.sparta.delivery.backend.global.validation.annotation.ValidPassword;
-import com.sparta.delivery.backend.global.validation.annotation.ValidUsername;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -12,16 +9,8 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-@Schema(name = "ReqCreateManagerDto", description = "매니저 회원가입 요청")
-public class ReqCreateManagerDto {
-
-	@Schema(description = "사용자 아이디", example = "manager1")
-	@ValidUsername
-	private String username;
-
-	@Schema(description = "비밀번호", example = "Password123!")
-	@ValidPassword
-	private String password;
+@Schema(name = "ReqUpdateManagerDto", description = "매니저 수정 요청")
+public class ReqUpdateManagerDto {
 
 	@Schema(description = "이메일", example = "manager@example.com")
 	@NotBlank(message = "이메일은 필수입니다.")

@@ -1,5 +1,6 @@
 package com.sparta.delivery.backend.manager.entity;
 
+import java.util.Objects;
 import java.util.UUID;
 
 import com.sparta.delivery.backend.global.common.BaseEntity;
@@ -57,8 +58,16 @@ public class Manager extends BaseEntity {
 		return this.user.getRole();
 	}
 
-	public void updateRole(UserRoleEnum role) {
-		this.user.updateRole(role);
+	public void updateManager(String email, String name, String phoneNumber) {
+		if (!Objects.equals(this.email, email)) {
+			this.email = email;
+		}
+		if (!Objects.equals(this.name, name)) {
+			this.name = name;
+		}
+		if (!Objects.equals(this.phoneNumber, phoneNumber)) {
+			this.phoneNumber = phoneNumber;
+		}
 	}
 
 	public void delete(Long userId) {

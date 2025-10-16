@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.sparta.delivery.backend.global.excpetion.DuplicateUsernameException;
 import com.sparta.delivery.backend.manager.dto.ReqCreateManagerDto;
-import com.sparta.delivery.backend.manager.dto.ReqUpdateRoleDto;
+import com.sparta.delivery.backend.manager.dto.ReqUpdateManagerDto;
 import com.sparta.delivery.backend.manager.dto.ResGetManagerDetailDto;
 import com.sparta.delivery.backend.manager.dto.ResGetManagerSummaryDto;
 import com.sparta.delivery.backend.manager.entity.Manager;
@@ -68,15 +68,11 @@ public class ManagerService {
 	}
 
 	@Transactional
-	public void updateRole(UUID managerUserPublicId, ReqUpdateRoleDto requestDto) {
+	public void updateManager(UUID managerUserPublicId, ReqUpdateManagerDto requestDto) {
 		Manager manager = managerRepository.findByUserPublicIdAndDeletedAtIsNull(managerUserPublicId)
 			.orElseThrow(() -> new IllegalArgumentException("잘못된 유저 아이디입니다."));
 
-		if (manager.getUserRole().equals(UserRoleEnum.MASTER)) {
-			throw new IllegalArgumentException("MASTER의 권한은 변경할 수 없습니다.");
-		}
-
-		manager.updateRole(requestDto.getRole());
+		manager.updateManager(requestDto.getEmail(), requestDto.getName(), requestDto.getPhoneNumber());
 	}
 
 	@Transactional

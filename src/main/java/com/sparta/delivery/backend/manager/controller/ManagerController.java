@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sparta.delivery.backend.manager.dto.ReqCreateManagerDto;
-import com.sparta.delivery.backend.manager.dto.ReqUpdateRoleDto;
+import com.sparta.delivery.backend.manager.dto.ReqUpdateManagerDto;
 import com.sparta.delivery.backend.manager.dto.ResGetManagerDetailDto;
 import com.sparta.delivery.backend.manager.dto.ResGetManagerSummaryDto;
 import com.sparta.delivery.backend.manager.service.ManagerService;
@@ -39,9 +39,15 @@ import lombok.RequiredArgsConstructor;
 public class ManagerController {
 	private final ManagerService managerService;
 
+	@Operation(summary = "관리자 생성", description = "관리자를 생성합니다. MASTER만 사용 가능합니다.")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "201", description = "생성 성공"),
+		@ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content(schema = @Schema(hidden = true))),
+		@ApiResponse(responseCode = "403", description = "권한 없음", content = @Content(schema = @Schema(hidden = true))),
+		@ApiResponse(responseCode = "409", description = "이미 존재하는 관리자", content = @Content(schema = @Schema(hidden = true))),
+	})
 	@PostMapping
-	//TODO: 추후 개발이 거의 완료 된다면 해당 API @Secured 필요
-	// @PreAuthorize("hasAnyRole('MANAGER', 'MASTER')")
+	@PreAuthorize("isAuthenticated() && hasRole('MASTER')")
 	public ResponseEntity<Void> createManager(@Valid @RequestBody ReqCreateManagerDto requestDto) {
 		managerService.createManager(requestDto);
 		return ResponseEntity.status(HttpStatus.CREATED).build();
@@ -79,24 +85,25 @@ public class ManagerController {
 		return ResponseEntity.status(HttpStatus.OK).body(responseDto);
 	}
 
-	@Operation(summary = "관리자 수정", description = "관리자의 권한을 수정합니다. MASTER만 사용 가능합니다.")
+	@Operation(summary = "관리자 수정", description = "관리자를 수정합니다. MASTER만 사용 가능합니다.")
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "200", description = "수정 성공"),
 		@ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content(schema = @Schema(hidden = true))),
 		@ApiResponse(responseCode = "403", description = "권한 없음", content = @Content(schema = @Schema(hidden = true))),
-		@ApiResponse(responseCode = "404", description = "관리자 정보를 찾을 수 없음", content = @Content(schema = @Schema(hidden = true)))
+		@ApiResponse(responseCode = "404", description = "관리자 정보를 찾을 수 없음", content = @Content(schema = @Schema(hidden = true))),
+		@ApiResponse(responseCode = "409", description = "중복 발생", content = @Content(schema = @Schema(hidden = true)))
 	})
 	@PatchMapping("/{managerUserPublicId}")
 	@PreAuthorize("isAuthenticated() && hasRole('MASTER')")
-	public ResponseEntity<Void> updateRole(
+	public ResponseEntity<Void> updateManager(
 		@Parameter(description = "managerPublicId", example = "2863fc2e-a7ed-44db-bc61-2b831995691e")
-		@PathVariable UUID managerUserPublicId, @Valid @RequestBody ReqUpdateRoleDto requestDto
+		@PathVariable UUID managerUserPublicId, @Valid @RequestBody ReqUpdateManagerDto requestDto
 	) {
-		managerService.updateRole(managerUserPublicId, requestDto);
+		managerService.updateManager(managerUserPublicId, requestDto);
 		return ResponseEntity.status(HttpStatus.OK).build();
 	}
 
-	@Operation(summary = "관리자 삭제", description = "관리자를 삭제합니다.. MASTER만 사용 가능합니다.")
+	@Operation(summary = "관리자 삭제", description = "관리자를 삭제합니다. MASTER만 사용 가능합니다.")
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "204", description = "삭제 성공"),
 		@ApiResponse(responseCode = "403", description = "권한 없음", content = @Content(schema = @Schema(hidden = true))),
