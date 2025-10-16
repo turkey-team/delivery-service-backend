@@ -1,6 +1,5 @@
 package com.sparta.delivery.backend.review.controller;
 
-import java.util.List;
 import java.util.UUID;
 
 import org.springdoc.core.annotations.ParameterObject;
@@ -18,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.sparta.delivery.backend.global.common.dto.PageResponse;
 import com.sparta.delivery.backend.review.dto.ReqCreateReviewDto;
 import com.sparta.delivery.backend.review.dto.ReqUpdateReviewDto;
 import com.sparta.delivery.backend.review.dto.ResDeleteReviewDto;
@@ -56,7 +56,7 @@ public class ReviewController {
 	})
 	// default 추가
 	@GetMapping("/stores/{storeId}/reviews")
-	public List<ResViewReviewDto> getReviews(
+	public PageResponse<ResViewReviewDto> getReviews(
 		@Parameter(description = "리뷰를 조회할 매장의 UUID") @PathVariable UUID storeId,
 		@ParameterObject @ModelAttribute ReviewRepositorySearchConditionDto condition,
 		@Parameter(description = "페이지네이션 정보") @ParameterObject
