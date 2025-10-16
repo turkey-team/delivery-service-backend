@@ -125,6 +125,7 @@ public class ReviewService {
 
 		util.increaseGeneration(storeId);
 
+		// Todo : reply 자동생성 되면 이 주석 해제
 		/*Owner owner = store.getOwner();
 		log.info("registerReview 완료 - 비동기 호출 직전 thread: {}", Thread.currentThread().getName());
 		replyService.generateReplyAsync(review.getId(), owner.getId());*/
