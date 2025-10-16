@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.sparta.delivery.backend.global.common.dto.PageResponse;
 import com.sparta.delivery.backend.security.UserDetailsImpl;
 import com.sparta.delivery.backend.store.dto.ReqCreateStoreDto;
 import com.sparta.delivery.backend.store.dto.ReqDeleteStoreDto;
@@ -32,7 +33,6 @@ import com.sparta.delivery.backend.store.service.StoreService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -83,7 +83,7 @@ public class StoreController {
 		,@ApiResponse(responseCode = "400", description = "카테고리 없음")
 	})
 	@PreAuthorize("isAuthenticated() && hasAnyRole('MANAGER', 'OWNER', 'CUSTOMER')")
-	public Page<ResGetListStoreDto> getStores(
+	public PageResponse<ResGetListStoreDto> getStores(
 		@RequestParam(value = "page", required = false, defaultValue = "1") int page,
 		@RequestParam(value = "size", required = false, defaultValue = "10") int size,
 		@RequestParam(value = "sort", required = false, defaultValue = "createdAt") String sort,

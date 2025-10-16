@@ -1,7 +1,12 @@
 package com.sparta.delivery.backend.review.entity;
 
 import com.sparta.delivery.backend.global.common.BaseEntity;
+import java.util.ArrayList;
+import java.util.List;
+
+
 import com.sparta.delivery.backend.customer.entity.Customer;
+import com.sparta.delivery.backend.reply.entity.Reply;
 import com.sparta.delivery.backend.store.entity.Store;
 
 import jakarta.persistence.Column;
@@ -9,6 +14,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Builder;
 import lombok.Getter;
@@ -37,6 +43,9 @@ public class Review extends BaseEntity {
 	@Column(name = "rate", nullable = false)
 	private int rate; // rate는 null값 존재X
 
+	@OneToMany(mappedBy = "review")
+	private List<Reply> replies = new ArrayList<>();
+
 	@Builder
 	private Review(Customer customer, String imageUrl, Store store, String context, int rate) {
 		this.customer = customer;
@@ -50,6 +59,13 @@ public class Review extends BaseEntity {
 		this.context = context;
 		this.rate = rate;
 		this.imageUrl = imageUrl;
+	}
+
+	public void deleteWithReply(Long deletedBy){
+		this.softDelete(deletedBy);
+
+		this.replies.forEach(reply -> reply.softDelete(deletedBy));
+
 	}
 
 }

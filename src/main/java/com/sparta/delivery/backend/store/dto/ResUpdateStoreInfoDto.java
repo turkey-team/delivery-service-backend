@@ -3,6 +3,8 @@ package com.sparta.delivery.backend.store.dto;
 import java.util.List;
 import java.util.UUID;
 
+import com.sparta.delivery.backend.address.entity.Address;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,19 +20,17 @@ public class ResUpdateStoreInfoDto {
 	private UUID storeId;
 	@Schema(description = "가게 이름", example = "김밥천국")
 	private String storeName;
-	@Schema(description = "가게 상세주소", example = "광화문로 1길 1")
-	private String addressDetails;
+	@Schema(description = "가게 주소", example = "광화문로 1길 1")
+	private String fullAddress;
 	@Schema(description = "가게 연락처", example = "02-1234-5678")
 	private String phoneNumber;
-	@Schema(description = "법정동 코드", example = "123")
-	private String regionDong;
+
 
 	@Builder
-	public ResUpdateStoreInfoDto(UUID storeId, String storeName, String addressDetails, String phoneNumber, String regionDong, String businessNumber) {
+	public ResUpdateStoreInfoDto(UUID storeId, String storeName, String fullAddress, String phoneNumber) {
 		this.storeId = storeId;
 		this.storeName = storeName;
-		this.addressDetails = addressDetails;
+		this.fullAddress = fullAddress;
 		this.phoneNumber = phoneNumber;
-		this.regionDong = regionDong;
 	}
 }
