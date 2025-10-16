@@ -1,10 +1,21 @@
 package com.sparta.delivery.backend.user.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
-
 import java.time.Instant;
 import java.util.UUID;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "p_user")
@@ -12,43 +23,47 @@ import java.util.UUID;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @Column(name = "public_id", nullable = false, unique = true)
-    private UUID publicId;
+	@Column(name = "public_id", nullable = false, unique = true)
+	private UUID publicId;
 
-    @Column(name = "username", length = 100, nullable = false, unique = true)
-    private String username;
+	@Column(name = "username", length = 100, nullable = false, unique = true)
+	private String username;
 
-    @Column(name = "password", length = 255, nullable = false)
-    private String password;
+	@Column(name = "password", length = 255, nullable = false)
+	private String password;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "role", length = 20, nullable = false)
-    private UserRoleEnum role;
+	@Enumerated(EnumType.STRING)
+	@Column(name = "role", length = 20, nullable = false)
+	private UserRoleEnum role;
 
 	private Instant deletedAt;
 
 	private Long deletedBy;
 
-    @Builder
-    private User(String username, String password, UserRoleEnum role) {
-        this.username = username;
-        this.password = password;
-        this.role = role;
-    }
+	@Builder
+	private User(String username, String password, UserRoleEnum role) {
+		this.username = username;
+		this.password = password;
+		this.role = role;
+	}
 
-    @PrePersist
-    public void generatePublicId() {
-        if (this.publicId == null) {
-            this.publicId = UUID.randomUUID();
-        }
-    }
+	@PrePersist
+	public void generatePublicId() {
+		if (this.publicId == null) {
+			this.publicId = UUID.randomUUID();
+		}
+	}
 
 	public void changePassword(String encodedPassword) {
 		password = encodedPassword;
+	}
+
+	public void updateRole(UserRoleEnum role) {
+		this.role = role;
 	}
 
 	public void softDelete(Long userId) {
