@@ -9,9 +9,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -93,7 +93,7 @@ public class ManagerController {
 		@ApiResponse(responseCode = "404", description = "관리자 정보를 찾을 수 없음", content = @Content(schema = @Schema(hidden = true))),
 		@ApiResponse(responseCode = "409", description = "중복 발생", content = @Content(schema = @Schema(hidden = true)))
 	})
-	@PatchMapping("/{managerUserPublicId}")
+	@PutMapping("/{managerUserPublicId}")
 	@PreAuthorize("isAuthenticated() && hasRole('MASTER')")
 	public ResponseEntity<Void> updateManager(
 		@Parameter(description = "managerPublicId", example = "2863fc2e-a7ed-44db-bc61-2b831995691e")
