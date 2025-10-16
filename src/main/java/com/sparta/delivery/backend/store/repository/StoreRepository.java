@@ -38,4 +38,20 @@ public interface StoreRepository extends JpaRepository<Store, UUID> {
 		@Param("categoryId") UUID categoryId,
 		Pageable pageable
 	);
+
+	@Query("""
+		    SELECT DISTINCT s FROM Store s
+		    LEFT JOIN s.storeMenus m ON m.deletedAt IS NULL
+		    WHERE s.deletedAt IS NULL
+		      AND ST_Within(:location, s.deliveryZone)
+		      AND (
+		           s.name LIKE CONCAT('%', :keyword, '%')
+		        OR m.name LIKE CONCAT('%', :keyword, '%')
+		      )
+		""")
+	Page<Store> findStoresByKeywordWithinDeliveryZone(
+		@Param("location") Point location,
+		@Param("keyword") String keyword,
+		Pageable pageable
+	);
 }

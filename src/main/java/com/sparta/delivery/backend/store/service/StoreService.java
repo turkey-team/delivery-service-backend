@@ -90,6 +90,7 @@ public class StoreService {
 	private final StoreImageRepository storeImageRepository;
 	private final CustomerAddressRepository customerAddressRepository;
 
+	private static final Set<Integer> ALLOWED_PAGE_SIZES = Set.of(10, 30, 50);
 	private static final int WGS84_SRID = 4326;
 	private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory(new PrecisionModel(), WGS84_SRID);
 
@@ -468,29 +469,30 @@ public class StoreService {
 
 	@Transactional(readOnly = true)
 	public PageResponse<ResGetListStoreDto> getStores(int page, int size, String sort, UUID categoryId, User user) {
-		Customer customer = customerRepository.findByUserId(user.getId())
-			.orElseThrow(() -> new NotFoundException("존재하지 않는 고객입니다."));
+		CustomerAddress defaultAddress = getDefaultCustomerAddress(user);
+		Pageable pageable = buildPageable(page, size, sort);
 
-		CustomerAddress address = customerAddressRepository
-			.findByCustomerAndIsDefaultTrueAndDeletedAtIsNull(customer)
-			.orElseThrow(() -> new NotFoundException("기본 배송지가 설정되지 않았습니다."));
+		Page<Store> stores = storeRepository.findStoresByCategoryWithinDeliveryZone(
+			defaultAddress.getAddress().getLocation(), categoryId, pageable
+		);
 
-		// 허용 사이즈
-		List<Integer> sizeList = List.of(10, 30, 50);
-		if (!sizeList.contains(size)) {
-			size = 10;
+		return PageResponse.of(stores.map(ResGetListStoreDto::from));
+	}
+
+	@Transactional(readOnly = true)
+	public PageResponse<ResGetListStoreDto> getStoresByKeyword(int page, int size, String sort, String keyword, User user) {
+		if (keyword == null || keyword.isBlank()) {
+			throw new IllegalArgumentException("키워드를 입력해주세요.");
 		}
 
-		// 음수일경우 0 강제
-		page = Math.max(page - 1, 0);
+		CustomerAddress defaultAddress = getDefaultCustomerAddress(user);
+		Pageable pageable = buildPageable(page, size, sort);
 
-		Sort sortSpec = parseSort(sort);
-		Pageable pageable = PageRequest.of(page, size, sortSpec);
+		Page<Store> stores = storeRepository.findStoresByKeywordWithinDeliveryZone(
+			defaultAddress.getAddress().getLocation(), keyword, pageable
+		);
 
-		Page<Store> findStores = storeRepository.findStoresByCategoryWithinDeliveryZone(
-			address.getAddress().getLocation(), categoryId, pageable);
-
-		return PageResponse.of(findStores.map(ResGetListStoreDto::from));
+		return PageResponse.of(stores.map(ResGetListStoreDto::from));
 	}
 
 	/**
@@ -715,6 +717,21 @@ public class StoreService {
 		}
 
 		throw new IllegalArgumentException("유효하지 않은 정렬 기준입니다.");
+	}
+
+	private CustomerAddress getDefaultCustomerAddress(User user) {
+		Customer customer = customerRepository.findByUserId(user.getId())
+			.orElseThrow(() -> new NotFoundException("존재하지 않는 고객입니다."));
+		return customerAddressRepository
+			.findByCustomerAndIsDefaultTrueAndDeletedAtIsNull(customer)
+			.orElseThrow(() -> new NotFoundException("기본 배송지가 설정되지 않았습니다."));
+	}
+
+	private Pageable buildPageable(int page, int size, String sort) {
+		int normalizedSize = ALLOWED_PAGE_SIZES.contains(size) ? size : 10;
+		int pageIndex = Math.max(page - 1, 0);
+		Sort sortSpec = parseSort(sort);
+		return PageRequest.of(pageIndex, normalizedSize, sortSpec);
 	}
 }
 

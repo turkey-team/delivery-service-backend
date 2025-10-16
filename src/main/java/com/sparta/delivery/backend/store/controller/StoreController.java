@@ -96,6 +96,26 @@ public class StoreController {
 		return storeService.getStores(page, size, sort, categoryId, userDetails.getUser());
 	}
 
+	@GetMapping("/stores/search")
+	@Operation(summary = "가게 목록 조회", description = "가게 목록을 조회합니다.")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "가게 목록 조회 성공"
+			, content = @Content(schema = @Schema(implementation = ResGetListStoreDto.class)))
+		, @ApiResponse(responseCode = "400", description = "키워드를 입력하지 않음")
+	})
+	@PreAuthorize("isAuthenticated() && hasAnyRole('MANAGER', 'OWNER', 'CUSTOMER')")
+	public PageResponse<ResGetListStoreDto> getStoresByKeywords(
+		@RequestParam(value = "page", required = false, defaultValue = "1") int page,
+		@RequestParam(value = "size", required = false, defaultValue = "10") int size,
+		@RequestParam(value = "sort", required = false) String sort,
+		@RequestParam(value = "keyword") String keyword,
+		@AuthenticationPrincipal UserDetailsImpl userDetails
+	) {
+		return storeService.getStoresByKeyword(page, size, sort, keyword, userDetails.getUser());
+	}
+
+
+
 	@PatchMapping("/stores/{storeId}")
 	@Operation(summary = "가게 수정", description = "가게 정보를 수정합니다.")
 	@ApiResponses(value = {
