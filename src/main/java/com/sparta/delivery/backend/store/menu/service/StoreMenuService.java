@@ -10,6 +10,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sparta.delivery.backend.cart.entity.Cart;
+import com.sparta.delivery.backend.cart.repository.CartRepository;
 import com.sparta.delivery.backend.global.common.dto.PageResponse;
 import com.sparta.delivery.backend.image.entity.Image;
 import com.sparta.delivery.backend.image.repository.ImageRepository;
@@ -35,6 +37,7 @@ public class StoreMenuService {
 	private final StoreMenuRepository storeMenuRepository;
 	private final StoreRepository storeRepository;
 	private final ImageRepository imageRepository;
+	private final CartRepository cartRepository;
 
 	/** 생성 **/
 	@Transactional
@@ -203,6 +206,13 @@ public class StoreMenuService {
 		}
 
 		storeMenu.setHiddenAt(reqUpdateVisibilityDto.isHidden());
+
+		if (wantHidden) {
+			List<Cart> carts = cartRepository.findAllByMenuIdAndDeletedAtIsNull(menuId);
+			for (Cart cart : carts) {
+				cart.softDelete(user.getId());
+			}
+		}
 	}
 
 	/** 삭제 **/
