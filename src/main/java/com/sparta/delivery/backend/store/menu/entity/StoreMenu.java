@@ -124,13 +124,22 @@ public class StoreMenu extends BaseEntity {
 		this.sortOrder = minSortOrder - 1;
 	}
 
+	// 영구 삭제
 	public void delete(Long deletedBy) {
 		this.softDelete(deletedBy);
-		if (image != null) {
-			image.softDelete(deletedBy);
+
+		if (this.image != null && this.image.getDeletedAt() == null) {
+			this.image.softDelete(deletedBy);
 		}
+
 		this.carts.stream()
 			.filter(cart -> cart.getDeletedAt() == null)
 			.forEach(cart -> cart.delete(deletedBy));
+
+		if (this.orderMenus != null) {
+			this.orderMenus.stream()
+				.filter(orderMenu -> orderMenu.getDeletedAt() == null)
+				.forEach(orderMenu -> orderMenu.softDelete(deletedBy));
+		}
 	}
 }
