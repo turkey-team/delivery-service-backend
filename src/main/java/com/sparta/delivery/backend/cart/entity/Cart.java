@@ -39,8 +39,8 @@ public class Cart {
 	@JoinColumn(name = "p_store_menu_id", nullable = false)
 	private StoreMenu menu;
 
-	@Column(name = "create_at", updatable = false, nullable = false)
-	private Instant createAt;
+	@Column(name = "created_at", updatable = false, nullable = false)
+	private Instant createdAt;
 
 	@Column(name = "deleted_at")
 	private Instant deletedAt;
@@ -56,7 +56,7 @@ public class Cart {
 
 	@PrePersist
 	protected void preCreate() {
-		this.createAt = Instant.now();
+		this.createdAt = Instant.now();
 	}
 
 	public void delete(Long deletedBy) {
