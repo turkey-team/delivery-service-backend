@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-@Profile("local") // prod 환경에서만 활성화
+@Profile("prod") // prod 환경에서만 활성화
 public class SlackService {
 
 	private final String webhook;
