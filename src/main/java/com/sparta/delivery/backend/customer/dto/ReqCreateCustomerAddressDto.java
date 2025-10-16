@@ -1,6 +1,8 @@
 package com.sparta.delivery.backend.customer.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -28,4 +30,12 @@ public class ReqCreateCustomerAddressDto {
 
 	@Schema(description = "기본 배송지 설정 여부", example = "true")
 	private Boolean isDefault = false;
+
+	@DecimalMin(value = "-180.0", message = "경도는 -180 이상 ~ 180 이하이어야 합니다.")
+	@DecimalMax(value = "180.0", message = "경도는 -180 이상 ~ 180 이하이어야 합니다.")
+	private double longitude;
+
+	@DecimalMin(value = "-90.0", message = "위도는 -90 이상 ~ 90 이하이어야 합니다.")
+	@DecimalMax(value = "90.0", message = "위도는 -90 이상 ~ 90 이하이어야 합니다.")
+	private double latitude;
 }

@@ -74,6 +74,13 @@ dependencies {
     // PostgresSQL
     runtimeOnly 'org.postgresql:postgresql'
 
+    // Hibernate Spatial
+    implementation 'org.hibernate.orm:hibernate-spatial:6.6.4.Final'
+
+    // Java Topology Suite
+    implementation 'org.locationtech.jts:jts-core:1.19.0'
+    implementation 'org.locationtech.jts.io:jts-io-common:1.19.0'
+
     // H2
     runtimeOnly 'com.h2database:h2'
 

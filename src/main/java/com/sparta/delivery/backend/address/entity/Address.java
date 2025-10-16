@@ -1,5 +1,7 @@
 package com.sparta.delivery.backend.address.entity;
 
+import org.locationtech.jts.geom.Point;
+
 import com.sparta.delivery.backend.global.common.BaseEntity;
 import com.sparta.delivery.backend.region.entity.Dong;
 
@@ -27,10 +29,14 @@ public class Address extends BaseEntity {
 	@Column(name = "full_address", nullable = false)
 	private String fullAddress;
 
+	@Column(name = "location", columnDefinition = "geometry(Point, 4326)", nullable = false)
+	private Point location;
+
 	@Builder
-	private Address(Dong dong, String fullAddress) {
+	private Address(Dong dong, String fullAddress, Point location) {
 		this.dong = dong;
 		this.fullAddress = fullAddress;
+		this.location = location;
 	}
 
 	public void update(Dong dong, String address) {

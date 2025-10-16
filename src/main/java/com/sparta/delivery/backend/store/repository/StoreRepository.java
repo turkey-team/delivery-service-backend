@@ -5,9 +5,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.locationtech.jts.geom.Point;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.sparta.delivery.backend.owner.entity.Owner;
 import com.sparta.delivery.backend.store.entity.Store;
@@ -20,4 +24,18 @@ public interface StoreRepository extends JpaRepository<Store, UUID>, StoreReposi
 	void bulkSoftDeleteById(Long storeId, Long deletedBy, Instant deletedAt);
 
 	Optional<Store> findByIdAndDeletedAtIsNull(UUID id);
+
+	@Query("""
+		SELECT DISTINCT s FROM Store s
+		JOIN s.storeCategories sc
+		JOIN sc.category c
+		WHERE s.deletedAt IS NULL
+		AND ST_Within(:location, s.deliveryZone)
+		AND c.id = :categoryId
+		""")
+	Page<Store> findStoresByCategoryWithinDeliveryZone(
+		@Param("location") Point location,
+		@Param("categoryId") UUID categoryId,
+		Pageable pageable
+	);
 }

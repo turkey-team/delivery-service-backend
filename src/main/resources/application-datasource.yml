@@ -5,8 +5,8 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/deliverydb
     driver-class-name: org.postgresql.Driver
-    username: postgres
-    password: 1234
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
 
   jpa:
     hibernate:
@@ -17,7 +17,6 @@ spring:
         show_sql: false
         use_sql_comments: false
     database-platform: org.hibernate.dialect.PostgreSQLDialect
-
 
 logging:
   level:
@@ -43,7 +42,7 @@ spring:
         format_sql: false
         show_sql: false
         use_sql_comments: false
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
+        database-platform: org.hibernate.spatial.dialect.postgis.PostgisPG10Dialect
 
 logging:
   level:
@@ -95,7 +94,7 @@ spring:
         format_sql: false
         show_sql: false
         use_sql_comments: false
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    database-platform: org.hibernate.spatial.dialect.postgis.PostgisPG10Dialect
 
 logging:
   level:
