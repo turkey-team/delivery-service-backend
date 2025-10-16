@@ -94,11 +94,11 @@ class StoreMenuServiceTest {
 		store = Store.builder()
 			.owner(owner) // 더미 Owner
 			.name("테스트용 햄버거 가게")
-			.addressDetails("고양시 덕양구 화정동 백양로 65")
+			//.addressDetails("고양시 덕양구 화정동 백양로 65")
 			.reviewRate(0.0)
 			.minOrderPrice(13000)
 			.deliveryFee(1500)
-			.regionDong(null) // 추후 필요하면 더미 Dong 생성
+			//.regionDong(null) // 추후 필요하면 더미 Dong 생성
 			.status(StoreStatusEnum.OPEN)
 			.phoneNumber("01012345678")
 			.build();

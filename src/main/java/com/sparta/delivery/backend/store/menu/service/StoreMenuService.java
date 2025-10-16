@@ -210,7 +210,7 @@ public class StoreMenuService {
 		if (wantHidden) {
 			List<Cart> carts = cartRepository.findAllByMenuIdAndDeletedAtIsNull(menuId);
 			for (Cart cart : carts) {
-				cart.softDelete(user.getId());
+				cart.delete(user.getId());
 			}
 		}
 	}

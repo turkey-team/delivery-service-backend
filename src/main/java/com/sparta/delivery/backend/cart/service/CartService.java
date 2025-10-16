@@ -82,7 +82,7 @@ public class CartService {
 		}
 
 		// 메뉴 row 삭제
-		cart.softDelete(user.getId());
+		cart.delete(user.getId());
 		Cart savedCart = cartRepository.save(cart);
 
 		return new ResDeleteCartItemDto(savedCart.getId(),savedCart.getMenu().getName());
@@ -95,7 +95,7 @@ public class CartService {
 		List<Cart> carts = cartRepository.findAllByCustomerIdAndDeletedAtIsNull(customer.getId());
 
 		for(Cart cart : carts) {
-			cart.softDelete(user.getId());
+			cart.delete(user.getId());
 		}
 
 		List<Cart> savedCarts = cartRepository.saveAll(carts);

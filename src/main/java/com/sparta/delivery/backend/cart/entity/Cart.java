@@ -59,9 +59,9 @@ public class Cart {
 		this.createAt = Instant.now();
 	}
 
-	public void softDelete(Long userId) {
+	public void delete(Long deletedBy) {
 		this.deletedAt = Instant.now();
-		this.deletedBy = userId;
+		this.deletedBy = deletedBy;
 	}
 
 }
