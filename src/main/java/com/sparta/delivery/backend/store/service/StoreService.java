@@ -242,7 +242,11 @@ public class StoreService {
 
 		Dong dong = dongRepository.findByCode(requestDto.getRegionDong())
 			.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "존재하지 않는 주소지입니다."));
-		Address address = Address.builder().dong(dong).fullAddress(requestDto.getAddressDetails()).build();
+		Address address = Address.builder()
+			.dong(dong)
+			.fullAddress(requestDto.getAddressDetails())
+			.location(createPoint(requestDto.getLongitude(), requestDto.getLatitude()))
+			.build();
 
 		// 현재 등록된 카테고리 조회
 		List<StoreCategory> currentCategories = store.getStoreCategories();

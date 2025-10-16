@@ -16,7 +16,7 @@ import org.springframework.data.repository.query.Param;
 import com.sparta.delivery.backend.owner.entity.Owner;
 import com.sparta.delivery.backend.store.entity.Store;
 
-public interface StoreRepository extends JpaRepository<Store, UUID>, StoreRepositoryCustom {
+public interface StoreRepository extends JpaRepository<Store, UUID> {
 	List<Store> findByOwner(Owner owner);
 
 	@Modifying(clearAutomatically = true, flushAutomatically = true)
