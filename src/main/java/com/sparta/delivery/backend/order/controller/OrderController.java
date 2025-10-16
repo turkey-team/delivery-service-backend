@@ -80,9 +80,9 @@ public class OrderController {
 
 	// 주문 상세 정보 조회
 	@GetMapping("/{orderId}")
-	@Operation(summary = "주문 내역 상세 조회", description = "자신의 주문 내역을 페이징 형태로 조회합니다.")
+	@Operation(summary = "주문 내역 상세 조회", description = "자신의 주문 내역을 상세 조회합니다.")
 	@ApiResponses({
-		@ApiResponse(responseCode = "200", description = "주문 내역 조회 성공", content = @Content(schema = @Schema(implementation = ResGetListOrderDto.class))),
+		@ApiResponse(responseCode = "200", description = "주문 내역 조회 성공", content = @Content(schema = @Schema(implementation = ResGetOrderDto.class))),
 		@ApiResponse(responseCode = "400", description = "유효하지 않은 사용자 정보")
 	})
 	public ResponseEntity<ResGetOrderDto> getOrderById(

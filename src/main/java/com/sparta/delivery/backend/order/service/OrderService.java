@@ -214,13 +214,14 @@ public class OrderService {
 	}
 
 	/** --------------------- Helper --------------------- **/
-	// Owner 본인 확인 || Manager 검증
+	// Customer, Owner 본인 확인 || Manager 검증
 	private void validateRoleAccess(User user, Order order) {
+		boolean isCustomer = order.getCustomer().getUser().getId().equals(user.getId());
 		boolean isOwner = order.getStore().getOwner().getUser().getId().equals(user.getId());
 		boolean isManager = user.getRole() == UserRoleEnum.MANAGER;
 		boolean isMaster = user.getRole() == UserRoleEnum.MASTER;
 
-		if (!(isOwner || isManager || isMaster)) {
+		if (!(isCustomer || isOwner || isManager || isMaster)) {
 			throw new IllegalStateException("접근 권한이 없습니다.");
 		}
 	}
