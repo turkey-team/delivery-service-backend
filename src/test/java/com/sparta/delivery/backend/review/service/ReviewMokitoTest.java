@@ -212,7 +212,7 @@ public class ReviewMokitoTest {
 		ResResultReviewDto result = reviewService.registerReview(dto, storeId, mockUser.getId());
 
 		assertEquals("맛있음", result.getContext());
-		verify(replyService).generateReplyAsync(any(), any());
+		//verify(replyService).generateReplyAsync(any(), any());
 	}
 
 	@Test

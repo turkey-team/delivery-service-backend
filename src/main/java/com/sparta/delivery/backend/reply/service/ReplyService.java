@@ -6,7 +6,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,20 +40,20 @@ public class ReplyService {
 
 	private static final int MAX_RETRY = 3;
 
-	@Async
+	/*@Async
 	public void generateReplyAsync(UUID reviewId, UUID ownerId) {
 		log.info("generateReplyAsync 시작 - thread: {}", Thread.currentThread().getName());
 		createReplyTransactionalWithRetry(reviewId, ownerId);
-	}
+	}*/
 
 	@Transactional
-	public void createReplyTransactionalWithRetry(UUID reviewId, UUID ownerId) {
+	public void createReplyTransactionalWithRetry(UUID reviewId, Long userId) {
 		int attempt = 0;
 
-		Review review = reviewRepository.findById(reviewId)
+		Review review = reviewRepository.findByIdAndDeletedAtIsNull(reviewId)
 			.orElseThrow(() -> new NoSuchElementException("리뷰 없음"));
 
-		Owner owner = ownerRepository.findById(ownerId)
+		Owner owner = ownerRepository.findByUserId(userId)
 			.orElseThrow(() -> new NoSuchElementException("점주 없음"));
 
 		while (attempt < MAX_RETRY) {

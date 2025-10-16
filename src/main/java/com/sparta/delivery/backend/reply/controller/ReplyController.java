@@ -3,6 +3,7 @@ package com.sparta.delivery.backend.reply.controller;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -77,6 +78,32 @@ public class ReplyController {
 		@AuthenticationPrincipal UserDetailsImpl userDetails) {
 		Long userId = userDetails.getId();
 		return replyService.createReply(dto, reviewId, userId);
+	}
+
+	//
+	@Operation(
+		summary = "AI 답글 생성",
+		description = "주어진 리뷰 ID에 대해 AI가 점주 입장에서 답글을 생성합니다. OWNER 권한 필요"
+	)
+	@ApiResponses({
+		@ApiResponse(responseCode = "200", description = "답글 생성 성공"),
+		@ApiResponse(responseCode = "403", description = "권한 없음"),
+		@ApiResponse(responseCode = "404", description = "리뷰 또는 점주를 찾을 수 없음"),
+		@ApiResponse(responseCode = "504", description = "AI 답글 생성 실패")
+	})
+	@PreAuthorize("hasAnyRole('OWNER')")
+	@PostMapping("/review/{reviewId}/auto")
+	public ResponseEntity<String> createReply(
+		@Parameter(description = "답글을 생성할 리뷰 ID", required = true)
+		@PathVariable UUID reviewId,
+		@Parameter(hidden = true)
+		@AuthenticationPrincipal UserDetailsImpl userDetails
+	) {
+		Long userId = userDetails.getId();
+
+		replyService.createReplyTransactionalWithRetry(reviewId, userId);
+
+		return ResponseEntity.ok("AI 답글 생성 요청 완료");
 	}
 
 	@Operation(summary = "리뷰 답글 수정",
