@@ -1,5 +1,6 @@
 package com.sparta.delivery.backend.store.menu.controller;
 
+import com.sparta.delivery.backend.global.common.dto.PageResponse;
 import com.sparta.delivery.backend.security.UserDetailsImpl;
 import com.sparta.delivery.backend.store.menu.dto.*;
 import com.sparta.delivery.backend.store.menu.service.StoreMenuService;
@@ -48,13 +49,13 @@ public class StoreMenuController {
 			@ApiResponse(responseCode = "200", description = "메뉴 목록 조회 성공"),
 			@ApiResponse(responseCode = "400", description = "가게 없음")
 	})
-	public ResponseEntity<Page<ResGetListStoreMenuDto>> getAllStoreMenusByStoreId(
+	public ResponseEntity<PageResponse<ResGetListStoreMenuDto>> getAllStoreMenusByStoreId(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable UUID storeId,
 		@RequestParam("page") int page,
 		@RequestParam("size") int size
 	) {
-		Page<ResGetListStoreMenuDto> menus = storeMenuService.getStoreMenusByStoreId(userDetails.getUser(), storeId, page - 1, size);
+		PageResponse<ResGetListStoreMenuDto> menus = storeMenuService.getStoreMenusByStoreId(userDetails.getUser(), storeId, page - 1, size);
 		return ResponseEntity.ok(menus);
 	}
 

@@ -45,6 +45,9 @@ public class Cart {
 	@Column(name = "deleted_at")
 	private Instant deletedAt;
 
+	@Column(name = "deleted_by")
+	private Long deletedBy;
+
 	@Builder
 	public Cart(Customer customer, StoreMenu menu) {
 		this.customer = customer;
@@ -58,6 +61,7 @@ public class Cart {
 
 	public void delete() {
 		this.deletedAt = Instant.now();
+		this.deletedBy = userId;
 	}
 
 }

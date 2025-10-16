@@ -81,6 +81,6 @@ public class CustomerAddress extends BaseEntity {
 	}
 
 	public Dong getDong() {
-		return getDong();
+		return address.getDong();
 	}
 }

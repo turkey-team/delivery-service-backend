@@ -10,6 +10,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sparta.delivery.backend.cart.entity.Cart;
+import com.sparta.delivery.backend.cart.repository.CartRepository;
+import com.sparta.delivery.backend.global.common.dto.PageResponse;
 import com.sparta.delivery.backend.image.entity.Image;
 import com.sparta.delivery.backend.image.repository.ImageRepository;
 import com.sparta.delivery.backend.store.entity.Store;
@@ -34,6 +37,7 @@ public class StoreMenuService {
 	private final StoreMenuRepository storeMenuRepository;
 	private final StoreRepository storeRepository;
 	private final ImageRepository imageRepository;
+	private final CartRepository cartRepository;
 
 	/** 생성 **/
 	@Transactional
@@ -78,7 +82,7 @@ public class StoreMenuService {
 
 	// 전체 메뉴 조회 (페이징)
 	@Transactional(readOnly = true)
-	public Page<ResGetListStoreMenuDto> getStoreMenusByStoreId(
+	public PageResponse<ResGetListStoreMenuDto> getStoreMenusByStoreId(
 		User user,
 		UUID storeId,
 		int page,
@@ -111,11 +115,13 @@ public class StoreMenuService {
 		*/
 
 		// 메뉴가 하나도 없어도 빈 페이지는 반환
+		// 메뉴가 하나도 없어도 빈 페이지는 반환
 		if (storeMenuList == null || storeMenuList.isEmpty()) {
-			return Page.empty(pageable);
+			return PageResponse.of(Page.empty(pageable));
 		}
 
-		return storeMenuList.map(ResGetListStoreMenuDto::new);
+		Page<ResGetListStoreMenuDto> mappedPage = storeMenuList.map(ResGetListStoreMenuDto::new);
+		return PageResponse.of(mappedPage);
 	}
 
 	/** 수정 **/
@@ -200,6 +206,13 @@ public class StoreMenuService {
 		}
 
 		storeMenu.setHiddenAt(reqUpdateVisibilityDto.isHidden());
+
+		if (wantHidden) {
+			List<Cart> carts = cartRepository.findAllByMenuIdAndDeletedAtIsNull(menuId);
+			for (Cart cart : carts) {
+				cart.softDelete(user.getId());
+			}
+		}
 	}
 
 	/** 삭제 **/

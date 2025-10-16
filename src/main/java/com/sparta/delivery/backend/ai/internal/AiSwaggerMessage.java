@@ -32,41 +32,23 @@ public class AiSwaggerMessage {
 
 	public static final String AI_PROMPT_LIST_EXAMPLE = """
 			{
-			  "content": [
-				{
-				  "id": "e0866968-d417-469a-98e8-7ee6275ce170",
-				  "reqMessage": "치즈와 베이컨이 들어간 햄버거 메뉴의 음식 설명을 추천해줘",
-				  "resMessage": "고소한 치즈와 짭짤한 베이컨의 환상적인 만남! 풍미 가득한 햄버거",
-				  "createdAt": "2025-10-13T06:49:42.431683Z",
-				  "createdBy": 1
-				}
-			  ],
-			  "pageable": {
-				"pageNumber": 0,
-				"pageSize": 1,
-				"sort": {
-				  "empty": false,
-				  "sorted": true,
-				  "unsorted": false
-				},
-				"offset": 0,
-				"paged": true,
-				"unpaged": false
-			  },
-			  "last": true,
-			  "totalPages": 1,
-			  "totalElements": 1,
-			  "size": 1,
-			  "number": 0,
-			  "sort": {
-				"empty": false,
-				"sorted": true,
-				"unsorted": false
-			  },
-			  "first": true,
-			  "numberOfElements": 1,
-			  "empty": false
-			}
+		    "content": [
+		      {
+		        "id": "66201786-2dfa-4696-87d1-72a32f6f78f0",
+		        "reqMessage": "치즈와 베이컨이 들어간 햄버거 메뉴의 음식 설명을 추천해줘",
+		        "resMessage": "고소한 치즈와 짭짤한 베이컨의 환상적인 만남! 육즙 가득 패티와 완벽 조화!\\n",
+		        "createdAt": "2025-10-16T03:48:10.827628Z",
+		        "createdBy": 1
+		      }
+		    ],
+		    "currentPage": 0,
+		    "pageSize": 20,
+		    "totalElements": 1,
+		    "totalPages": 1,
+		    "first": true,
+		    "last": true,
+		    "hasNext": false
+		  }
 		""";
 
 }

@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.sparta.delivery.backend.customer.entity.Customer;
 import com.sparta.delivery.backend.customer.repository.CustomerRepository;
+import com.sparta.delivery.backend.global.common.dto.PageResponse;
 import com.sparta.delivery.backend.global.excpetion.UnauthorizedException;
 import com.sparta.delivery.backend.order.entity.Order;
 import com.sparta.delivery.backend.order.enums.OrderStatus;
@@ -77,11 +78,12 @@ public class ReviewService {
 		condition = "#pageable.pageNumber == 0 && (#condition.isNull() || #condition == null)"
 	)
 	@Transactional(readOnly = true)
-	public List<ResViewReviewDto> getReviews(UUID storeId, ReviewRepositorySearchConditionDto condition,
+	public PageResponse<ResViewReviewDto> getReviews(UUID storeId, ReviewRepositorySearchConditionDto condition,
 		Pageable pageable) {
 		Page<ResViewReviewDto> reviews = reviewRepository.findReviews(storeId, condition, pageable);
 
-		return reviews.getContent();
+		//return reviews.getContent();
+		return PageResponse.of(reviews);
 	}
 
 	// 내가 작성한 reviews list 조회

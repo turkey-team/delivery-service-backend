@@ -64,7 +64,7 @@ public class StoreMenu extends BaseEntity {
 	private int sortOrder;
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "stock_status", length = 20)
+	@Column(name = "stock_status")
 	private StockStatus stockStatus;
 
 	// hiddenAt 로그 여부로 숨기기/보이기 설정하려면 Instant 가 적합
