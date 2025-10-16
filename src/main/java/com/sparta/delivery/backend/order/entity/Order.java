@@ -58,7 +58,7 @@ public class Order extends BaseEntity {
 	private String addressDetails;
 
 	@Enumerated(EnumType.STRING)
-	@Column(length = 20, nullable = false)
+	@Column(nullable = false)
 	private OrderStatus orderStatus;
 
 	@Column(name = "request_message")
