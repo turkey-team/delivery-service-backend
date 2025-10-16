@@ -45,6 +45,7 @@ import com.sparta.delivery.backend.region.entity.Dong;
 import com.sparta.delivery.backend.region.repository.DongRepository;
 import com.sparta.delivery.backend.store.dto.ReqCreateStoreDto;
 import com.sparta.delivery.backend.store.dto.ReqDeleteStoreDto;
+import com.sparta.delivery.backend.store.dto.ReqUpdateStoreDeliveryZoneDto;
 import com.sparta.delivery.backend.store.dto.ReqUpdateStoreDetailsDto;
 import com.sparta.delivery.backend.store.dto.ReqUpdateStoreInfoDto;
 import com.sparta.delivery.backend.store.dto.ReqUpdateStoreStatusDto;
@@ -52,6 +53,7 @@ import com.sparta.delivery.backend.store.dto.ResCreateStoreDto;
 import com.sparta.delivery.backend.store.dto.ResDeleteStoreDto;
 import com.sparta.delivery.backend.store.dto.ResGetListStoreDto;
 import com.sparta.delivery.backend.store.dto.ResGetStoreDto;
+import com.sparta.delivery.backend.store.dto.ResUpdateStoreDeliveryZoneDto;
 import com.sparta.delivery.backend.store.dto.ResUpdateStoreDetailsDto;
 import com.sparta.delivery.backend.store.dto.ResUpdateStoreInfoDto;
 import com.sparta.delivery.backend.store.dto.ResUpdateStoreStatusDto;
@@ -534,6 +536,17 @@ public class StoreService {
 
 	}
 
+	@Transactional
+	public List<ResUpdateStoreDeliveryZoneDto> updateStoreDeliveryZone(UUID storeId, ReqUpdateStoreDeliveryZoneDto requestDto, User user) {
+		Store findStore = storeRepository.findById(storeId).orElseThrow(() -> new NotFoundException("존재하지 않는 가게입니다."));
+
+		// 배달가능지역 설정
+		List<Dong> findDongs = dongRepository.findAllByCodeIn(requestDto.getDeliveryRegions());
+		findStore.updateDeliveryZone(createMultiPolygon(findDongs));
+
+		return findDongs.stream().map(d -> ResUpdateStoreDeliveryZoneDto.from(d.getName())).toList();
+	}
+
 	/**
 	 *
 	 * @param storeId 삭제할 가게ID
@@ -703,6 +716,5 @@ public class StoreService {
 
 		throw new IllegalArgumentException("유효하지 않은 정렬 기준입니다.");
 	}
-
 }
 
