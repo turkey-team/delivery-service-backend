@@ -23,11 +23,15 @@ public class ResReadDongDto {
 	@Schema(description = "동 코드", example = "010")
 	private String code;
 
+	@Schema(description = "동 폴리곤", example = "POLYGON((127.0276199 37.500705, 127.0276201 37.5007051, 127.0276202 37.5007052, 127.0276199 37.500705))")
+	private String polygon;
+
 	public static ResReadDongDto from(Dong dong) {
 		return new ResReadDongDto(
 			dong.getId(),
 			dong.getName(),
-			dong.getCode()
+			dong.getCode(),
+			dong.getPolygon().toString()
 		);
 	}
 

@@ -123,7 +123,7 @@ public class DongService {
 			throw new RegionAlreadyExistsException("이미 존재하는 동 코드입니다.");
 		}
 
-		dong.update(sigungu, requestDto.getName(), requestDto.getCode());
+		dong.update(sigungu, requestDto.getName(), requestDto.getCode(), getPolygon(requestDto.getPolygonWkt()));
 
 		return ResUpdateDongDto.from(dong);
 	}

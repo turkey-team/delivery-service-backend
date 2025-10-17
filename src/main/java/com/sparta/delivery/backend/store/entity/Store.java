@@ -128,12 +128,15 @@ public class Store extends BaseEntity {
 		this.name = requestDto.getStoreName();
 		this.address = address;
 		this.phoneNumber = requestDto.getPhoneNumber();
-
 	}
 
 	public void updateStoreDetails(int deliveryFee, Integer minOrderPrice) {
 		this.deliveryFee = deliveryFee;
 		this.minOrderPrice = minOrderPrice;
+	}
+
+	public void updateDeliveryZone(MultiPolygon deliveryZone) {
+		this.deliveryZone = deliveryZone;
 	}
 
 	public void updateStoreStatus(StoreStatusEnum status) {

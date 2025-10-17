@@ -89,6 +89,7 @@ public class CustomerAddressService {
 		Address newAddress = Address.builder()
 			.dong(dong)
 			.fullAddress(requestDto.getFullAddress())
+			.location(createPoint(requestDto.getLongitude(), requestDto.getLatitude()))
 			.build();
 
 		if (requestDto.getIsDefault()) {

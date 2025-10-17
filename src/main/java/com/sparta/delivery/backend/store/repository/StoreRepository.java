@@ -16,7 +16,7 @@ import org.springframework.data.repository.query.Param;
 import com.sparta.delivery.backend.owner.entity.Owner;
 import com.sparta.delivery.backend.store.entity.Store;
 
-public interface StoreRepository extends JpaRepository<Store, UUID>, StoreRepositoryCustom {
+public interface StoreRepository extends JpaRepository<Store, UUID> {
 	List<Store> findByOwner(Owner owner);
 
 	@Modifying(clearAutomatically = true, flushAutomatically = true)
@@ -36,6 +36,22 @@ public interface StoreRepository extends JpaRepository<Store, UUID>, StoreReposi
 	Page<Store> findStoresByCategoryWithinDeliveryZone(
 		@Param("location") Point location,
 		@Param("categoryId") UUID categoryId,
+		Pageable pageable
+	);
+
+	@Query("""
+		    SELECT DISTINCT s FROM Store s
+		    LEFT JOIN s.storeMenus m ON m.deletedAt IS NULL
+		    WHERE s.deletedAt IS NULL
+		      AND ST_Within(:location, s.deliveryZone)
+		      AND (
+		           s.name LIKE CONCAT('%', :keyword, '%')
+		        OR m.name LIKE CONCAT('%', :keyword, '%')
+		      )
+		""")
+	Page<Store> findStoresByKeywordWithinDeliveryZone(
+		@Param("location") Point location,
+		@Param("keyword") String keyword,
 		Pageable pageable
 	);
 }
