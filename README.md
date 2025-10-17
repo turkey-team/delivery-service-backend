@@ -99,6 +99,12 @@ java -jar build/libs/*.jar
 
 ---
 
+## 📄 API 문서
+
+[![Swagger](http://43.203.27.160/swagger-ui/index.html)
+
+---
+
 ## 🔧 기술 스택
 ### Back-end
 - **Java**
@@ -122,6 +128,7 @@ java -jar build/libs/*.jar
     - Redis
 - **Google AI Studio**
 - Docker
+- Gmail SMTP
 
 ### CI/CD
 - Github Actions
