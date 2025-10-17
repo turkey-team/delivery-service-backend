@@ -99,6 +99,12 @@ java -jar build/libs/*.jar
 
 ---
 
+## 📄 API 문서
+
+[Swagger 링크] : http://43.203.27.160/swagger-ui/index.html
+
+---
+
 ## 🔧 기술 스택
 ### Back-end
 - **Java**
