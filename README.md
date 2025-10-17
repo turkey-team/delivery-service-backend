@@ -122,6 +122,7 @@ java -jar build/libs/*.jar
     - Redis
 - **Google AI Studio**
 - Docker
+- Gmail SMTP
 
 ### CI/CD
 - Github Actions
